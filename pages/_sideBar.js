@@ -9,6 +9,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import { useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 const Bar = styled("div")`
   height: 100vh;
@@ -32,8 +33,8 @@ export default function SideBar() {
       <Stack spacing={2} sx={{padding: '20px 15px'}}>
         <Stack spacing={1} direction='row' sx={{padding: '15px'}}>
         {/* <AccountBalanceWalletIcon sx={{marginTop:'-3px'}} /> */}
-        <img src="/favicon.png" width={48} style={{marginTop:'-13px', marginRight: '10px'}} />
-        <i>Aries Web Wallet</i>
+        <Image src="/favicon.png" width={48} height={48}/>
+        <i style={{marginTop:'12px', marginLeft: '15px'}} >Aries Web Wallet</i>
         </Stack>
         <Button variant="outlined">Connect Wallet</Button>
         <TextField size="small" label="Balance" value={balance} />
