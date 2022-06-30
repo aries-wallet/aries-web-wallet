@@ -203,6 +203,9 @@ class Wallet extends React.Component {
 
   resetApp = async () => {
     const { web3 } = this.props.wallet;
+    if (!web3) {
+      return;
+    }
     if (web3 && web3.currentProvider && web3.currentProvider.close) {
       await web3.currentProvider.close();
     }
