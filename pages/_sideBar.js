@@ -36,8 +36,6 @@ export default function SideBar() {
     getBalance();
   }, [wallet, wallet.address, wallet.networkId, wallet.web3]);
 
-  console.log('wallet', wallet);
-  
   return <Bar>
     <Head>
       <title>Aries Web Wallet</title>
@@ -78,7 +76,7 @@ export default function SideBar() {
       <Divider direction="horizontal" />
         <List>
           <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/'} onClick={() => setSelectedIndex(-1)} component="a" href="/" >
+            <ListItemButton selected={router.pathname === '/'} onClick={() => router.push('/')} >
               <ListItemIcon>
                 <AccountBalanceIcon />
               </ListItemIcon>
@@ -86,7 +84,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/smart_contract'} onClick={() => setSelectedIndex(0)} component="a" href="/smart_contract" >
+            <ListItemButton selected={router.pathname === '/smart_contract'} onClick={() => router.push('/smart_contract')} >
               <ListItemIcon>
                 <AccountBalanceIcon />
               </ListItemIcon>
@@ -94,7 +92,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 1} onClick={() => setSelectedIndex(1)} component="a" href="/transaction">
+            <ListItemButton selected={selectedIndex === 1} onClick={() => router.push('/transaction')} >
               <ListItemIcon>
                 <SendIcon />
               </ListItemIcon>
@@ -102,7 +100,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 2} onClick={() => setSelectedIndex(2)} component="a" href="/raw_transaction">
+            <ListItemButton selected={selectedIndex === 2} onClick={() => router.push('/raw_transaction')}>
               <ListItemIcon>
                 <AbcIcon />
               </ListItemIcon>
@@ -110,7 +108,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 3} onClick={() => setSelectedIndex(3)} component="a" href="/erc20">
+            <ListItemButton selected={selectedIndex === 3} onClick={() => router.push('/erc20')} >
             <ListItemIcon>
                 <CurrencyBitcoinIcon />
               </ListItemIcon>
@@ -118,7 +116,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 4} onClick={() => setSelectedIndex(4)} component="a" href="/erc721">
+            <ListItemButton selected={selectedIndex === 4} onClick={() => router.push('/erc721')} >
             <ListItemIcon>
                 <CurrencyBitcoinIcon />
               </ListItemIcon>
@@ -126,7 +124,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 5} onClick={() => setSelectedIndex(5)} component="a" href="/erc1155">
+            <ListItemButton selected={selectedIndex === 5} onClick={() => router.push('/erc1155')} >
             <ListItemIcon>
                 <CurrencyBitcoinIcon />
               </ListItemIcon>
