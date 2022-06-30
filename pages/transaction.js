@@ -2,7 +2,7 @@ import { Button, Paper, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import useWallet from "./hooks/useWallet";
 
-export default function SmartContract() {
+export default function SendTransaction() {
   const [toAddr, setToAddr] = useState('');
   const [value, setValue] = useState('');
   const [data, setData] = useState('');
