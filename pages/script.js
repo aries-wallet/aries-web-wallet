@@ -1,5 +1,5 @@
 
 export default function SmartContract() {
-  return <div>ERC721</div>
+  return <div>Script</div>
 }
 

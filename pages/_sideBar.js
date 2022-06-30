@@ -7,12 +7,14 @@ import AbcIcon from '@mui/icons-material/Abc';
 import CurrencyBitcoinIcon from '@mui/icons-material/CurrencyBitcoin';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import JavascriptIcon from '@mui/icons-material/Javascript';
 import LinkIcon from '@mui/icons-material/Link';
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import Wallet from "../utils/Wallet";
+import Wallet from "./utils/Wallet";
+import useWallet from "./hooks/useWallet";
 
 const Bar = styled("div")`
   height: 100vh;
@@ -23,7 +25,7 @@ const Bar = styled("div")`
 export default function SideBar() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [balance, setBalance] = useState('0');
-  const [wallet, setWallet] = useState({});
+  const { wallet, setWallet } = useWallet();
   const router = useRouter();
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export default function SideBar() {
       <meta name="description" content="Multi-chain EVM Web Wallet" />
       <link rel="icon" href="/favicon.png" />
     </Head>
-    <Paper elevation={0} sx={{height: "100vh"}}>
+    <Paper elevation={12} sx={{height: "100vh"}}>
       <Stack spacing={0}>
       <Stack spacing={2} sx={{padding: '20px 15px'}}>
         <Stack spacing={1} direction='row' sx={{padding: '15px'}}>
@@ -108,29 +110,22 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 3} onClick={() => router.push('/erc20')} >
+            <ListItemButton selected={selectedIndex === 3} onClick={() => router.push('/token_tools')} >
             <ListItemIcon>
                 <CurrencyBitcoinIcon />
               </ListItemIcon>
-              <ListItemText primary="ERC20" />
+              <ListItemText primary="Token Tools" />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 4} onClick={() => router.push('/erc721')} >
+            <ListItemButton selected={selectedIndex === 3} onClick={() => router.push('/script')} >
             <ListItemIcon>
-                <CurrencyBitcoinIcon />
+                <JavascriptIcon />
               </ListItemIcon>
-              <ListItemText primary="ERC721" />
+              <ListItemText primary="Script" />
             </ListItemButton>
           </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 5} onClick={() => router.push('/erc1155')} >
-            <ListItemIcon>
-                <CurrencyBitcoinIcon />
-              </ListItemIcon>
-              <ListItemText primary="ERC1155" />
-            </ListItemButton>
-          </ListItem>
+          
           <ListItem disablePadding>
             <ListItemButton component="a" href="https://chainlist.org">
               <ListItemIcon>
