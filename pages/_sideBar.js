@@ -52,6 +52,7 @@ export default function SideBar() {
         <Image src="/favicon.png" width={48} height={48}/>
         <i style={{marginTop:'12px', marginLeft: '15px'}} >Aries Web Wallet</i>
         </Stack>
+        
         {
           wallet.connected && <Button variant="outlined" sx={{textTransform:'none'}} onClick={async ()=>{
             wallet.resetApp().then(()=>{

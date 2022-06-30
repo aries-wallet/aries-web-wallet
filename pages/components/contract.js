@@ -112,7 +112,7 @@ export function Contract(props) {
 
   return <div style={{width:'100%', textAlign:'left'}}>
     {/* <Stack spacing={2} direction='row' sx={{height:'40px'}}> */}
-    <Space>
+    <Space style={{padding:'10px'}}>
       <JsonForms
         renderers={materialRenderers}
         cells={materialCells}
