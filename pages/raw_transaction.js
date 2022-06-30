@@ -1,5 +1,5 @@
 
 export default function SmartContract() {
-  return <div>Smart Contract</div>
+  return <div>Raw Transaction</div>
 }
 
