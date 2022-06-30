@@ -4,12 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Stack, TextField, Tooltip } from "@mui/material";
 import { AddBox, ContentCopy, DeleteForever, Explore, FileCopy } from "@mui/icons-material";
 import { MessageBox } from "./message";
-import useContract from "../hooks/useContract";
+import useContract from "../pages/hooks/useContract";
 import { ContractRead } from "./ContractRead";
 import { ContractWrite } from "./ContractWrite";
 import copy from 'copy-to-clipboard';
 import { Space } from "antd";
-import useWallet from "../hooks/useWallet";
+import useWallet from "../pages/hooks/useWallet";
 
 const schemaSCAddress = {
   type: "string",
@@ -52,7 +52,7 @@ export function Contract(props) {
   }, [contractList, listLength]);
 
   const contractNames = useMemo(()=>{
-    if (contractList && contractList.length > 0) {
+    if (contractList && listLength > 0) {
       return contractList.map(v=>v.name);
     }
   }, [contractList, listLength])
@@ -72,7 +72,7 @@ export function Contract(props) {
       return wallet.web3;
     }
     return null;
-  }, [wallet, wallet && wallet.web3]);
+  }, [wallet]);
 
   const send = useCallback(()=>{
     return async (subAbi, params, payableValue) => {

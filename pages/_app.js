@@ -3,7 +3,7 @@ import { Stack } from '@mui/material'
 import { createTheme } from '@mui/material/styles'
 import { useEffect, useState } from 'react'
 import '../styles/globals.css'
-import { initDb } from './utils/db'
+import { initDb } from '../utils/db'
 import SideBar from './_sideBar'
 
 const theme = createTheme({

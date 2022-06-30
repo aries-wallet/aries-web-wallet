@@ -1,6 +1,6 @@
 import { createModel } from "hox";
 import { useEffect, useState } from "react";
-import { getDb } from "../utils/db";
+import { getDb } from "../../utils/db";
 
 function useContract() {
   const [contract, setContract] = useState({});

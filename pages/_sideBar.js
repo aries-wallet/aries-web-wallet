@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import Wallet from "./utils/Wallet";
+import Wallet from "../utils/Wallet";
 import useWallet from "./hooks/useWallet";
 
 const Bar = styled("div")`
@@ -49,7 +49,7 @@ export default function SideBar() {
       <Stack spacing={2} sx={{padding: '20px 15px'}}>
         <Stack spacing={1} direction='row' sx={{padding: '15px'}}>
         {/* <AccountBalanceWalletIcon sx={{marginTop:'-3px'}} /> */}
-        <Image src="/favicon.png" width={48} height={48}/>
+        <Image alt="logo" src="/favicon.png" width={48} height={48}/>
         <i style={{marginTop:'12px', marginLeft: '15px'}} >Aries Web Wallet</i>
         </Stack>
         
@@ -141,7 +141,7 @@ export default function SideBar() {
     </Paper>
     <Stack spacing={2} direction='row' sx={{marginTop:'-50px', marginLeft:'20px'}}>
       <Tooltip title="GitHub">
-        <a target="_blank" href="https://github.com/aries-wallet/aries-web-wallet"><GitHubIcon /></a>
+        <a target="_blank" rel="noreferrer" href="https://github.com/aries-wallet/aries-web-wallet"><GitHubIcon /></a>
       </Tooltip>
       <Tooltip title="Donate">
         <FavoriteBorderIcon onClick={()=>{console.log('donate')}} sx={{cursor: 'pointer'}} />
