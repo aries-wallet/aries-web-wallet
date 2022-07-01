@@ -113,13 +113,26 @@ export function Contract(props) {
   return <div style={{width:'100%', textAlign:'left'}}>
     {/* <Stack spacing={2} direction='row' sx={{height:'40px'}}> */}
     <Space style={{padding:'10px'}}>
-      <JsonForms
+      {/* <JsonForms
         renderers={materialRenderers}
         cells={materialCells}
         data={scName}
         onChange={v=>setContract(v.data)}
         schema={schemaAbi}
+      /> */}
+
+      <Autocomplete 
+        disablePortal
+        options={contractNames}
+        sx={{width:'260px'}}
+        renderInput={(params) => <TextField {...params} label="Contract Name" variant="standard" />}
+        onChange={(event, value)=>{
+          console.log('onChange', event, value);
+          setContract(value);
+        }}
+        defaultValue={contractNames[0]}
       />
+
      
       <JsonForms
         renderers={materialRenderers}
