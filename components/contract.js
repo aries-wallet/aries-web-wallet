@@ -130,7 +130,7 @@ export function Contract(props) {
           console.log('onChange', event, value);
           setContract(value);
         }}
-        defaultValue={contractNames[0]}
+        defaultValue={contractNames && contractNames[0]}
       />
 
      
