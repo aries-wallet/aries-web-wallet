@@ -36,6 +36,8 @@ export default function SideBar() {
       }
     }
     getBalance();
+    let timer = setInterval(getBalance, 10000);
+    return () => clearInterval(timer);
   }, [wallet, wallet.address, wallet.networkId, wallet.web3]);
 
   return <Bar>
