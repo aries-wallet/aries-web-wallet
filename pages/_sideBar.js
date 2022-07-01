@@ -1,10 +1,11 @@
-import { Autocomplete, Button, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, styled, TextField, Tooltip } from "@mui/material"
+import { Autocomplete, Button, Divider, LinearProgress, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, styled, TextField, Tooltip } from "@mui/material"
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 import SendIcon from '@mui/icons-material/Send';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AbcIcon from '@mui/icons-material/Abc';
 import CurrencyBitcoinIcon from '@mui/icons-material/CurrencyBitcoin';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import JavascriptIcon from '@mui/icons-material/Javascript';
@@ -26,6 +27,7 @@ export default function SideBar() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [balance, setBalance] = useState('0');
   const { wallet, setWallet } = useWallet();
+  const [storagePercent, setStoragePercent] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -40,11 +42,33 @@ export default function SideBar() {
     return () => clearInterval(timer);
   }, [wallet, wallet.address, wallet.networkId, wallet.web3]);
 
+  useEffect(()=>{
+    const checkFree = () => {
+      var _lsTotal = 0, _xLen, _x;
+      for (_x in localStorage) {
+        if (!localStorage.hasOwnProperty(_x)) {
+            continue;
+        }
+        _xLen = ((localStorage[_x].length + _x.length) * 2);
+        _lsTotal += _xLen;
+        // console.log(_x.substr(0, 50) + " = " + (_xLen / 1024).toFixed(2) + " KB")
+      };
+      console.log("Total = " + (_lsTotal / 1024).toFixed(2) + " KB");
+      console.log('Percent', _lsTotal * 100 / (1024 * 1024 * 1024) / 5);
+      setStoragePercent(_lsTotal * 100 / (1024 * 1024 * 1024) / 5);
+    }
+    let timer = setInterval(checkFree, 10000);
+    return () => clearInterval(timer);
+  }, []);
+
   return <Bar>
     <Head>
       <title>Aries Web Wallet</title>
-      <meta name="description" content="Multi-chain EVM Web Wallet" />
+      <meta name="description" content="Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet]" />
       <link rel="icon" href="/favicon.png" />
+      <meta itemprop="name" content={'Aries Web Wallet'} />
+      <meta itemprop="description" content={'Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet]'} />
+      <meta itemprop="image" content={'/smart_contract.png'} />
     </Head>
     <Paper elevation={12} sx={{height: "100vh"}}>
       <Stack spacing={0}>
@@ -145,9 +169,18 @@ export default function SideBar() {
       <Tooltip title="GitHub">
         <a target="_blank" rel="noreferrer" href="https://github.com/aries-wallet/aries-web-wallet"><GitHubIcon /></a>
       </Tooltip>
-      <Tooltip title="Donate">
-        <FavoriteBorderIcon onClick={()=>{console.log('donate')}} sx={{cursor: 'pointer'}} />
+      <Tooltip title="Email">
+        <a target="_blank" rel="noreferrer" href="mailto:lolieatapple@gmail.com"><MailOutlineIcon /></a>
       </Tooltip>
+      <Tooltip title="Donate">
+        <FavoriteBorderIcon onClick={()=>{
+          window.alert("Welcome donate any amount of ETH to 0x7521EDa00E2Ce05aC4a9d8353d096CCB970d5188");
+        }} sx={{cursor: 'pointer'}} />
+      </Tooltip>
+      <div>
+        LocalStorage
+        <LinearProgress variant="determinate" value={storagePercent} />
+      </div>
     </Stack>
   </Bar>
 }
