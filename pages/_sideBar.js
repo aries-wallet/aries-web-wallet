@@ -64,11 +64,11 @@ export default function SideBar() {
   return <Bar>
     <Head>
       <title>Aries Web Wallet</title>
-      <meta name="description" content="Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet]" />
+      <meta name="description" content="Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet] [Wallet] [EVM]" />
       <link rel="icon" href="/favicon.png" />
-      <meta itemprop="name" content={'Aries Web Wallet'} />
-      <meta itemprop="description" content={'Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet]'} />
-      <meta itemprop="image" content={'/smart_contract.png'} />
+      <meta itemProp="name" content={'Aries Web Wallet'} />
+      <meta itemProp="description" content={'Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet] [Wallet] [EVM]'} />
+      <meta itemProp="image" content={'/smart_contract.png'} />
     </Head>
     <Paper elevation={12} sx={{height: "100vh"}}>
       <Stack spacing={0}>
