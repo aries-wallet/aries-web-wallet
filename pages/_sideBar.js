@@ -154,7 +154,7 @@ export default function SideBar() {
           </ListItem>
           
           <ListItem disablePadding>
-            <ListItemButton component="a" href="https://chainlist.org">
+            <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://chainlist.org">
               <ListItemIcon>
                 <LinkIcon />
               </ListItemIcon>
