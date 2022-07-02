@@ -32,7 +32,7 @@ function TokenTools() {
         <h2 style={{ color: "white" }}>DApp tools</h2>
         
         <div style={{display: 'flex', alignItems:'center', justifyContent:'center', flexFlow:'row wrap' }}>
-          <Card style={{borderRadius: '20px', margin: "20px"}}>
+          <Card style={{borderRadius: '20px', margin: "20px", textAlign:"center"}}>
             <Space direction="vertical" >
               <h2>ERC20 tools</h2>
               <Input
@@ -213,7 +213,7 @@ function TokenTools() {
             </Space>
           </Card>
 
-          <Card style={{borderRadius: '20px', margin: "20px"}}>
+          <Card style={{borderRadius: '20px', margin: "20px", textAlign:"center"}}>
             <Space direction="vertical" >
               <h2>ERC721 tools</h2>
               <Input
