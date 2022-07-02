@@ -57,6 +57,8 @@ export function Contract(props) {
     }
   }, [contractList, listLength])
 
+  console.log('contractNames', contractNames, scName, scAddr);
+
   const [newContract, setNewContract] = useState({
     name: '',
     address: '0x',
@@ -120,27 +122,30 @@ export function Contract(props) {
         onChange={v=>setContract(v.data)}
         schema={schemaAbi}
       /> */}
-
-      <Autocomplete 
-        disablePortal
-        options={contractNames}
-        sx={{width:'260px'}}
-        renderInput={(params) => <TextField {...params} label="Contract Name" variant="standard" />}
-        onChange={(event, value)=>{
-          console.log('onChange', event, value);
-          setContract(value);
-        }}
-        defaultValue={contractNames && contractNames[0]}
-      />
-
-     
-      <JsonForms
-        renderers={materialRenderers}
-        cells={materialCells}
-        data={scAddr}
-        onChange={v=>setScAddr(v.data)}
-        schema={schemaSCAddress}
-      />
+      {
+        contractNames && <Autocomplete 
+          disablePortal
+          options={contractNames}
+          sx={{width:'260px'}}
+          renderInput={(params) => <TextField {...params} label="Contract Name" variant="standard" />}
+          onChange={(event, value)=>{
+            console.log('onChange', event, value);
+            setContract(value);
+          }}
+          defaultValue={scName}
+          // value={scName}
+        />
+      }
+      {
+        scAddr && <JsonForms
+          renderers={materialRenderers}
+          cells={materialCells}
+          data={scAddr}
+          onChange={v=>setScAddr(v.data)}
+          schema={schemaSCAddress}
+        />
+      }
+      
       
       <Divider orientation="vertical" flexItem />
       <Divider orientation="vertical" flexItem />
