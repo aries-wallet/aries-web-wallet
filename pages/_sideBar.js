@@ -57,6 +57,7 @@ export default function SideBar() {
       // console.log('Percent', _lsTotal * 100 / (1024 * 1024) / 5);
       setStoragePercent(_lsTotal * 100 / (1024 * 1024) / 5);
     }
+    checkFree();
     let timer = setInterval(checkFree, 10000);
     return () => clearInterval(timer);
   }, []);
