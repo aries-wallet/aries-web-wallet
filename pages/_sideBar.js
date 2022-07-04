@@ -53,8 +53,8 @@ export default function SideBar() {
         _lsTotal += _xLen;
         // console.log(_x.substr(0, 50) + " = " + (_xLen / 1024).toFixed(2) + " KB")
       };
-      console.log("Total = " + (_lsTotal / 1024).toFixed(2) + " KB");
-      console.log('Percent', _lsTotal * 100 / (1024 * 1024) / 5);
+      // console.log("Total = " + (_lsTotal / 1024).toFixed(2) + " KB");
+      // console.log('Percent', _lsTotal * 100 / (1024 * 1024) / 5);
       setStoragePercent(_lsTotal * 100 / (1024 * 1024) / 5);
     }
     let timer = setInterval(checkFree, 10000);
