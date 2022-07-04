@@ -136,16 +136,14 @@ export function Contract(props) {
           // value={scName}
         />
       }
-      {
-        scAddr && <JsonForms
-          renderers={materialRenderers}
-          cells={materialCells}
-          data={scAddr}
-          onChange={v=>setScAddr(v.data)}
-          schema={schemaSCAddress}
-        />
-      }
       
+      <JsonForms
+        renderers={materialRenderers}
+        cells={materialCells}
+        data={scAddr}
+        onChange={v=>setScAddr(v.data)}
+        schema={schemaSCAddress}
+      />
       
       <Divider orientation="vertical" flexItem />
       <Divider orientation="vertical" flexItem />
