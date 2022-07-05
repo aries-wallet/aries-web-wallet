@@ -74,10 +74,8 @@ export default function SideBar() {
     <Paper elevation={12} sx={{height: "100vh"}}>
       <Stack spacing={0}>
       <Stack spacing={2} sx={{padding: '20px 15px'}}>
-        <Stack spacing={1} direction='row' sx={{padding: '15px'}}>
-        {/* <AccountBalanceWalletIcon sx={{marginTop:'-3px'}} /> */}
-        <Image alt="logo" src="/favicon.png" width={48} height={48}/>
-        <i style={{marginTop:'12px', marginLeft: '15px'}} >Aries Web Wallet</i>
+        <Stack spacing={1} direction='row' sx={{padding: '10px 0 10px 25px'}}>
+        <Image alt="logo" src="/logo.png" width={180} height={58}/>
         </Stack>
         
         {
