@@ -1,6 +1,7 @@
 import { ThemeProvider } from '@emotion/react'
 import { Stack } from '@mui/material'
 import { createTheme } from '@mui/material/styles'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import '../styles/globals.css'
 import { initDb } from '../utils/db'
@@ -25,7 +26,9 @@ function MyApp({ Component, pageProps }) {
 
   return <ThemeProvider theme={theme}>
     {
-      loading ? <div>Loading...</div> :  <Stack spacing={2} direction='row' >
+      loading ? <div style={{width:'100%', textAlign:'center'}}>
+          <Image alt="Loading..." src="/loading.gif" width="800" height="600" />
+        </div> :  <Stack spacing={2} direction='row' >
         <SideBar />
         <div style={{width:'100%', height: "100vh", overflow: "scroll"}}>
           <Component {...pageProps} />
