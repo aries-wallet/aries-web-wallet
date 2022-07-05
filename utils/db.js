@@ -103,12 +103,12 @@ export const initDb = async () => {
     console.log('initDb', db);
     if (!db) {
       let adapter = new AriesAdapter();
-      console.log('adapter', adapter);
+      // console.log('adapter', adapter);
       db = new Low(adapter);
-      console.log('db', db);
+      // console.log('db', db);
     }
     await db.read();
-    console.log('db2', db);
+    // console.log('db2', db);
     if (!db.data) {
       db.data = dbModal;
       await db.write();
@@ -125,6 +125,6 @@ export const initDb = async () => {
 }
 
 export const getDb = ()=>{
-  console.log('db', db);
+  // console.log('db', db);
   return db;
 }
