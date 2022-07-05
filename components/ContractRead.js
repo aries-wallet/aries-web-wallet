@@ -146,6 +146,5 @@ export function objectToArray(object, abi, payable) {
   if (payable) {
     ret.push(object['payable']);
   }
-  console.log('objectToArray', object, ret);
   return ret;
 }

@@ -17,13 +17,15 @@ function MyApp({ Component, pageProps }) {
   useEffect(()=>{
     initDb().then(ret=>{
       console.log('initDb', ret)
+    }).catch(console.error).finally(()=>{
+      console.log('initDb finish');
       setLoading(false);
-    }).catch(console.error).finally(()=>console.log('initDb finish'));
+    });
   }, []);
 
   return <ThemeProvider theme={theme}>
     {
-      loading ? <div>loading...</div> :  <Stack spacing={2} direction='row' >
+      loading ? <div>Loading...</div> :  <Stack spacing={2} direction='row' >
         <SideBar />
         <div style={{width:'100%', height: "100vh", overflow: "scroll"}}>
           <Component {...pageProps} />

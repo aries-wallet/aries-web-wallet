@@ -57,8 +57,6 @@ export function Contract(props) {
     }
   }, [contractList, listLength])
 
-  console.log('contractNames', contractNames, scName, scAddr);
-
   const [newContract, setNewContract] = useState({
     name: '',
     address: '0x',
@@ -91,8 +89,8 @@ export function Contract(props) {
           let nonce = await web3.eth.getTransactionCount(wallet.address);
           console.log('params', params);
           let tx = await sc.methods[subAbi.name](...params).send({from: wallet.address, value: payableValue ? payableValue : 0, nonce: `0x${nonce.toString(16)}`});
+          console.log('tx reciept:', tx);
           if (tx && tx.status) {
-            console.log('Transaction Hash:', tx.transactionHash);
             setSuccessInfo("Send Tx successed");
           } else {
             console.log('tx', tx);
@@ -201,9 +199,6 @@ export function Contract(props) {
       }}>Write Contract</Button>
     {/* </Stack> */}
     </Space>
-    {
-      console.log("isRead", isRead, accessAddr, accessAbi.length > 0, web3Reader)
-    }
     {
       isRead && accessAddr && accessAbi.length > 0 && web3Reader && <ContractRead web3={web3Reader} scAddr={accessAddr} abi={accessAbi} />
     }

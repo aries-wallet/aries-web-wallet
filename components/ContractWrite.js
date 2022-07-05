@@ -78,7 +78,6 @@ function abiToSchema(subAbi, payable) {
       description: 'uint256',
     }
   }
-  console.log('props', props);
   return {
     type: 'object',
     properties: props,
