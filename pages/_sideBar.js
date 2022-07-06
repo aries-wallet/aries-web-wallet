@@ -10,12 +10,19 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import JavascriptIcon from '@mui/icons-material/Javascript';
 import LinkIcon from '@mui/icons-material/Link';
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Wallet from "../utils/Wallet";
 import useWallet from "./hooks/useWallet";
+import WbSunnyIcon from '@mui/icons-material/WbSunny';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+
+let DarkReader;
+if (typeof window !== 'undefined') {
+  DarkReader = require('darkreader');
+}
 
 const Bar = styled("div")`
   height: 100vh;
@@ -62,6 +69,29 @@ export default function SideBar() {
     return () => clearInterval(timer);
   }, []);
 
+  const [updateDark, setUpdateDark] = useState(0);
+
+  const isDarkMode = useMemo(() => {
+    return DarkReader ? DarkReader.isEnabled() : false;
+  }, [updateDark]);
+
+  const handleDarkMode = () => {
+    if (DarkReader) {
+      const isEnabled = DarkReader.isEnabled();
+      if (isEnabled) {
+        DarkReader.disable();
+        setUpdateDark(Date.now());
+      } else {
+        DarkReader.enable({
+          brightness: 100,
+          contrast: 90,
+          sepia: 10
+        });
+        setUpdateDark(Date.now());
+      }
+    }
+  }
+
   return <Bar>
     <Head>
       <title>Aries Web Wallet</title>
@@ -75,7 +105,15 @@ export default function SideBar() {
       <Stack spacing={0}>
       <Stack spacing={2} sx={{padding: '20px 15px'}}>
         <Stack spacing={1} direction='row' sx={{padding: '10px 0 10px 25px'}}>
-        <Image alt="logo" src="/logo.png" width={180} height={58}/>
+        <Image alt="logo" src="/logo.png" width={180} height={58} style={{cursor:'pointer'}} onClick={()=>{
+          window.location.href = '/';
+        }}/>
+        <Tooltip title="Toggle Dark Mode">
+        {
+          isDarkMode ? <WbSunnyIcon onClick={handleDarkMode} style={{cursor:'pointer'}} /> : <DarkModeIcon onClick={handleDarkMode} style={{cursor:'pointer'}} />
+        }
+        </Tooltip>
+        
         </Stack>
         
         {

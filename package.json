@@ -23,6 +23,7 @@
     "ahooks": "^3.5.1",
     "antd": "^4.21.4",
     "copy-to-clipboard": "^3.3.1",
+    "darkreader": "^4.9.52",
     "ethers": "^5.6.9",
     "hox": "^1.1.6",
     "next": "12.1.4",
