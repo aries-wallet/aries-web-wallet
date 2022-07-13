@@ -13,6 +13,7 @@ export default function RawTransaction() {
       <Button variant="contained" color="primary" onClick={async ()=>{
         try {
           if (!web3) return;
+          console.log('start sending signed tx...', data);
           const tx = await web3.eth.sendSignedTransaction(data);
           console.log(tx);
           window.alert(`Transaction Hash: ${tx.transactionHash}`);
