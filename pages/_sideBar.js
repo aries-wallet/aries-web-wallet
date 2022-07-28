@@ -18,6 +18,7 @@ import Wallet from "../utils/Wallet";
 import useWallet from "./hooks/useWallet";
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import TwitterIcon from '@mui/icons-material/Twitter';
 
 let DarkReader;
 if (typeof window !== 'undefined') {
@@ -206,8 +207,8 @@ export default function SideBar() {
       <Tooltip title="GitHub">
         <a target="_blank" rel="noreferrer" href="https://github.com/aries-wallet/aries-web-wallet"><GitHubIcon /></a>
       </Tooltip>
-      <Tooltip title="Email">
-        <a target="_blank" rel="noreferrer" href="mailto:lolieatapple@gmail.com"><MailOutlineIcon /></a>
+      <Tooltip title="Twitter">
+        <a target="_blank" rel="noreferrer" href="https://twitter.com/aries_wallet"><TwitterIcon /></a>
       </Tooltip>
       <Tooltip title="Donate">
         <FavoriteBorderIcon onClick={()=>{
