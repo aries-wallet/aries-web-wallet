@@ -77,10 +77,10 @@ export function Contract(props) {
   const send = useCallback(()=>{
     return async (subAbi, params, payableValue) => {
       try {
-        let confirm = await window.confirm("Do you want to send Transaction?", "Transaction Confirm");
-        if (!confirm) {
-          return;
-        }
+        // let confirm = await window.confirm("Do you want to send Transaction?", "Transaction Confirm");
+        // if (!confirm) {
+        //   return;
+        // }
 
         try {
           console.log(`Sending Transaction call method: ${subAbi.name} with params: ${params}`);
