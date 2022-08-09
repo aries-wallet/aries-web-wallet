@@ -132,6 +132,7 @@ function abiToUISchema(subAbi) {
 }
 
 export function objectToArray(object, abi, payable) {
+  console.log('object', object);
   let ret = [];
   abi.map((v,i)=>{
     let obj = object[v.name ? v.name : `param${i}`];
@@ -140,11 +141,12 @@ export function objectToArray(object, abi, payable) {
     } catch {
 
     }
-    ret.push(obj);
+    ret.push(obj.toString());
     return ret;
   })
   if (payable) {
     ret.push(object['payable']);
   }
+  console.log('ret', ret);
   return ret;
 }
