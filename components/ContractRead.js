@@ -141,7 +141,11 @@ export function objectToArray(object, abi, payable) {
     } catch {
 
     }
-    ret.push(obj.toString());
+    if (typeof obj === 'number') {
+      ret.push(obj.toString());
+    } else {
+      ret.push(obj);
+    }
     return ret;
   })
   if (payable) {
