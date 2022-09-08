@@ -137,7 +137,9 @@ export function objectToArray(object, abi, payable) {
   abi.map((v,i)=>{
     let obj = object[v.name ? v.name : `param${i}`];
     try {
-      obj = JSON.parse(obj);
+      if (obj.toString().includes('[') || obj.toString().includes('{')) {
+        obj = JSON.parse(obj);
+      }
     } catch {
 
     }
