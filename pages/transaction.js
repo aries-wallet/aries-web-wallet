@@ -17,12 +17,12 @@ export default function SendTransaction() {
       <Button variant="contained" color="primary" onClick={async ()=>{
         try {
           if (!web3) return;
-          if (!toAddr) return;
-          if (!value) return;
+          // if (!toAddr) return;
+          // if (!value) return;
           const tx = await web3.eth.sendTransaction({
             from: wallet.address,
-            to: toAddr,
-            value: web3.utils.toWei(value),
+            to: toAddr ? toAddr : undefined,
+            value: value ? web3.utils.toWei(value) : '0',
             data: data
           });
           console.log(tx);
