@@ -7,8 +7,12 @@ export default function SendTransaction() {
   const [value, setValue] = useState('');
   const [data, setData] = useState('');
   const { wallet } = useWallet();
+  const [txHash, setTxHash] = useState('');
+  const [txJson, setTxJson] = useState('');
+  const [txReceipt, setTxReceipt] = useState('');
   const web3 = wallet && wallet.web3;
-  return <Paper sx={{padding: '30px', margin: '50px', overflow:'auto'}}>
+  return <div>
+    <Paper sx={{padding: '30px', margin: '50px', overflow:'auto'}}>
     <Stack spacing={2}>
       <h1>Send Normal Transaction</h1>
       <TextField label="To Address" value={toAddr} onChange={e=>setToAddr(e.target.value)} />
@@ -34,5 +38,33 @@ export default function SendTransaction() {
       }}>Send</Button>
     </Stack>
   </Paper>
+  <Paper sx={{padding: '30px', margin: '50px', overflow:'auto'}}>
+    <Stack spacing={2}>
+      <h1>Get Transaction Status</h1>
+      <TextField label="Transacton Hash" value={txHash} onChange={e=>setTxHash(e.target.value)} />
+      <Button variant="contained" color="primary" onClick={async ()=>{
+        try {
+          if (!web3) return;
+          // if (!toAddr) return;
+          // if (!value) return;
+          const tx = await web3.eth.getTransaction(txHash);
+          console.log(tx);
+          setTxJson(JSON.stringify(tx, null, 2));
+
+          const _receipt = await web3.eth.getTransactionReceipt(txHash);
+          console.log(_receipt);
+          setTxReceipt(JSON.stringify(_receipt, null, 2));
+        } catch (error) {
+          console.error(error);
+          window.alert(error.message);
+        }
+      }}>Get Tx & Receipt</Button>
+      <h4>Tx JSON</h4>
+      <pre>{txJson}</pre>
+      <h4>Tx Receipt</h4>
+      <pre>{txReceipt}</pre>
+    </Stack>
+  </Paper>
+    </div>
 }
 
