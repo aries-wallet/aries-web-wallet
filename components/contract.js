@@ -128,10 +128,11 @@ export function Contract(props) {
           renderInput={(params) => <TextField {...params} label="Contract Name" variant="standard" />}
           onChange={(event, value)=>{
             console.log('onChange', event, value);
+            console.log('scName', scName);
             setContract(value);
           }}
-          defaultValue={scName}
-          // value={scName}
+          // defaultValue={scName}
+          value={scName}
         />
       }
       
