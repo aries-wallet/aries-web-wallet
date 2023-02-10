@@ -70,6 +70,7 @@ export default function Storeman() {
   const { wallet } = useWallet();
   const [workAddress, setWorkAddress] = useLocalStorageState("workAddress", "");
   const [info, setInfo] = useState({});
+  const [updater, setUpdater] = useState(0);
   useEffect(() => {
     const func = async () => {
       try {
@@ -89,7 +90,7 @@ export default function Storeman() {
     };
 
     func();
-  }, [wallet, workAddress]);
+  }, [wallet, workAddress, updater]);
   return (
     <div
       style={{
@@ -148,6 +149,7 @@ export default function Storeman() {
                       const web3 = wallet.web3;
                       const sc = new web3.eth.Contract(storermanABI, storemanSC);
                       await sc.methods.stakeIncentiveClaim(ethers.utils.getAddress(workAddress)).send({from: wallet.address});
+                      setUpdater(Date.now());
                     }} >
                       Claim
                     </Button>
