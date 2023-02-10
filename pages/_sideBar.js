@@ -190,6 +190,14 @@ export default function SideBar() {
               <ListItemText primary="Script" />
             </ListItemButton>
           </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton selected={selectedIndex === 3} onClick={() => router.push('/storeman')} >
+            <ListItemIcon>
+                <JavascriptIcon />
+              </ListItemIcon>
+              <ListItemText primary="Wanchain Storeman" />
+            </ListItemButton>
+          </ListItem>
           
           <ListItem disablePadding>
             <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://chainlist.org">
