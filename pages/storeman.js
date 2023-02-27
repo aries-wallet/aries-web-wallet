@@ -22,6 +22,7 @@ export default function Storeman() {
   const { wallet } = useWallet();
   const [workAddress, setWorkAddress] = useLocalStorageState("workAddress", "");
   const [info, setInfo] = useState({});
+  const [delegateInfo, setDelegateInfo] = useState({});
   const [updater, setUpdater] = useState(0);
   useEffect(() => {
     const func = async () => {
@@ -36,13 +37,22 @@ export default function Storeman() {
         );
         console.log("info", result);
         setInfo(result);
+
+        if (wallet.address) {
+          const delegateInfo = await sc.getSmDelegatorInfo(
+            ethers.utils.getAddress(workAddress),
+            wallet.address
+          );
+          console.log("delegateInfo", delegateInfo);
+          setDelegateInfo(delegateInfo);
+        }
       } catch (error) {
         console.log(error.message);
       }
     };
 
     func();
-  }, [wallet, workAddress, updater]);
+  }, [wallet, workAddress, updater, wallet.address]);
   return (
     <div
       style={{
@@ -110,11 +120,22 @@ export default function Storeman() {
                 <TableRow>
                   <TableCell>DelegateDeposit</TableCell>
                   <TableCell>
-                    {info.delegateDeposit &&
+                    [T: {info.delegateDeposit &&
                       ethers.utils.formatEther(
                         info.delegateDeposit.toString()
                       )}{" "}
-                    WAN
+                    WAN]
+                    [M: {delegateInfo.deposit &&
+                      ethers.utils.formatEther(
+                        delegateInfo.deposit.toString()
+                      )}{" "}
+                    WAN]
+                    [R: {delegateInfo.incentive &&
+                      ethers.utils.formatEther(
+                        delegateInfo.incentive.toString()
+                      )}{" WAN"}
+                    
+                  ]
                   </TableCell>
                   <TableCell>
                     <Stack direction="row" spacing={2}>
