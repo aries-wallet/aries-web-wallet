@@ -121,19 +121,19 @@ export default function Storeman() {
                   <TableCell>DelegateDeposit</TableCell>
                   <TableCell>
                     [T: {info.delegateDeposit &&
-                      ethers.utils.formatEther(
+                      Number(ethers.utils.formatEther(
                         info.delegateDeposit.toString()
-                      )}{" "}
+                      )).toFixed(0)}{" "}
                     WAN]
                     [M: {delegateInfo.deposit &&
-                      ethers.utils.formatEther(
+                      Number(ethers.utils.formatEther(
                         delegateInfo.deposit.toString()
-                      )}{" "}
+                      )).toFixed(0)}{" "}
                     WAN]
                     [R: {delegateInfo.incentive &&
-                      ethers.utils.formatEther(
+                      Number(ethers.utils.formatEther(
                         delegateInfo.incentive.toString()
-                      )}{" WAN"}
+                      )).toFixed(0)}{" WAN"}
                     
                   ]
                   </TableCell>
