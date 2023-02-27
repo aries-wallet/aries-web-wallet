@@ -2,6 +2,7 @@ import {
   Button,
   Divider,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -13,56 +14,7 @@ import { useLocalStorageState } from "ahooks";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import useWallet from "./hooks/useWallet";
-const storermanABI = [
-  {
-    constant: true,
-    inputs: [{ name: "wkAddr", type: "address" }],
-    name: "getStoremanInfo",
-    outputs: [
-      {
-        components: [
-          { name: "sender", type: "address" },
-          { name: "enodeID", type: "bytes" },
-          { name: "PK", type: "bytes" },
-          { name: "wkAddr", type: "address" },
-          { name: "isWhite", type: "bool" },
-          { name: "quited", type: "bool" },
-          { name: "delegatorCount", type: "uint256" },
-          { name: "delegateDeposit", type: "uint256" },
-          { name: "partnerCount", type: "uint256" },
-          { name: "partnerDeposit", type: "uint256" },
-          { name: "crossIncoming", type: "uint256" },
-          { name: "slashedCount", type: "uint256" },
-          { name: "incentivedDelegator", type: "uint256" },
-          { name: "incentivedDay", type: "uint256" },
-          { name: "groupId", type: "bytes32" },
-          { name: "nextGroupId", type: "bytes32" },
-          { name: "deposit", type: "uint256" },
-          { name: "incentive", type: "uint256" },
-        ],
-        name: "si",
-        type: "tuple",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "wkAddr",
-        "type": "address"
-      }
-    ],
-    "name": "stakeIncentiveClaim",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-];
+const storermanABI = require("./storeman.abi.json");
 
 const storemanSC = "0x1E7450D5d17338a348C5438546f0b4D0A5fbeaB6";
 
@@ -101,7 +53,7 @@ export default function Storeman() {
         justifyContent: "center",
       }}
     >
-      <Paper elevation={10} sx={{ width: "700px", padding: "20px" }}>
+      <Paper elevation={10} sx={{ width: "800px", padding: "20px" }}>
         <h1>Wanchain Storeman Monitor</h1>
         <TextField
           fullWidth
@@ -164,7 +116,33 @@ export default function Storeman() {
                       )}{" "}
                     WAN
                   </TableCell>
-                  <TableCell></TableCell>
+                  <TableCell>
+                    <Stack direction="row" spacing={2}>
+                    <Button variant="outlined" fullWidth onClick={async () => {
+                      const web3 = wallet.web3;
+                      let balance = await web3.eth.getBalance(wallet.address);
+                      let amount = prompt("Please enter the amount of WAN to deposit. \nBalance: " + ethers.utils.formatEther(balance) +" WAN", "100");
+                      if (!amount) {
+                        return;
+                      }
+                      amount = ethers.utils.parseEther(amount);
+                      console.log('amount', amount);
+                      const sc = new web3.eth.Contract(storermanABI, storemanSC);
+                      await sc.methods.delegateIn(ethers.utils.getAddress(workAddress)).send({from: wallet.address, value: amount});
+                      setUpdater(Date.now());
+                    }} >
+                      Deposit
+                    </Button>
+                    <Button variant="outlined" fullWidth onClick={async () => {
+                      const web3 = wallet.web3;
+                      const sc = new web3.eth.Contract(storermanABI, storemanSC);
+                      await sc.methods.delegateIncentiveClaim(ethers.utils.getAddress(workAddress)).send({from: wallet.address});
+                      setUpdater(Date.now());
+                    }} >
+                      Claim
+                    </Button>
+                    </Stack>
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>DelegatorCount</TableCell>
