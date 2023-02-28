@@ -133,7 +133,7 @@ export default function Storeman() {
                     [R: {delegateInfo.incentive &&
                       Number(ethers.utils.formatEther(
                         delegateInfo.incentive.toString()
-                      )).toFixed(0)}{" WAN"}
+                      )).toFixed(1)}{" WAN"}
                     
                   ]
                   </TableCell>
