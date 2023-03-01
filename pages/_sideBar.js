@@ -224,7 +224,13 @@ export default function SideBar() {
         }} sx={{cursor: 'pointer'}} />
       </Tooltip>
       <div>
-        LocalStorage
+        <a onClick={()=>{
+          let ret = window.confirm("Are you sure to reset localStorage for AriesWallet?");
+          if (ret) {
+            window.localStorage.clear();
+            window.location.reload();
+          }
+        }}>LocalStorage</a>
         <LinearProgress variant="determinate" value={storagePercent} />
       </div>
     </Stack>
