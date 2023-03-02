@@ -22,8 +22,8 @@ import { useLocalStorageState } from "ahooks";
 const storermanABI = require("./storeman.abi.json");
 
 const multiPrivateTxSC = {
-  888: '0xd2aDa415ED6FAF3d6CeD22aE93A0F0c726bB0A40',
-  999: '0xc35331dD51d2E76795ba67Da4A2C290aF3Be5d8d'
+  888: '0x7D02Ec17f20cA4Bf43FD50410aC52a4038a48365',
+  999: '0xD8D7fdab0d3ffD305b7ee4b4249405C9F82892A7'
 }
 
 const multiPrivateAbi = [
