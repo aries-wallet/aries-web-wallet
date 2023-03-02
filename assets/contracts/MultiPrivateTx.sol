@@ -2,13 +2,16 @@
 pragma solidity ^0.8.0;
 
 contract MultiPrivateTx {
-    address privateAddr = address(0x0000000000000000000000000000000000000064);
+    address constant public privateAddr = address(0x0000000000000000000000000000000000000064);
+
+    event Ota(string ota, uint256 value);
     
     function send(string[] calldata otas, uint256[] calldata values) external payable {
         require(otas.length == values.length, "length not match");
         for (uint256 i = 0; i < otas.length; i++) {
             bytes memory data = abi.encodeWithSignature("buyCoinNote(string,uint256)", otas[i], values[i]);
             callExternalContract(privateAddr, data, values[i]);
+            emit Ota(otas[i], values[i]);
         }
     }
 
