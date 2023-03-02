@@ -165,7 +165,7 @@ export default function PrivateTx() {
         success && <Alert severity="success">{success}</Alert>
       }
       </Stack>
-      <LoadingButton loading={loading} sx={{marginTop: '40px', width: '120px'}} variant="contained" onClick={async () => {
+      <LoadingButton disabled={error.length > 0} loading={loading} sx={{marginTop: '40px', width: '120px'}} variant="contained" onClick={async () => {
         try {
           setSuccess('');
           if (otas.length === 0) {
