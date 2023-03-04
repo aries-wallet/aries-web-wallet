@@ -118,7 +118,7 @@ export default function Storeman() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>Delegation</TableCell>
+                  <TableCell>Delegation Amount</TableCell>
                   <TableCell>
                     <Stack direction="column" spacing={1}>
                       <div>
@@ -151,7 +151,7 @@ export default function Storeman() {
                     <Button variant="outlined" fullWidth onClick={async () => {
                       const web3 = wallet.web3;
                       let balance = await web3.eth.getBalance(wallet.address);
-                      let amount = prompt("Please enter the amount of WAN to deposit. \nBalance: " + ethers.utils.formatEther(balance) +" WAN", "100");
+                      let amount = prompt("Please enter the amount of WAN to deposit(min: 100 WAN). \nBalance: " + ethers.utils.formatEther(balance) +" WAN", "100");
                       if (!amount) {
                         return;
                       }
@@ -190,7 +190,7 @@ export default function Storeman() {
                   <TableCell></TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>PartnerDeposit</TableCell>
+                  <TableCell>Partner Amount</TableCell>
                   <TableCell>
                     {info.partnerDeposit &&
                       ethers.utils.formatEther(
@@ -198,7 +198,41 @@ export default function Storeman() {
                       )}{" "}
                     WAN
                   </TableCell>
-                  <TableCell></TableCell>
+                  <TableCell>
+                  <Stack direction="row" spacing={2}>
+                    <Button variant="outlined" fullWidth onClick={async () => {
+                      const web3 = wallet.web3;
+                      let balance = await web3.eth.getBalance(wallet.address);
+                      let amount = prompt("Please enter the amount of WAN to deposit(min: 10000 WAN). \nBalance: " + ethers.utils.formatEther(balance) +" WAN", "100");
+                      if (!amount) {
+                        return;
+                      }
+                      amount = ethers.utils.parseEther(amount);
+                      console.log('amount', amount);
+                      const sc = new web3.eth.Contract(storermanABI, storemanSC);
+                      await sc.methods.partIn(ethers.utils.getAddress(workAddress)).send({from: wallet.address, value: amount});
+                      setUpdater(Date.now());
+                    }} >
+                      Deposit
+                    </Button>
+                    <Button variant="outlined" fullWidth onClick={async () => {
+                      const web3 = wallet.web3;
+                      const sc = new web3.eth.Contract(storermanABI, storemanSC);
+                      await sc.methods.partClaim(ethers.utils.getAddress(workAddress)).send({from: wallet.address});
+                      setUpdater(Date.now());
+                    }} >
+                      Claim
+                    </Button>
+                    <Button variant="outlined" fullWidth onClick={async () => {
+                      const web3 = wallet.web3;
+                      const sc = new web3.eth.Contract(storermanABI, storemanSC);
+                      await sc.methods.partOut(ethers.utils.getAddress(workAddress)).send({from: wallet.address});
+                      setUpdater(Date.now());
+                    }} >
+                      Exit
+                    </Button>
+                    </Stack>
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>PartnerCount</TableCell>
