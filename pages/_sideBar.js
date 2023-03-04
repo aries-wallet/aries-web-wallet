@@ -152,7 +152,7 @@ export default function SideBar() {
           <ListItem disablePadding>
             <ListItemButton selected={router.pathname === '/smart_contract'} onClick={() => router.push('/smart_contract')} >
               <ListItemIcon>
-                <AccountBalanceIcon />
+                <CollectionsBookmarkIcon />
               </ListItemIcon>
               <ListItemText primary="Smart Contract" />
             </ListItemButton>
@@ -192,7 +192,7 @@ export default function SideBar() {
           <ListItem disablePadding>
             <ListItemButton selected={router.pathname === '/storeman'} onClick={() => router.push('/storeman')} >
             <ListItemIcon>
-                <JavascriptIcon />
+                <AccountBalanceWalletIcon />
               </ListItemIcon>
               <ListItemText primary="Wanchain Storeman" />
             </ListItemButton>
