@@ -103,7 +103,7 @@ export default function Storeman() {
                   <TableCell>Incentive</TableCell>
                   <TableCell>
                     {info.incentive &&
-                      ethers.utils.formatEther(info.incentive.toString())}{" "}
+                      Number(ethers.utils.formatEther(info.incentive.toString())).toFixed(2)}{" "}
                     WAN
                   </TableCell>
                   <TableCell>
@@ -118,24 +118,33 @@ export default function Storeman() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>DelegateDeposit</TableCell>
+                  <TableCell>Delegation</TableCell>
                   <TableCell>
-                    [T: {info.delegateDeposit &&
+                    <Stack direction="column" spacing={1}>
+                      <div>
+                      All Delegation: {info.delegateDeposit &&
                       Number(ethers.utils.formatEther(
                         info.delegateDeposit.toString()
-                      )).toFixed(0)}{" "}
-                    WAN]
-                    [M: {delegateInfo.deposit &&
+                      )).toFixed(2)}{" "}
+                    WAN
+                      </div>
+                    <div>
+                    My Delegation: {delegateInfo.deposit &&
                       Number(ethers.utils.formatEther(
                         delegateInfo.deposit.toString()
                       )).toFixed(0)}{" "}
-                    WAN]
-                    [R: {delegateInfo.incentive &&
+                    WAN
+                    </div>
+                    <div>
+                    Claimable Amount: {delegateInfo.incentive &&
                       Number(ethers.utils.formatEther(
                         delegateInfo.incentive.toString()
                       )).toFixed(1)}{" WAN"}
+                    </div>
                     
-                  ]
+                    </Stack>
+                    
+                    
                   </TableCell>
                   <TableCell>
                     <Stack direction="row" spacing={2}>
@@ -161,6 +170,14 @@ export default function Storeman() {
                       setUpdater(Date.now());
                     }} >
                       Claim
+                    </Button>
+                    <Button variant="outlined" fullWidth onClick={async () => {
+                      const web3 = wallet.web3;
+                      const sc = new web3.eth.Contract(storermanABI, storemanSC);
+                      await sc.methods.delegateOut(ethers.utils.getAddress(workAddress)).send({from: wallet.address});
+                      setUpdater(Date.now());
+                    }} >
+                      Exit
                     </Button>
                     </Stack>
                   </TableCell>
@@ -193,7 +210,9 @@ export default function Storeman() {
                 <TableRow>
                   <TableCell>Owner</TableCell>
                   <TableCell>
-                    {info.sender && ethers.utils.getAddress(info.sender)}
+                    <a onClick={()=>{
+                      window.open("https://www.wanscan.org/address/" + info.sender);
+                    }}>{info.sender && ethers.utils.getAddress(info.sender).slice(0, 6) + "..." + ethers.utils.getAddress(info.sender).slice(-4)}</a>
                   </TableCell>
                   <TableCell></TableCell>
                 </TableRow>
