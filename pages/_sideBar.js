@@ -32,7 +32,6 @@ const Bar = styled("div")`
 
 
 export default function SideBar() {
-  const [selectedIndex, setSelectedIndex] = useState(-1);
   const [balance, setBalance] = useState('0');
   const { wallet, setWallet } = useWallet();
   const [storagePercent, setStoragePercent] = useState(0);
@@ -159,7 +158,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 1} onClick={() => router.push('/transaction')} >
+            <ListItemButton selected={router.pathname === '/transaction'} onClick={() => router.push('/transaction')} >
               <ListItemIcon>
                 <SendIcon />
               </ListItemIcon>
@@ -167,7 +166,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 2} onClick={() => router.push('/raw_transaction')}>
+            <ListItemButton selected={router.pathname === '/raw_transaction'} onClick={() => router.push('/raw_transaction')}>
               <ListItemIcon>
                 <AbcIcon />
               </ListItemIcon>
@@ -175,7 +174,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 3} onClick={() => router.push('/token_tools')} >
+            <ListItemButton selected={router.pathname === '/token_tools'} onClick={() => router.push('/token_tools')} >
             <ListItemIcon>
                 <CurrencyBitcoinIcon />
               </ListItemIcon>
@@ -183,7 +182,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 3} onClick={() => router.push('/script')} >
+            <ListItemButton selected={router.pathname === '/script'} onClick={() => router.push('/script')} >
             <ListItemIcon>
                 <JavascriptIcon />
               </ListItemIcon>
@@ -191,11 +190,19 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={selectedIndex === 3} onClick={() => router.push('/storeman')} >
+            <ListItemButton selected={router.pathname === '/storeman'} onClick={() => router.push('/storeman')} >
             <ListItemIcon>
                 <JavascriptIcon />
               </ListItemIcon>
               <ListItemText primary="Wanchain Storeman" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton selected={router.pathname === '/privateTx'} onClick={() => router.push('/privateTx')} >
+            <ListItemIcon>
+                <JavascriptIcon />
+              </ListItemIcon>
+              <ListItemText primary="Private Tx" />
             </ListItemButton>
           </ListItem>
           
