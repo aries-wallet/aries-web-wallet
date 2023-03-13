@@ -197,14 +197,14 @@ export default function SideBar() {
               <ListItemText primary="Wanchain Storeman" />
             </ListItemButton>
           </ListItem>
-          {/* <ListItem disablePadding>
+          <ListItem disablePadding>
             <ListItemButton selected={router.pathname === '/privateTx'} onClick={() => router.push('/privateTx')} >
             <ListItemIcon>
-                <JavascriptIcon />
+                <MailOutlineIcon />
               </ListItemIcon>
               <ListItemText primary="Private Tx" />
             </ListItemButton>
-          </ListItem> */}
+          </ListItem>
           
           <ListItem disablePadding>
             <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://chainlist.org">

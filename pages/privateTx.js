@@ -148,10 +148,11 @@ export default function PrivateTx() {
 
       <h1>Multiple Private Transaction</h1>
       <h4>* Support batch sending of private transactions on Wanchain mainnet and testnet. Each line should contain a private address and the amount to be sent, separated by a comma. The amount must be a multiple of 10 WAN.</h4>
+      <h4>* Only Wan Wallet Desktop v1.5.10 or above can receive the file. Please ensure the recipient has upgraded to the corresponding version before sending. If not, the wanOTA_mainnet.json file needs to be manually deleted to trigger a new OTA address scan.</h4>
       <TextareaAutosize
         fullwidth="true"
         aria-label="minimum height"
-        minRows={20}
+        minRows={10}
         style={{ color: 'black', backgroundColor: 'white' }}
         value={text}
         onChange={(e) => setText(e.target.value)}
