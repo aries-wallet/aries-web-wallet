@@ -14,6 +14,8 @@ import { useLocalStorageState } from "ahooks";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import useWallet from "./hooks/useWallet";
+import Swal from 'sweetalert2';
+
 const storermanABI = require("./storeman.abi.json");
 
 const storemanSC = "0x1E7450D5d17338a348C5438546f0b4D0A5fbeaB6";
@@ -151,11 +153,23 @@ export default function Storeman() {
                     <Button variant="outlined" fullWidth onClick={async () => {
                       const web3 = wallet.web3;
                       let balance = await web3.eth.getBalance(wallet.address);
-                      let amount = prompt("Please enter the amount of WAN to deposit(min: 100 WAN). \nBalance: " + ethers.utils.formatEther(balance) +" WAN", "100");
-                      if (!amount) {
+                      let amount = await Swal.fire({
+                        title: "Delegation deposit",
+                        html: "Please enter the amount of WAN to deposit. <br>Balance: " + Number(ethers.utils.formatEther(balance)).toFixed(2) +" WAN <br> Min 100 WAN for first time.",
+                        input: 'text',
+                        inputAttributes: {
+                          autocapitalize: 'off'
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Deposit'
+                      })
+
+                      console.log('amount', amount);
+
+                      if (!amount.isConfirmed) {
                         return;
                       }
-                      amount = ethers.utils.parseEther(amount);
+                      amount = ethers.utils.parseEther(amount.value);
                       console.log('amount', amount);
                       const sc = new web3.eth.Contract(storermanABI, storemanSC);
                       await sc.methods.delegateIn(ethers.utils.getAddress(workAddress)).send({from: wallet.address, value: amount});
@@ -203,11 +217,23 @@ export default function Storeman() {
                     <Button variant="outlined" fullWidth onClick={async () => {
                       const web3 = wallet.web3;
                       let balance = await web3.eth.getBalance(wallet.address);
-                      let amount = prompt("Please enter the amount of WAN to deposit(min: 10000 WAN). \nBalance: " + ethers.utils.formatEther(balance) +" WAN", "100");
-                      if (!amount) {
+                      let amount = await Swal.fire({
+                        title: "Partner deposit",
+                        html: "Please enter the amount of WAN to deposit. <br>Balance: " + Number(ethers.utils.formatEther(balance)).toFixed(2) +" WAN <br> Min 10000 WAN for first time.",
+                        input: 'text',
+                        inputAttributes: {
+                          autocapitalize: 'off'
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Deposit'
+                      })
+
+                      console.log('amount', amount);
+
+                      if (!amount.isConfirmed) {
                         return;
                       }
-                      amount = ethers.utils.parseEther(amount);
+                      amount = ethers.utils.parseEther(amount.value);
                       console.log('amount', amount);
                       const sc = new web3.eth.Contract(storermanABI, storemanSC);
                       await sc.methods.partIn(ethers.utils.getAddress(workAddress)).send({from: wallet.address, value: amount});
