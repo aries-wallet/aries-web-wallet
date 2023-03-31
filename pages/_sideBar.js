@@ -101,7 +101,7 @@ export default function SideBar() {
       <meta itemProp="description" content={'Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet] [Wallet] [EVM]'} />
       <meta itemProp="image" content={'/smart_contract.png'} />
     </Head>
-    <Paper elevation={12} sx={{height: "100vh"}}>
+    <Paper elevation={12} sx={{minHeight: "100vh", overflow: 'auto'}}>
       <Stack spacing={0}>
       <Stack spacing={2} sx={{padding: '20px 15px'}}>
         <Stack spacing={1} direction='row' sx={{padding: '10px 0 10px 25px'}}>
@@ -215,6 +215,7 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
         </List>
+        <div style={{height: '60px'}} />
       </Stack>
       
     </Paper>
