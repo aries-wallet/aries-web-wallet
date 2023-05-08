@@ -4,7 +4,7 @@ Multi-chain EVM Wallet.
 
 ![image-20220630223535078](./media/image-20220630223535078.png)
 
-
+Private Tx only support Wan Wallet v1.5.10 or above to receive.
 
 ## Development
 
