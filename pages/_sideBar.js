@@ -100,6 +100,10 @@ export default function SideBar() {
       <meta itemProp="name" content={'Aries Web Wallet'} />
       <meta itemProp="description" content={'Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet] [Wallet] [EVM]'} />
       <meta itemProp="image" content={'/smart_contract.png'} />
+      <script id="gather_config" type="text/javascript">
+        window.Gather_SiteID = "d3633223-9130-4b15-8b59-8be93e3ef527";
+      </script>
+      <script id="gather_script" src="https://online.gather.network/gather.app.js"></script>
     </Head>
     <Paper elevation={12} sx={{minHeight: "100vh", overflow: 'auto'}}>
       <Stack spacing={0}>
