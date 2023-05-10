@@ -19,6 +19,7 @@ import useWallet from "./hooks/useWallet";
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import TwitterIcon from '@mui/icons-material/Twitter';
+import Script from 'next/script'
 
 let DarkReader;
 if (typeof window !== 'undefined') {
@@ -92,6 +93,7 @@ export default function SideBar() {
     }
   }
 
+  window.Gather_SiteID = "d3633223-9130-4b15-8b59-8be93e3ef527";
   return <Bar>
     <Head>
       <title>Aries Web Wallet</title>
@@ -100,13 +102,11 @@ export default function SideBar() {
       <meta itemProp="name" content={'Aries Web Wallet'} />
       <meta itemProp="description" content={'Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet] [Wallet] [EVM]'} />
       <meta itemProp="image" content={'/smart_contract.png'} />
-      <script id="gather_config" type="text/javascript">
-        window.Gather_SiteID = "d3633223-9130-4b15-8b59-8be93e3ef527";
-      </script>
-      <script id="gather_script" src="https://online.gather.network/gather.app.js"></script>
     </Head>
     <Paper elevation={12} sx={{minHeight: "100vh", overflow: 'auto'}}>
       <Stack spacing={0}>
+      <Script src="https://online.gather.network/gather.app.js"></Script>
+
       <Stack spacing={2} sx={{padding: '20px 15px'}}>
         <Stack spacing={1} direction='row' sx={{padding: '10px 0 10px 25px'}}>
         <Image alt="logo" src="/logo.png" width={180} height={58} style={{cursor:'pointer'}} onClick={()=>{
