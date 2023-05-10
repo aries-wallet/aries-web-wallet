@@ -93,7 +93,12 @@ export default function SideBar() {
     }
   }
 
-  window.Gather_SiteID = "d3633223-9130-4b15-8b59-8be93e3ef527";
+  const gatherCode = `
+  <script id="gather_config" type="text/javascript">
+    window.Gather_SiteID = "d3633223-9130-4b15-8b59-8be93e3ef527";
+  </script>
+  <script id="gather_script" src="https://online.gather.network/gather.app.js"></script>
+  `;
   return <Bar>
     <Head>
       <title>Aries Web Wallet</title>
@@ -105,8 +110,7 @@ export default function SideBar() {
     </Head>
     <Paper elevation={12} sx={{minHeight: "100vh", overflow: 'auto'}}>
       <Stack spacing={0}>
-      <Script src="https://online.gather.network/gather.app.js"></Script>
-
+      <div id="gather" dangerouslySetInnerHTML={{__html: gatherCode}} />
       <Stack spacing={2} sx={{padding: '20px 15px'}}>
         <Stack spacing={1} direction='row' sx={{padding: '10px 0 10px 25px'}}>
         <Image alt="logo" src="/logo.png" width={180} height={58} style={{cursor:'pointer'}} onClick={()=>{
