@@ -19,7 +19,6 @@ import useWallet from "./hooks/useWallet";
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import TwitterIcon from '@mui/icons-material/Twitter';
-import Script from 'next/script'
 
 let DarkReader;
 if (typeof window !== 'undefined') {
