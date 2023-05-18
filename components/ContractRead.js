@@ -153,6 +153,15 @@ export function objectToArray(object, abi, payable) {
   if (payable) {
     ret.push(object['payable']);
   }
+  ret = ret.map(v=>{
+    if (v === 'true') {
+      return true;
+    }
+    if (v === 'false') {
+      return false;
+    }
+    return v;
+  })
   console.log('ret', ret);
   return ret;
 }
