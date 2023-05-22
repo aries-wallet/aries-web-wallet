@@ -25,6 +25,7 @@ export default function Storeman() {
   const [workAddress, setWorkAddress] = useLocalStorageState("workAddress", "");
   const [info, setInfo] = useState({});
   const [delegateInfo, setDelegateInfo] = useState({});
+  const [partnerInfo, setPartnerInfo] = useState({});
   const [updater, setUpdater] = useState(0);
   useEffect(() => {
     const func = async () => {
@@ -47,6 +48,14 @@ export default function Storeman() {
           );
           console.log("delegateInfo", delegateInfo);
           setDelegateInfo(delegateInfo);
+        }
+        if (wallet.address) {
+          const partnerInfo = await sc.getSmPartnerInfo(
+            ethers.utils.getAddress(workAddress),
+            wallet.address
+          );
+          console.log("getSmPartnerInfo", partnerInfo);
+          setPartnerInfo(partnerInfo);
         }
       } catch (error) {
         console.log(error.message);
@@ -206,11 +215,23 @@ export default function Storeman() {
                 <TableRow>
                   <TableCell>Partner Amount</TableCell>
                   <TableCell>
-                    {info.partnerDeposit &&
-                      ethers.utils.formatEther(
+                  <Stack direction="column" spacing={1}>
+                  <div>
+                      All Partners Deposit: {info.partnerDeposit &&
+                      Number(ethers.utils.formatEther(
                         info.partnerDeposit.toString()
-                      )}{" "}
+                      )).toFixed(2)}{" "}
                     WAN
+                      </div>
+                    <div>
+                    My Partner Deposit: {partnerInfo.deposit &&
+                      Number(ethers.utils.formatEther(
+                        partnerInfo.deposit.toString()
+                      )).toFixed(0)}{" "}
+                    WAN
+                    </div>
+                    </Stack>
+                    
                   </TableCell>
                   <TableCell>
                   <Stack direction="row" spacing={2}>
