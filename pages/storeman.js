@@ -50,12 +50,19 @@ export default function Storeman() {
           setDelegateInfo(delegateInfo);
         }
         if (wallet.address) {
-          const partnerInfo = await sc.getSmPartnerInfo(
+          let partnerInfo = await sc.getSmPartnerInfo(
+            ethers.utils.getAddress(workAddress),
+            wallet.address
+          );
+          let claimable = await sc.checkCanPartnerClaim(
             ethers.utils.getAddress(workAddress),
             wallet.address
           );
           console.log("getSmPartnerInfo", partnerInfo);
-          setPartnerInfo(partnerInfo);
+          setPartnerInfo({
+            ...partnerInfo,
+            claimable,
+          });
         }
       } catch (error) {
         console.log(error.message);
@@ -262,7 +269,7 @@ export default function Storeman() {
                     }} >
                       Deposit
                     </Button>
-                    <Button variant="outlined" fullWidth onClick={async () => {
+                    <Button disabled={!partnerInfo.claimable} variant="outlined" fullWidth onClick={async () => {
                       const web3 = wallet.web3;
                       const sc = new web3.eth.Contract(storermanABI, storemanSC);
                       await sc.methods.partClaim(ethers.utils.getAddress(workAddress)).send({from: wallet.address});
