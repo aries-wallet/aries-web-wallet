@@ -352,7 +352,7 @@ export default function Storeman() {
           showDistribution && <Paper  elevation={4} sx={{ padding: "10px", textAlign: 'center' }}>
             <h2>Partner Distribution</h2>
             <div style={{display:'flex', alignItems: 'center',justifyContent:'center'}}>
-              <label for="reward">Total Reward(WAN):</label>
+              <label htmlFor="reward">Total Reward(WAN):</label>
               <input type="text" id="reward" placeholder="Enter Reward" style={{
                 border: 'none', 
                 borderBottom: '1px solid black', 
@@ -402,7 +402,7 @@ export default function Storeman() {
                 </TableRow>
                 {
                   partners.map((partner, index) => {
-                    return <TableRow>
+                    return <TableRow key={partner.sender}>
                       <TableCell>{partner.sender.slice(0,6)+'...'+partner.sender.slice(-4)}</TableCell>
                       <TableCell>{ethers.utils.formatEther(partner.deposit.toString())}</TableCell>
                       <TableCell>{rewards[partner.sender]}</TableCell>
