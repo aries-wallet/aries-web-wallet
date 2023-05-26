@@ -27,6 +27,10 @@ export default function Storeman() {
   const [delegateInfo, setDelegateInfo] = useState({});
   const [partnerInfo, setPartnerInfo] = useState({});
   const [updater, setUpdater] = useState(0);
+  const [showDistribution, setShowDistribution] = useState(false);
+  const [partners, setPartners] = useState([]);
+  const [rewards, setRewards] = useState({});
+  const [totalReward, setTotalReward] = useState(0);
   useEffect(() => {
     const func = async () => {
       try {
@@ -63,6 +67,21 @@ export default function Storeman() {
             ...partnerInfo,
             claimable,
           });
+
+          let _partners = [];
+          for (let i = 0; i < result.partnerCount; i++) {
+            let partner = await sc.getSmPartnerAddr(
+              ethers.utils.getAddress(workAddress),
+              i
+            );
+            partnerInfo = await sc.getSmPartnerInfo(
+              ethers.utils.getAddress(workAddress),
+              partner
+            );
+            _partners.push(partnerInfo);
+          }
+          console.log('partners', _partners);
+          setPartners(_partners);
         }
       } catch (error) {
         console.log(error.message);
@@ -71,6 +90,21 @@ export default function Storeman() {
 
     func();
   }, [wallet, workAddress, updater, wallet.address]);
+
+  const calcReward = (value) => {
+    let total = Number(ethers.utils.formatEther(info.deposit.toString()));
+    for (let i=0; i<partners.length; i++) {
+      total += Number(ethers.utils.formatEther(partners[i].deposit.toString()));
+    }
+    console.log('total deposit', total);
+    let _rewards = {};
+    _rewards['staker'] = Number(value) * Number(ethers.utils.formatEther(info.deposit.toString())) / total;
+    for (let i=0; i<partners.length; i++) {
+      _rewards[partners[i].sender] = Number(value) * Number(ethers.utils.formatEther(partners[i].deposit.toString())) / total;
+    }
+    setRewards(_rewards);
+  }
+
   return (
     <div
       style={{
@@ -292,6 +326,9 @@ export default function Storeman() {
                   <TableCell>PartnerCount</TableCell>
                   <TableCell>
                     {info.partnerCount && info.partnerCount.toString()}
+                    &nbsp;&nbsp;<a onClick={()=>{
+                      setShowDistribution(!showDistribution);
+                    }}><i><u>Distribution</u></i></a>
                   </TableCell>
                   <TableCell></TableCell>
                 </TableRow>
@@ -304,6 +341,90 @@ export default function Storeman() {
                   </TableCell>
                   <TableCell></TableCell>
                 </TableRow>
+              </TableBody>
+            </Table>
+          </Paper>
+        }
+        {
+          showDistribution && <Divider sx={{ margin: "20px" }} />
+        }
+        {
+          showDistribution && <Paper  elevation={4} sx={{ padding: "10px", textAlign: 'center' }}>
+            <h2>Partner Distribution</h2>
+            <div style={{display:'flex', alignItems: 'center',justifyContent:'center'}}>
+              <label for="reward">Total Reward(WAN):</label>
+              <input type="text" id="reward" placeholder="Enter Reward" style={{
+                border: 'none', 
+                borderBottom: '1px solid black', 
+                outline: 'none', 
+                padding: '4px',
+                textAlign: 'center'
+              }} value={totalReward} onChange={(e) => {
+                setTotalReward(e.target.value);
+                calcReward(e.target.value);
+              }} />
+              <a onClick={()=>{
+                setTotalReward(Number(ethers.utils.formatEther(info.incentive.toString())).toFixed(2));
+                calcReward(Number(ethers.utils.formatEther(info.incentive.toString())).toFixed(2));
+              }}>↑</a>
+            </div>
+            
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Partner/Staker</TableCell>
+                  <TableCell>Deposit</TableCell>
+                  <TableCell>Reward</TableCell>
+                  <TableCell>Operation</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>{info.sender.slice(0,6)+'...'+info.sender.slice(-4)}</TableCell>
+                  <TableCell>{ethers.utils.formatEther(info.deposit.toString())}</TableCell>
+                  <TableCell>{rewards['staker']}</TableCell>
+                  <TableCell>
+                    <Button onClick={async ()=>{
+                      if (window.confirm(`Are you sure to send ${rewards['staker']} WAN to ${info.sender} ?`)) {
+                        console.log('send to', info.sender);
+                        const web3 = wallet.web3;
+                        let tx = await web3.eth.sendTransaction({
+                          from: wallet.address,
+                          to: info.sender,
+                          value: ethers.utils.parseEther(rewards['staker'].toString()),
+                        });
+                        console.log('tx', tx);
+                      } else {
+                        console.log('cancel');
+                      }
+                    }}>Send</Button>
+                  </TableCell>
+                </TableRow>
+                {
+                  partners.map((partner, index) => {
+                    return <TableRow>
+                      <TableCell>{partner.sender.slice(0,6)+'...'+partner.sender.slice(-4)}</TableCell>
+                      <TableCell>{ethers.utils.formatEther(partner.deposit.toString())}</TableCell>
+                      <TableCell>{rewards[partner.sender]}</TableCell>
+                      <TableCell>
+                        <Button onClick={async ()=>{
+                          if (window.confirm(`Are you sure to send ${rewards[partner.sender]} WAN to ${partner.sender} ?`)) {
+                            console.log('send to', partner.sender);
+                            const web3 = wallet.web3;
+                            let tx = await web3.eth.sendTransaction({
+                              from: wallet.address,
+                              to: info.sender,
+                              value: ethers.utils.parseEther(rewards[partner.sender].toString()),
+                            });
+                            console.log('tx', tx);
+                          } else {
+                            console.log('cancel');
+                          }
+                        }}>Send</Button>
+                      </TableCell>
+                    </TableRow>
+                  })
+                }
               </TableBody>
             </Table>
           </Paper>
