@@ -413,7 +413,7 @@ export default function Storeman() {
                             const web3 = wallet.web3;
                             let tx = await web3.eth.sendTransaction({
                               from: wallet.address,
-                              to: info.sender,
+                              to: partner.sender,
                               value: ethers.utils.parseEther(rewards[partner.sender].toString()),
                             });
                             console.log('tx', tx);
