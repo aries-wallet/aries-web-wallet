@@ -31,7 +31,6 @@ export default function Storeman() {
   const [partners, setPartners] = useState([]);
   const [rewards, setRewards] = useState({});
   const [totalReward, setTotalReward] = useState(0);
-  const [noRewardAddr, setNoRewardAddr] = useState(-1);
   useEffect(() => {
     const func = async () => {
       try {
@@ -92,7 +91,7 @@ export default function Storeman() {
     func();
   }, [wallet, workAddress, updater, wallet.address]);
 
-  const calcReward = (value) => {
+  const calcReward = (value, noRewardAddr) => {
     let total = Number(ethers.utils.formatEther(info.deposit.toString()));
     for (let i=0; i<partners.length; i++) {
       if (partners[i].sender === noRewardAddr) {
@@ -418,8 +417,7 @@ export default function Storeman() {
                       <TableCell>
                         {rewards[partner.sender]}
                         &nbsp;&nbsp;<a onClick={()=>{
-                          setNoRewardAddr(partner.sender);
-                          calcReward(totalReward);
+                          calcReward(totalReward, partner.sender);
                         }}>❎</a>
                       </TableCell>
                       <TableCell>
