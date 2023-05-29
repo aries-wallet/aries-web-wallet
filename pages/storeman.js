@@ -31,6 +31,7 @@ export default function Storeman() {
   const [partners, setPartners] = useState([]);
   const [rewards, setRewards] = useState({});
   const [totalReward, setTotalReward] = useState(0);
+  const [noRewardAddr, setNoRewardAddr] = useState(-1);
   useEffect(() => {
     const func = async () => {
       try {
@@ -94,12 +95,19 @@ export default function Storeman() {
   const calcReward = (value) => {
     let total = Number(ethers.utils.formatEther(info.deposit.toString()));
     for (let i=0; i<partners.length; i++) {
+      if (partners[i].sender === noRewardAddr) {
+        continue;
+      }
       total += Number(ethers.utils.formatEther(partners[i].deposit.toString()));
     }
     console.log('total deposit', total);
     let _rewards = {};
     _rewards['staker'] = Number(value) * Number(ethers.utils.formatEther(info.deposit.toString())) / total;
     for (let i=0; i<partners.length; i++) {
+      if (partners[i].sender === noRewardAddr) {
+        _rewards[partners[i].sender] = 0;
+        continue;
+      }
       _rewards[partners[i].sender] = Number(value) * Number(ethers.utils.formatEther(partners[i].deposit.toString())) / total;
     }
     setRewards(_rewards);
@@ -382,7 +390,9 @@ export default function Storeman() {
                 <TableRow>
                   <TableCell>{info.sender.slice(0,6)+'...'+info.sender.slice(-4)}</TableCell>
                   <TableCell>{ethers.utils.formatEther(info.deposit.toString())}</TableCell>
-                  <TableCell>{rewards['staker']}</TableCell>
+                  <TableCell>
+                    {rewards['staker']}
+                  </TableCell>
                   <TableCell>
                     <Button onClick={async ()=>{
                       if (window.confirm(`Are you sure to send ${rewards['staker']} WAN to ${info.sender} ?`)) {
@@ -405,7 +415,13 @@ export default function Storeman() {
                     return <TableRow key={partner.sender}>
                       <TableCell>{partner.sender.slice(0,6)+'...'+partner.sender.slice(-4)}</TableCell>
                       <TableCell>{ethers.utils.formatEther(partner.deposit.toString())}</TableCell>
-                      <TableCell>{rewards[partner.sender]}</TableCell>
+                      <TableCell>
+                        {rewards[partner.sender]}
+                        &nbsp;&nbsp;<a onClick={()=>{
+                          setNoRewardAddr(partner.sender);
+                          calcReward(totalReward);
+                        }}>❎</a>
+                      </TableCell>
                       <TableCell>
                         <Button onClick={async ()=>{
                           if (window.confirm(`Are you sure to send ${rewards[partner.sender]} WAN to ${partner.sender} ?`)) {
