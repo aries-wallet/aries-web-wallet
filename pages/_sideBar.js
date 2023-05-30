@@ -100,6 +100,17 @@ export default function SideBar() {
       <meta itemProp="name" content={'Aries Web Wallet'} />
       <meta itemProp="description" content={'Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet] [Wallet] [EVM]'} />
       <meta itemProp="image" content={'/smart_contract.png'} />
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-SCBDFKM6BK"></script>
+      <script dangerouslySetInnerHTML={{
+        __html: `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-SCBDFKM6BK');
+        `,
+      }}>
+      </script>
+      
     </Head>
     <Paper elevation={12} sx={{minHeight: "100vh", overflow: 'auto'}}>
       <Stack spacing={0}>
