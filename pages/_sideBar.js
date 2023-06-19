@@ -216,7 +216,14 @@ export default function SideBar() {
               <ListItemText primary="Private Tx" />
             </ListItemButton>
           </ListItem>
-          
+          <ListItem disablePadding>
+            <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://analyzer.arieswallet.xyz">
+              <ListItemIcon>
+                <LinkIcon />
+              </ListItemIcon>
+              <ListItemText primary="Event Analyzer" />
+            </ListItemButton>
+          </ListItem>
           <ListItem disablePadding>
             <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://chainlist.org">
               <ListItemIcon>
