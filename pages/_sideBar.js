@@ -225,11 +225,11 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://chainlist.org">
+            <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://friend.arieswallet.xyz">
               <ListItemIcon>
                 <LinkIcon />
               </ListItemIcon>
-              <ListItemText primary="chainlist.org" />
+              <ListItemText primary="FriendTech Analytics" />
             </ListItemButton>
           </ListItem>
         </List>
