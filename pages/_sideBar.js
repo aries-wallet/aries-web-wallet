@@ -232,6 +232,14 @@ export default function SideBar() {
               <ListItemText primary="FriendTech Analytics" />
             </ListItemButton>
           </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://cryptodonations.xyz">
+              <ListItemIcon>
+                <LinkIcon />
+              </ListItemIcon>
+              <ListItemText primary="Crypto Donations" />
+            </ListItemButton>
+          </ListItem>
         </List>
         <div style={{height: '60px'}} />
       </Stack>
@@ -246,7 +254,7 @@ export default function SideBar() {
       </Tooltip>
       <Tooltip title="Donate">
         <FavoriteBorderIcon onClick={()=>{
-          window.alert("Welcome donate any amount of ETH to 0x7521EDa00E2Ce05aC4a9d8353d096CCB970d5188");
+          window.open('https://cryptodonations.xyz/donate/0x7521eda00e2ce05ac4a9d8353d096ccb970d5188?tag=arieswallet');
         }} sx={{cursor: 'pointer'}} />
       </Tooltip>
       <div>
