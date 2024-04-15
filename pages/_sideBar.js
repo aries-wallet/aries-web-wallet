@@ -4,6 +4,7 @@ import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 import SendIcon from '@mui/icons-material/Send';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AbcIcon from '@mui/icons-material/Abc';
+import { BorderColor, FollowTheSigns } from "@mui/icons-material";
 import CurrencyBitcoinIcon from '@mui/icons-material/CurrencyBitcoin';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -182,6 +183,14 @@ export default function SideBar() {
                 <AbcIcon />
               </ListItemIcon>
               <ListItemText primary="Raw Transaction" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton selected={router.pathname === '/sign_message'} onClick={() => router.push('/sign_message')}>
+              <ListItemIcon>
+                <BorderColor />
+              </ListItemIcon>
+              <ListItemText primary="Sign Message" />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
