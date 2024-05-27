@@ -218,14 +218,6 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/privateTx'} onClick={() => router.push('/privateTx')} >
-            <ListItemIcon>
-                <MailOutlineIcon />
-              </ListItemIcon>
-              <ListItemText primary="Private Tx" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
             <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://analyzer.arieswallet.xyz">
               <ListItemIcon>
                 <LinkIcon />
