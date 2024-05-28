@@ -218,6 +218,14 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
+            <ListItemButton selected={router.pathname === '/meme'} onClick={() => router.push('/meme')} >
+            <ListItemIcon>
+                <AccountBalanceWalletIcon />
+              </ListItemIcon>
+              <ListItemText primary="MEME Coin Creation" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
             <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://analyzer.arieswallet.xyz">
               <ListItemIcon>
                 <LinkIcon />
