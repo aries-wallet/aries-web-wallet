@@ -73,9 +73,12 @@ function ReadPanel(props) {
 export function ContractRead(props) {
   const web3 = props.web3;
   const scAddr = props.scAddr;
-  const abi = useMemo(()=>{
-    return props.abi.filter(v=>!(v.type !== 'function' || v.stateMutability !== 'view'));
+  const abi = useMemo(() => {
+    return props.abi.filter(v => 
+      v.type === 'function' && (v.stateMutability === 'view' || v.stateMutability === 'pure')
+    );
   }, [props.abi]);
+  
   const sc = useMemo(()=>{
     console.log('scAddr 2', scAddr);
     try {
