@@ -226,6 +226,14 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
+            <ListItemButton selected={router.pathname === '/create2'} onClick={() => router.push('/create2')} >
+            <ListItemIcon>
+                <AccountBalanceWalletIcon />
+              </ListItemIcon>
+              <ListItemText primary="Create2 Deployer" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
             <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://analyzer.arieswallet.xyz">
               <ListItemIcon>
                 <LinkIcon />
