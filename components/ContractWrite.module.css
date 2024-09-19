@@ -24,6 +24,7 @@
   font-size: 0.875rem;
   border: 1px solid #ccc;
   border-radius: 4px;
+  height: 35px;
 }
 
 .writeButton {
@@ -40,4 +41,19 @@
 
 .writeButton:hover {
   background-color: rgba(25, 118, 210, 0.04);
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.unitSelect {
+  padding: 5px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+  height: 35px;
 }

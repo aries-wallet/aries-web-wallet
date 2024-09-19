@@ -3,15 +3,36 @@ import { objectToArray } from "./ContractRead";
 import styles from './ContractWrite.module.css';
 import { Paper } from "@mui/material";
 import { Collapse } from 'antd';
+import { ethers } from 'ethers';
 
 const { Panel } = Collapse;
+
+const convertToWei = (value, unit) => {
+  switch(unit) {
+    case 'Wei':
+      return value;
+    case 'Gwei':
+      return ethers.utils.parseUnits(value && value.toString(), 9);
+    case 'Ether':
+      return ethers.utils.parseUnits(value && value.toString(), 18);
+    default:
+      return value;
+  }
+};
+
 
 function WritePanel(props) {
   const { subAbi, send } = props;
   const [inputData, setInputData] = useState({});
+  const [units, setUnits] = useState({});
 
   const handleInputChange = (e) => {
     setInputData({ ...inputData, [e.target.name]: e.target.value });
+  };
+
+  const handleUnitChange = (e, name) => {
+    console.log('name:', name, 'value:', e.target.value);
+    setUnits({ ...units, [name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -21,13 +42,26 @@ function WritePanel(props) {
       console.log("input params count error");
       return;
     }
+
     let params = {...inputData};
-    let payable = params.payable;
+ 
+    const convertedParams = Object.keys(params).reduce((acc, key) => {
+      if (subAbi.inputs.find(input => input.type === 'uint256' && (input.name === key || `param${input.index}` === key)) || key === 'payable') {
+        acc[key] = convertToWei(params[key], units[key] || 'Wei');
+      } else {
+        acc[key] = params[key];
+      }
+      return acc;
+    }, {});
+
+    let payable = convertedParams.payable;
     if (payable) {
-      delete params.payable;
+      delete convertedParams.payable;
     }
 
-    await send(subAbi, objectToArray(params, subAbi.inputs), payable);
+    console.log('convertedParams', convertedParams, payable);
+
+    await send(subAbi, objectToArray(convertedParams, subAbi.inputs), payable);
   };
 
   return (
@@ -39,13 +73,27 @@ function WritePanel(props) {
               {input.name || `param${index}`}
               <span className={styles.inputType}>{input.type}</span>
             </label>
-            <input
-              type="text"
-              id={input.name || `param${index}`}
-              name={input.name || `param${index}`}
-              onChange={handleInputChange}
-              className={styles.input}
-            />
+            <div className={styles.inputWrapper}>
+              {input.type === 'uint256' && (
+                <select
+                    name={input.name || `param${index}`}
+                    value={units[input.name || `param${index}`] || 'Wei'}
+                    onChange={(e) => handleUnitChange(e, input.name || `param${index}`)}
+                    className={styles.unitSelect}
+                  >
+                    <option value="Wei">Wei</option>
+                    <option value="Gwei">Gwei</option>
+                    <option value="Ether">Ether</option>
+                </select>
+              )}
+              <input
+                type="text"
+                id={input.name || `param${index}`}
+                name={input.name || `param${index}`}
+                onChange={handleInputChange}
+                className={styles.input}
+              />
+            </div>
           </div>
         ))}
         {subAbi.stateMutability === 'payable' && (
@@ -54,13 +102,25 @@ function WritePanel(props) {
               payable value
               <span className={styles.inputType}>uint256</span>
             </label>
-            <input
-              type="text"
-              id="payable"
-              name="payable"
-              onChange={handleInputChange}
-              className={styles.input}
-            />
+            <div className={styles.inputWrapper}>
+              <select
+                name="payable"
+                value={units.payable || 'Wei'}
+                onChange={(e) => handleUnitChange(e, 'payable')}
+                className={styles.unitSelect}
+              >
+                <option value="Wei">Wei</option>
+                <option value="Gwei">Gwei</option>
+                <option value="Ether">Ether</option>
+              </select>
+              <input
+                type="text"
+                id="payable"
+                name="payable"
+                onChange={handleInputChange}
+                className={styles.input}
+              />
+            </div>
           </div>
         )}
         <button type="submit" className={styles.writeButton}>Write</button>
