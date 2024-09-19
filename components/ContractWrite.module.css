@@ -1,0 +1,43 @@
+.writePanel {
+  padding: 10px;
+}
+
+.inputGroup {
+  margin-bottom: 10px;
+}
+
+.inputGroup label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.875rem;
+}
+
+.inputType {
+  margin-left: 5px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.input {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 0.875rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.writeButton {
+  width: 120px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  color: #1976d2;
+  background-color: transparent;
+  border: 1px solid #1976d2;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.writeButton:hover {
+  background-color: rgba(25, 118, 210, 0.04);
+}

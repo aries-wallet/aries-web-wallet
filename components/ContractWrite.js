@@ -1,71 +1,72 @@
-import { JsonForms } from "@jsonforms/react";
-import { materialCells, materialRenderers } from "@jsonforms/material-renderers";
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Button, Paper, Stack } from "@mui/material";
-import { Collapse } from "antd";
-import { useMemo, useState } from "react";
+import { useState, useMemo } from "react";
 import { objectToArray } from "./ContractRead";
+import styles from './ContractWrite.module.css';
+import { Paper } from "@mui/material";
+import { Collapse } from 'antd';
 
 const { Panel } = Collapse;
 
-const customTheme = createTheme({
-  components: {
-    MuiInputBase: {
-      styleOverrides: {
-        root: {
-          border: 'none',
-          fontSize: '0.875rem',
-        },
-        input: {
-          padding: '6px 8px',
-        },
-      },
-    },
-    MuiFormLabel: {
-      styleOverrides: {
-        root: {
-          fontSize: '0.875rem',
-        },
-      },
-    },
-  },
-});
-
 function WritePanel(props) {
-  const subAbi = props.subAbi;
-  const send = props.send;
+  const { subAbi, send } = props;
   const [inputData, setInputData] = useState({});
 
-  return <div>
-    <Stack spacing={1}>
-      { subAbi.inputs && 
-        <ThemeProvider theme={customTheme}>
-          <JsonForms
-            renderers={materialRenderers}
-            cells={materialCells}
-            data={inputData}
-            onChange={e=>setInputData(e.data)}
-            schema={abiToSchema(subAbi.inputs, subAbi.stateMutability === 'payable')}
-            uischema={abiToUISchema(subAbi.inputs, subAbi.stateMutability === 'payable')}
-          />
-        </ThemeProvider>
-      }
-      <Button style={{width: '120px'}} variant="outlined" size="small" onClick={async ()=>{
-        console.log('inputData', inputData);
-        if (objectToArray(inputData, subAbi.inputs, subAbi.stateMutability === 'payable').length < subAbi.inputs.length) {
-          console.log("input params count error");
-          return;
-        }
-        let params = {...inputData};
-        let payable = params.payable;
-        if (payable) {
-          delete params.payable;
-        }
+  const handleInputChange = (e) => {
+    setInputData({ ...inputData, [e.target.name]: e.target.value });
+  };
 
-        await send(subAbi, objectToArray(params, subAbi.inputs), payable);
-      }} >Write</Button>
-    </Stack>
-  </div>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log('inputData', inputData);
+    if (objectToArray(inputData, subAbi.inputs, subAbi.stateMutability === 'payable').length < subAbi.inputs.length) {
+      console.log("input params count error");
+      return;
+    }
+    let params = {...inputData};
+    let payable = params.payable;
+    if (payable) {
+      delete params.payable;
+    }
+
+    await send(subAbi, objectToArray(params, subAbi.inputs), payable);
+  };
+
+  return (
+    <div className={styles.writePanel}>
+      <form onSubmit={handleSubmit}>
+        {subAbi.inputs && subAbi.inputs.map((input, index) => (
+          <div key={index} className={styles.inputGroup}>
+            <label htmlFor={input.name || `param${index}`}>
+              {input.name || `param${index}`}
+              <span className={styles.inputType}>{input.type}</span>
+            </label>
+            <input
+              type="text"
+              id={input.name || `param${index}`}
+              name={input.name || `param${index}`}
+              onChange={handleInputChange}
+              className={styles.input}
+            />
+          </div>
+        ))}
+        {subAbi.stateMutability === 'payable' && (
+          <div className={styles.inputGroup}>
+            <label htmlFor="payable">
+              payable value
+              <span className={styles.inputType}>uint256</span>
+            </label>
+            <input
+              type="text"
+              id="payable"
+              name="payable"
+              onChange={handleInputChange}
+              className={styles.input}
+            />
+          </div>
+        )}
+        <button type="submit" className={styles.writeButton}>Write</button>
+      </form>
+    </div>
+  );
 }
 
 export function ContractWrite(props) {
