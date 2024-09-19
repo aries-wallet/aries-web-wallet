@@ -1,12 +1,35 @@
 import { JsonForms } from "@jsonforms/react";
 import { materialCells, materialRenderers } from "@jsonforms/material-renderers";
-
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { Button, Paper, Stack } from "@mui/material";
 import { Collapse } from "antd";
 import { useMemo, useState } from "react";
 import { objectToArray } from "./ContractRead";
 
 const { Panel } = Collapse;
+
+const customTheme = createTheme({
+  components: {
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          border: 'none',
+          fontSize: '0.875rem',
+        },
+        input: {
+          padding: '6px 8px',
+        },
+      },
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          fontSize: '0.875rem',
+        },
+      },
+    },
+  },
+});
 
 function WritePanel(props) {
   const subAbi = props.subAbi;
@@ -15,14 +38,17 @@ function WritePanel(props) {
 
   return <div>
     <Stack spacing={1}>
-      { subAbi.inputs && <JsonForms 
-          renderers={materialRenderers}
-          cells={materialCells}
-          data={inputData}
-          onChange={e=>setInputData(e.data)}
-          schema={abiToSchema(subAbi.inputs, subAbi.stateMutability === 'payable')}
-          uischema={abiToUISchema(subAbi.inputs, subAbi.stateMutability === 'payable')}
-        />
+      { subAbi.inputs && 
+        <ThemeProvider theme={customTheme}>
+          <JsonForms
+            renderers={materialRenderers}
+            cells={materialCells}
+            data={inputData}
+            onChange={e=>setInputData(e.data)}
+            schema={abiToSchema(subAbi.inputs, subAbi.stateMutability === 'payable')}
+            uischema={abiToUISchema(subAbi.inputs, subAbi.stateMutability === 'payable')}
+          />
+        </ThemeProvider>
       }
       <Button style={{width: '120px'}} variant="outlined" size="small" onClick={async ()=>{
         console.log('inputData', inputData);
