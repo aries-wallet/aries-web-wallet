@@ -1,10 +1,11 @@
-import { Autocomplete, Button, Divider, LinearProgress, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, styled, TextField, Tooltip, Box, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material"
+import { Autocomplete, Button, Divider, LinearProgress, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, styled, TextField, Tooltip, Box, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, List as MUIList, ListItemSecondaryAction, Checkbox, DialogContentText } from "@mui/material"
 import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Wallet from "../utils/Wallet";
 import useWallet from "./hooks/useWallet";
+import { lighten } from '@mui/material/styles';
 
 // Import React Icons
 import { FaHome, FaFileContract, FaPaperPlane, FaFileAlt, FaSignature, FaCoins, FaCode, FaKey, FaUserFriends, FaMoon, FaSun, FaTwitter, FaGithub, FaEnvelope, FaHeart, FaLink, FaChevronLeft, FaBars, FaWallet, FaRocket, FaCubes } from 'react-icons/fa';
@@ -61,6 +62,8 @@ export default function SideBar() {
   const router = useRouter();
   const [open, setOpen] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
+  const [contractList, setContractList] = useState([]);
+  const [selectedContracts, setSelectedContracts] = useState([]);
 
   useEffect(() => {
     async function getBalance() {
@@ -119,13 +122,48 @@ export default function SideBar() {
   };
 
   const handleStorageClick = () => {
+    const ariesWalletData = JSON.parse(localStorage.getItem('aries-web-wallet') || '{}');
+    const contracts = ariesWalletData.contractList || [];
+    console.log('Loaded contracts:', contracts);
+    setContractList(contracts);
+    setSelectedContracts([]);
     setOpenDialog(true);
   };
 
-  const handleClearStorage = () => {
-    localStorage.clear();
-    setOpenDialog(false);
-    window.location.reload();
+  const handleToggleContract = (address) => {
+    console.log('Toggling contract:', address);
+    console.log('Current selectedContracts:', selectedContracts);
+    
+    setSelectedContracts(prev => {
+      if (!address) {
+        console.error('Invalid address:', address);
+        return prev;
+      }
+      const newSelected = prev.includes(address)
+        ? prev.filter(item => item !== address)
+        : [...prev, address];
+      
+      console.log('New selectedContracts:', newSelected);
+      return newSelected;
+    });
+  };
+
+  const handleDeleteSelected = () => {
+    const ariesWalletData = JSON.parse(localStorage.getItem('aries-web-wallet') || '{}');
+    const updatedContractList = ariesWalletData.contractList.filter(
+      contract => !selectedContracts.includes(contract.name)
+    );
+    ariesWalletData.contractList = updatedContractList;
+    localStorage.setItem('aries-web-wallet', JSON.stringify(ariesWalletData));
+    setContractList(updatedContractList);
+    setSelectedContracts([]);
+  };
+
+  // Modify this function to return valid color values
+  const getColorForPercentage = (percent) => {
+    if (percent < 50) return '#4caf50'; // green
+    if (percent < 75) return '#ff9800'; // orange
+    return '#f44336'; // red
   };
 
   return (
@@ -349,7 +387,13 @@ export default function SideBar() {
               variant="determinate" 
               value={storagePercent} 
               onClick={handleStorageClick}
-              sx={{ cursor: 'pointer' }}
+              sx={{ 
+                cursor: 'pointer',
+                '& .MuiLinearProgress-bar': {
+                  backgroundColor: getColorForPercentage(storagePercent),
+                },
+                backgroundColor: (theme) => lighten(getColorForPercentage(storagePercent), 0.5),
+              }}
             />
           </Tooltip>
           <Stack direction="row" justifyContent="center" spacing={2}>
@@ -372,15 +416,42 @@ export default function SideBar() {
         {open ? <FaChevronLeft /> : <FaBars />}
       </ToggleButton>
 
-      {/* Dialog for confirming localStorage reset */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Reset localStorage</DialogTitle>
+      {/* Updated Dialog for contractList management */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Manage Contract List</DialogTitle>
         <DialogContent>
-          Do you want to reset localStorage and free up space?
+          <DialogContentText>
+            Select contracts to delete. Current contracts: {contractList.length}
+          </DialogContentText>
+          <Box sx={{ mt: 2, maxHeight: 400, overflow: 'auto' }}>
+            <MUIList>
+              {contractList.map((contract) => (
+                <ListItem key={contract.name}>
+                  <ListItemText 
+                    primary={contract.name || 'Unnamed Contract'} 
+                    secondary={contract.contract || 'No address'}
+                  />
+                  <ListItemSecondaryAction>
+                    <Checkbox
+                      edge="end"
+                      onChange={() => handleToggleContract(contract.name)}
+                      checked={selectedContracts.includes(contract.name)}
+                    />
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </MUIList>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>No</Button>
-          <Button onClick={handleClearStorage} autoFocus>Yes</Button>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button 
+            onClick={handleDeleteSelected} 
+            disabled={selectedContracts.length === 0}
+            color="error"
+          >
+            Delete Selected ({selectedContracts.length})
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
