@@ -20,23 +20,49 @@ import useWallet from "./hooks/useWallet";
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import TwitterIcon from '@mui/icons-material/Twitter';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import IconButton from '@mui/material/IconButton';
 
 let DarkReader;
 if (typeof window !== 'undefined') {
   DarkReader = require('darkreader');
 }
 
-const Bar = styled("div")`
+const Bar = styled(Paper)`
   height: 100vh;
-  width: 300px;
+  width: ${props => props.open ? '300px' : '60px'};
+  transition: width 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
 `
 
+const ScrollableSection = styled('div')`
+  flex-grow: 1;
+  overflow-y: auto;
+`
+
+const CompactListItem = styled(ListItem)(({ theme }) => ({
+  padding: 0,
+}));
+
+const CompactListItemButton = styled(ListItemButton)(({ theme }) => ({
+  padding: theme.spacing(0.5, 1), // Reduced horizontal padding
+  minHeight: 40,
+}));
+
+const CompactListItemIcon = styled(ListItemIcon)(({ theme }) => ({
+  minWidth: 40,
+  marginRight: theme.spacing(0), // Reduce space between icon and text
+  marginLeft: theme.spacing(1), // Reduce space between icon and text
+}));
 
 export default function SideBar() {
   const [balance, setBalance] = useState('0');
   const { wallet, setWallet } = useWallet();
   const [storagePercent, setStoragePercent] = useState(0);
   const router = useRouter();
+  const [open, setOpen] = useState(true);
 
   useEffect(() => {
     async function getBalance() {
@@ -59,10 +85,7 @@ export default function SideBar() {
         }
         _xLen = ((localStorage[_x].length + _x.length) * 2);
         _lsTotal += _xLen;
-        // console.log(_x.substr(0, 50) + " = " + (_xLen / 1024).toFixed(2) + " KB")
       };
-      // console.log("Total = " + (_lsTotal / 1024).toFixed(2) + " KB");
-      // console.log('Percent', _lsTotal * 100 / (1024 * 1024) / 5);
       setStoragePercent(_lsTotal * 100 / (1024 * 1024) / 5);
     }
     checkFree();
@@ -93,205 +116,194 @@ export default function SideBar() {
     }
   }
 
-  return <Bar>
-    <Head>
-      <title>Aries Web Wallet</title>
-      <meta name="description" content="Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet] [Wallet] [EVM]" />
-      <link rel="icon" href="/favicon.png" />
-      <meta itemProp="name" content={'Aries Web Wallet'} />
-      <meta itemProp="description" content={'Multi-chain EVM Web Wallet. [Ethereum] [Myetherwallet] [Wallet] [EVM]'} />
-      <meta itemProp="image" content={'/smart_contract.png'} />
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-SCBDFKM6BK"></script>
-      <script dangerouslySetInnerHTML={{
-        __html: `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-SCBDFKM6BK');
-        `,
-      }}>
-      </script>
-      
-    </Head>
-    <Paper elevation={12} sx={{minHeight: "100vh", overflow: 'auto'}}>
-      <Stack spacing={0}>
-      <Stack spacing={2} sx={{padding: '20px 15px'}}>
+  const toggleDrawer = () => {
+    setOpen(!open);
+  };
+
+  return (
+    <Bar open={open} elevation={12}>
+      {/* Top section */}
+      <Stack spacing={2} sx={{ padding: '20px 15px' }}>
         <Stack spacing={1} direction='row' sx={{padding: '10px 0 10px 25px'}}>
-        <Image alt="logo" src="/logo.png" width={180} height={58} style={{cursor:'pointer'}} onClick={()=>{
-          window.location.href = '/';
-        }}/>
-        <Tooltip title="Toggle Dark Mode">
-        {
-          isDarkMode ? <WbSunnyIcon onClick={handleDarkMode} style={{cursor:'pointer'}} /> : <DarkModeIcon onClick={handleDarkMode} style={{cursor:'pointer'}} />
-        }
-        </Tooltip>
-        
-        </Stack>
-        
-        {
-          wallet.connected && <Button variant="outlined" sx={{textTransform:'none'}} onClick={async ()=>{
-            wallet.resetApp().then(()=>{
-              wallet.connect();
-            });
-          }} >{wallet.address.slice(0, 6) + '...' + wallet.address.slice(-4)}</Button>
-        }
-        {
-          !wallet.connected && <Button variant="outlined" onClick={async ()=>{
-            wallet.resetApp().then(()=>{
-              wallet.connect();
-            });
-          }}>Connect Wallet</Button>
-        }
-        
-        <TextField size="small" label="ChainId" value={wallet.networkId ? wallet.networkId : 'N/A'} sx={{textAlign:'center'}} InputProps={{
-          readOnly: true,
-        }} />
-        <TextField size="small" label="Balance" value={balance} InputProps={{
-          readOnly: true,
-        }} />
-        <Wallet wallet={wallet} setWallet={setWallet} />
-      </Stack>
-      <Divider direction="horizontal" />
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/'} onClick={() => router.push('/')} >
-              <ListItemIcon>
-                <AccountBalanceIcon />
-              </ListItemIcon>
-              <ListItemText primary="Home" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/smart_contract'} onClick={() => router.push('/smart_contract')} >
-              <ListItemIcon>
-                <CollectionsBookmarkIcon />
-              </ListItemIcon>
-              <ListItemText primary="Smart Contract" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/transaction'} onClick={() => router.push('/transaction')} >
-              <ListItemIcon>
-                <SendIcon />
-              </ListItemIcon>
-              <ListItemText primary="Transaction" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/raw_transaction'} onClick={() => router.push('/raw_transaction')}>
-              <ListItemIcon>
-                <AbcIcon />
-              </ListItemIcon>
-              <ListItemText primary="Raw Transaction" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/sign_message'} onClick={() => router.push('/sign_message')}>
-              <ListItemIcon>
-                <BorderColor />
-              </ListItemIcon>
-              <ListItemText primary="Sign Message" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/token_tools'} onClick={() => router.push('/token_tools')} >
-            <ListItemIcon>
-                <CurrencyBitcoinIcon />
-              </ListItemIcon>
-              <ListItemText primary="Token Tools" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/script'} onClick={() => router.push('/script')} >
-            <ListItemIcon>
-                <JavascriptIcon />
-              </ListItemIcon>
-              <ListItemText primary="Script" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/keystore'} onClick={() => router.push('/keystore')} >
-            <ListItemIcon>
-                <JavascriptIcon />
-              </ListItemIcon>
-              <ListItemText primary="Keystore" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/storeman'} onClick={() => router.push('/storeman')} >
-            <ListItemIcon>
-                <AccountBalanceWalletIcon />
-              </ListItemIcon>
-              <ListItemText primary="Wanchain Storeman" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/meme'} onClick={() => router.push('/meme')} >
-            <ListItemIcon>
-                <AccountBalanceWalletIcon />
-              </ListItemIcon>
-              <ListItemText primary="MEME Coin Creation" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton selected={router.pathname === '/create2'} onClick={() => router.push('/create2')} >
-            <ListItemIcon>
-                <AccountBalanceWalletIcon />
-              </ListItemIcon>
-              <ListItemText primary="Create2 Deployer" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://analyzer.arieswallet.xyz">
-              <ListItemIcon>
-                <LinkIcon />
-              </ListItemIcon>
-              <ListItemText primary="Event Analyzer" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://friend.arieswallet.xyz">
-              <ListItemIcon>
-                <LinkIcon />
-              </ListItemIcon>
-              <ListItemText primary="FriendTech Analytics" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component="a" target="_blank" rel="noreferrer" href="https://cryptodonations.xyz">
-              <ListItemIcon>
-                <LinkIcon />
-              </ListItemIcon>
-              <ListItemText primary="Crypto Donations" />
-            </ListItemButton>
-          </ListItem>
-        </List>
-        <div style={{height: '60px'}} />
-      </Stack>
-      
-    </Paper>
-    <Stack spacing={2} direction='row' sx={{marginTop:'-50px', marginLeft:'20px'}}>
-      <Tooltip title="GitHub">
-        <a target="_blank" rel="noreferrer" href="https://github.com/aries-wallet/aries-web-wallet"><GitHubIcon /></a>
-      </Tooltip>
-      <Tooltip title="Twitter">
-        <a target="_blank" rel="noreferrer" href="https://twitter.com/aries_wallet"><TwitterIcon /></a>
-      </Tooltip>
-      <Tooltip title="Donate">
-        <FavoriteBorderIcon onClick={()=>{
-          window.open('https://cryptodonations.xyz/donate/0x7521eda00e2ce05ac4a9d8353d096ccb970d5188?tag=arieswallet');
-        }} sx={{cursor: 'pointer'}} />
-      </Tooltip>
-      <div>
-        <a onClick={()=>{
-          let ret = window.confirm("Are you sure to reset localStorage for AriesWallet?");
-          if (ret) {
-            window.localStorage.clear();
-            window.location.reload();
+          {open && (
+            <Image alt="logo" src="/logo.png" width={180} height={58} style={{cursor:'pointer'}} onClick={()=>{
+              window.location.href = '/';
+            }}/>
+          )}
+          <Tooltip title={open ? "Collapse Sidebar" : "Expand Sidebar"}>
+            <Button onClick={toggleDrawer}>
+              {open ? <ChevronLeftIcon /> : <MenuIcon />}
+            </Button>
+          </Tooltip>
+          <Tooltip title="Toggle Dark Mode">
+          {
+            isDarkMode ? <WbSunnyIcon onClick={handleDarkMode} style={{cursor:'pointer'}} /> : <DarkModeIcon onClick={handleDarkMode} style={{cursor:'pointer'}} />
           }
-        }}>LocalStorage</a>
+          </Tooltip>
+          
+          </Stack>
+          
+          {
+            wallet.connected && <Button variant="outlined" sx={{textTransform:'none'}} onClick={async ()=>{
+              wallet.resetApp().then(()=>{
+                wallet.connect();
+              });
+            }} >{wallet.address.slice(0, 6) + '...' + wallet.address.slice(-4)}</Button>
+          }
+          {
+            !wallet.connected && <Button variant="outlined" onClick={async ()=>{
+              wallet.resetApp().then(()=>{
+                wallet.connect();
+              });
+            }}>Connect Wallet</Button>
+          }
+          
+          <TextField size="small" label="ChainId" value={wallet.networkId ? wallet.networkId : 'N/A'} sx={{textAlign:'center'}} InputProps={{
+            readOnly: true,
+          }} />
+          <TextField size="small" label="Balance" value={balance} InputProps={{
+            readOnly: true,
+          }} />
+          <Wallet wallet={wallet} setWallet={setWallet} />
+        </Stack>
+
+      {/* Middle scrollable section */}
+      <ScrollableSection>
+        <Divider direction="horizontal" />
+        <List>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/'} onClick={() => router.push('/')} >
+              <CompactListItemIcon>
+                <AccountBalanceIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Home" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/smart_contract'} onClick={() => router.push('/smart_contract')} >
+              <CompactListItemIcon>
+                <CollectionsBookmarkIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Smart Contract" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/transaction'} onClick={() => router.push('/transaction')} >
+              <CompactListItemIcon>
+                <SendIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Transaction" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/raw_transaction'} onClick={() => router.push('/raw_transaction')}>
+              <CompactListItemIcon>
+                <AbcIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Raw Transaction" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/sign_message'} onClick={() => router.push('/sign_message')}>
+              <CompactListItemIcon>
+                <BorderColor />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Sign Message" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/token_tools'} onClick={() => router.push('/token_tools')} >
+            <CompactListItemIcon>
+                <CurrencyBitcoinIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Token Tools" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/script'} onClick={() => router.push('/script')} >
+            <CompactListItemIcon>
+                <JavascriptIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Script" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/keystore'} onClick={() => router.push('/keystore')} >
+            <CompactListItemIcon>
+                <JavascriptIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Keystore" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/storeman'} onClick={() => router.push('/storeman')} >
+            <CompactListItemIcon>
+                <AccountBalanceWalletIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Wanchain Storeman" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/meme'} onClick={() => router.push('/meme')} >
+            <CompactListItemIcon>
+                <AccountBalanceWalletIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="MEME Coin Creation" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton selected={router.pathname === '/create2'} onClick={() => router.push('/create2')} >
+            <CompactListItemIcon>
+                <AccountBalanceWalletIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Create2 Deployer" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton component="a" target="_blank" rel="noreferrer" href="https://analyzer.arieswallet.xyz">
+              <CompactListItemIcon>
+                <LinkIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Event Analyzer" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton component="a" target="_blank" rel="noreferrer" href="https://friend.arieswallet.xyz">
+              <CompactListItemIcon>
+                <LinkIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="FriendTech Analytics" />}
+            </CompactListItemButton>
+          </CompactListItem>
+          <CompactListItem disablePadding>
+            <CompactListItemButton component="a" target="_blank" rel="noreferrer" href="https://cryptodonations.xyz">
+              <CompactListItemIcon>
+                <LinkIcon />
+              </CompactListItemIcon>
+              {open && <ListItemText primary="Crypto Donations" />}
+            </CompactListItemButton>
+          </CompactListItem>
+        </List>
+      </ScrollableSection>
+
+      {/* Bottom fixed section */}
+      <Stack spacing={1} sx={{ padding: '10px' }}>
         <LinearProgress variant="determinate" value={storagePercent} />
-      </div>
-    </Stack>
-  </Bar>
+        <Stack direction="row" justifyContent="center" spacing={2}>
+          <IconButton>
+            <TwitterIcon />
+          </IconButton>
+          <IconButton>
+            <GitHubIcon />
+          </IconButton>
+          <IconButton>
+            <MailOutlineIcon />
+          </IconButton>
+          <IconButton>
+            <FavoriteBorderIcon />
+          </IconButton>
+        </Stack>
+      </Stack>
+    </Bar>
+  )
 }
