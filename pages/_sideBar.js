@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Divider, LinearProgress, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, styled, TextField, Tooltip, Box, IconButton } from "@mui/material"
+import { Autocomplete, Button, Divider, LinearProgress, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, styled, TextField, Tooltip, Box, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material"
 import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -60,6 +60,7 @@ export default function SideBar() {
   const [storagePercent, setStoragePercent] = useState(0);
   const router = useRouter();
   const [open, setOpen] = useState(true);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     async function getBalance() {
@@ -115,6 +116,16 @@ export default function SideBar() {
 
   const toggleDrawer = () => {
     setOpen(!open);
+  };
+
+  const handleStorageClick = () => {
+    setOpenDialog(true);
+  };
+
+  const handleClearStorage = () => {
+    localStorage.clear();
+    setOpenDialog(false);
+    window.location.reload();
   };
 
   return (
@@ -333,7 +344,14 @@ export default function SideBar() {
 
         {/* Bottom fixed section */}
         <Stack spacing={1} sx={{ padding: '10px' }}>
-          <LinearProgress variant="determinate" value={storagePercent} />
+          <Tooltip title="Click to reset localStorage">
+            <LinearProgress 
+              variant="determinate" 
+              value={storagePercent} 
+              onClick={handleStorageClick}
+              sx={{ cursor: 'pointer' }}
+            />
+          </Tooltip>
           <Stack direction="row" justifyContent="center" spacing={2}>
             <IconButton>
               <FaTwitter />
@@ -353,6 +371,18 @@ export default function SideBar() {
       <ToggleButton onClick={toggleDrawer} size="small">
         {open ? <FaChevronLeft /> : <FaBars />}
       </ToggleButton>
+
+      {/* Dialog for confirming localStorage reset */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Reset localStorage</DialogTitle>
+        <DialogContent>
+          Do you want to reset localStorage and free up space?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>No</Button>
+          <Button onClick={handleClearStorage} autoFocus>Yes</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
