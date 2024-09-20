@@ -210,6 +210,14 @@ export default function SideBar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
+            <ListItemButton selected={router.pathname === '/keystore'} onClick={() => router.push('/keystore')} >
+            <ListItemIcon>
+                <JavascriptIcon />
+              </ListItemIcon>
+              <ListItemText primary="Keystore" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
             <ListItemButton selected={router.pathname === '/storeman'} onClick={() => router.push('/storeman')} >
             <ListItemIcon>
                 <AccountBalanceWalletIcon />
