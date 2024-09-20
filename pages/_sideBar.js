@@ -382,7 +382,7 @@ export default function SideBar() {
 
         {/* Bottom fixed section */}
         <Stack spacing={1} sx={{ padding: '10px' }}>
-          <Tooltip title="Click to reset localStorage">
+          <Tooltip title="Click to manage localStorage">
             <LinearProgress 
               variant="determinate" 
               value={storagePercent} 
