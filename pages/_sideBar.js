@@ -1,28 +1,14 @@
 import { Autocomplete, Button, Divider, LinearProgress, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, styled, TextField, Tooltip } from "@mui/material"
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
-import SendIcon from '@mui/icons-material/Send';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import AbcIcon from '@mui/icons-material/Abc';
-import { BorderColor, FollowTheSigns } from "@mui/icons-material";
-import CurrencyBitcoinIcon from '@mui/icons-material/CurrencyBitcoin';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import JavascriptIcon from '@mui/icons-material/Javascript';
-import LinkIcon from '@mui/icons-material/Link';
 import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Wallet from "../utils/Wallet";
 import useWallet from "./hooks/useWallet";
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import IconButton from '@mui/material/IconButton';
+
+// Import React Icons
+import { FaHome, FaFileContract, FaPaperPlane, FaFileAlt, FaSignature, FaCoins, FaCode, FaKey, FaUserFriends, FaMoon, FaSun, FaTwitter, FaGithub, FaEnvelope, FaHeart, FaLink, FaChevronLeft, FaBars, FaWallet, FaRocket, FaCubes } from 'react-icons/fa';
 
 let DarkReader;
 if (typeof window !== 'undefined') {
@@ -54,7 +40,7 @@ const CompactListItemButton = styled(ListItemButton)(({ theme }) => ({
 const CompactListItemIcon = styled(ListItemIcon)(({ theme }) => ({
   minWidth: 40,
   marginRight: theme.spacing(0), // Reduce space between icon and text
-  marginLeft: theme.spacing(1), // Reduce space between icon and text
+  marginLeft: theme.spacing(2), // Reduce space between icon and text
 }));
 
 export default function SideBar() {
@@ -132,12 +118,12 @@ export default function SideBar() {
           )}
           <Tooltip title={open ? "Collapse Sidebar" : "Expand Sidebar"}>
             <Button onClick={toggleDrawer}>
-              {open ? <ChevronLeftIcon /> : <MenuIcon />}
+              {open ? <FaChevronLeft /> : <FaBars />}
             </Button>
           </Tooltip>
           <Tooltip title="Toggle Dark Mode">
           {
-            isDarkMode ? <WbSunnyIcon onClick={handleDarkMode} style={{cursor:'pointer'}} /> : <DarkModeIcon onClick={handleDarkMode} style={{cursor:'pointer'}} />
+            isDarkMode ? <FaSun onClick={handleDarkMode} style={{cursor:'pointer'}} /> : <FaMoon onClick={handleDarkMode} style={{cursor:'pointer'}} />
           }
           </Tooltip>
           
@@ -174,7 +160,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/'} onClick={() => router.push('/')} >
               <CompactListItemIcon>
-                <AccountBalanceIcon />
+                <FaHome />
               </CompactListItemIcon>
               {open && <ListItemText primary="Home" />}
             </CompactListItemButton>
@@ -182,7 +168,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/smart_contract'} onClick={() => router.push('/smart_contract')} >
               <CompactListItemIcon>
-                <CollectionsBookmarkIcon />
+                <FaFileContract />
               </CompactListItemIcon>
               {open && <ListItemText primary="Smart Contract" />}
             </CompactListItemButton>
@@ -190,7 +176,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/transaction'} onClick={() => router.push('/transaction')} >
               <CompactListItemIcon>
-                <SendIcon />
+                <FaPaperPlane />
               </CompactListItemIcon>
               {open && <ListItemText primary="Transaction" />}
             </CompactListItemButton>
@@ -198,7 +184,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/raw_transaction'} onClick={() => router.push('/raw_transaction')}>
               <CompactListItemIcon>
-                <AbcIcon />
+                <FaFileAlt />
               </CompactListItemIcon>
               {open && <ListItemText primary="Raw Transaction" />}
             </CompactListItemButton>
@@ -206,7 +192,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/sign_message'} onClick={() => router.push('/sign_message')}>
               <CompactListItemIcon>
-                <BorderColor />
+                <FaSignature />
               </CompactListItemIcon>
               {open && <ListItemText primary="Sign Message" />}
             </CompactListItemButton>
@@ -214,7 +200,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/token_tools'} onClick={() => router.push('/token_tools')} >
             <CompactListItemIcon>
-                <CurrencyBitcoinIcon />
+                <FaCoins />
               </CompactListItemIcon>
               {open && <ListItemText primary="Token Tools" />}
             </CompactListItemButton>
@@ -222,7 +208,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/script'} onClick={() => router.push('/script')} >
             <CompactListItemIcon>
-                <JavascriptIcon />
+                <FaCode />
               </CompactListItemIcon>
               {open && <ListItemText primary="Script" />}
             </CompactListItemButton>
@@ -230,7 +216,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/keystore'} onClick={() => router.push('/keystore')} >
             <CompactListItemIcon>
-                <JavascriptIcon />
+                <FaKey />
               </CompactListItemIcon>
               {open && <ListItemText primary="Keystore" />}
             </CompactListItemButton>
@@ -238,7 +224,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/storeman'} onClick={() => router.push('/storeman')} >
             <CompactListItemIcon>
-                <AccountBalanceWalletIcon />
+                <FaUserFriends />
               </CompactListItemIcon>
               {open && <ListItemText primary="Wanchain Storeman" />}
             </CompactListItemButton>
@@ -246,7 +232,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/meme'} onClick={() => router.push('/meme')} >
             <CompactListItemIcon>
-                <AccountBalanceWalletIcon />
+                <FaRocket />
               </CompactListItemIcon>
               {open && <ListItemText primary="MEME Coin Creation" />}
             </CompactListItemButton>
@@ -254,7 +240,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton selected={router.pathname === '/create2'} onClick={() => router.push('/create2')} >
             <CompactListItemIcon>
-                <AccountBalanceWalletIcon />
+                <FaCubes />
               </CompactListItemIcon>
               {open && <ListItemText primary="Create2 Deployer" />}
             </CompactListItemButton>
@@ -262,7 +248,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton component="a" target="_blank" rel="noreferrer" href="https://analyzer.arieswallet.xyz">
               <CompactListItemIcon>
-                <LinkIcon />
+                <FaLink />
               </CompactListItemIcon>
               {open && <ListItemText primary="Event Analyzer" />}
             </CompactListItemButton>
@@ -270,7 +256,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton component="a" target="_blank" rel="noreferrer" href="https://friend.arieswallet.xyz">
               <CompactListItemIcon>
-                <LinkIcon />
+                <FaUserFriends />
               </CompactListItemIcon>
               {open && <ListItemText primary="FriendTech Analytics" />}
             </CompactListItemButton>
@@ -278,7 +264,7 @@ export default function SideBar() {
           <CompactListItem disablePadding>
             <CompactListItemButton component="a" target="_blank" rel="noreferrer" href="https://cryptodonations.xyz">
               <CompactListItemIcon>
-                <LinkIcon />
+                <FaWallet />
               </CompactListItemIcon>
               {open && <ListItemText primary="Crypto Donations" />}
             </CompactListItemButton>
@@ -291,16 +277,16 @@ export default function SideBar() {
         <LinearProgress variant="determinate" value={storagePercent} />
         <Stack direction="row" justifyContent="center" spacing={2}>
           <IconButton>
-            <TwitterIcon />
+            <FaTwitter />
           </IconButton>
           <IconButton>
-            <GitHubIcon />
+            <FaGithub />
           </IconButton>
           <IconButton>
-            <MailOutlineIcon />
+            <FaEnvelope />
           </IconButton>
           <IconButton>
-            <FavoriteBorderIcon />
+            <FaHeart />
           </IconButton>
         </Stack>
       </Stack>
