@@ -1,73 +1,148 @@
-import { JsonForms } from "@jsonforms/react";
-import { materialCells, materialRenderers } from "@jsonforms/material-renderers";
-
 import { Button, Paper, Stack } from "@mui/material";
 import { Collapse } from "antd";
 import { useEffect, useMemo, useState } from "react";
+import { ethers } from 'ethers';
+import styles from './ContractRead.module.css';
 
 const { Panel } = Collapse;
 
+const convertFromWei = (value, unit) => {
+  if (!value) return '';
+  switch(unit) {
+    case 'Wei':
+      return value.toString();
+    case 'Gwei':
+      return ethers.utils.formatUnits(value, 9);
+    case 'Ether':
+      return ethers.utils.formatUnits(value, 18);
+    default:
+      return value.toString();
+  }
+};
+
 function ReadPanel(props) {
-  const subAbi = props.subAbi;
-  const sc = props.sc;
+  const { subAbi, sc } = props;
   const [inputData, setInputData] = useState({});
   const [outputData, setOutputData] = useState([]);
+  const [inputUnits, setInputUnits] = useState({});
+  const [outputUnits, setOutputUnits] = useState({});
   const [reload, setReload] = useState(0);
 
-  useEffect(()=>{
-    try{
-      if (subAbi.inputs.length === 0) {
-        console.log('query sc function', subAbi.name, 'pending...');
-        sc.methods[subAbi.name]().call().then(ret=>{
-          console.log(`query sc function ${subAbi.name} return`, ret);
-          setOutputData(ret);
-        }).catch(err=>{
-          console.error(err);
-          console.log('ERROR:', err.message);
-        });
-      } else if (objectToArray(inputData, subAbi.inputs).length > 0) {
-        console.log(`query sc function ${subAbi.name} with params ${objectToArray(inputData, subAbi.inputs)} pending...`);
-        sc.methods[subAbi.name](...objectToArray(inputData, subAbi.inputs)).call().then(ret=>{
-          console.log('ret', ret);
-          console.log(`query sc function ${subAbi.name} with params ${objectToArray(inputData, subAbi.inputs)} return`, JSON.stringify(ret));
-          setOutputData(ret);
-        }).catch(err=>{
-          console.error(err);
-          console.log('ERROR:', err.message);
-        });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let params = objectToArray(inputData, subAbi.inputs);
+        if (subAbi.inputs.length === 0 || params.length > 0) {
+          console.log(`query sc function ${subAbi.name} with params ${params} pending...`);
+          const result = await sc.methods[subAbi.name](...params).call();
+          console.log(`query sc function ${subAbi.name} return`, result);
+          setOutputData(result);
+        }
+      } catch (err) {
+        console.error('ERROR:', err.message);
       }
-    } catch (err) {
-      console.error(err);
-      console.log('ERROR', err.message);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    };
+
+    fetchData();
   }, [reload, subAbi, inputData, sc]);
 
-  return <div>
-    <Stack spacing={1}>
-      { subAbi.inputs && subAbi.inputs.length > 0 && <JsonForms 
-          renderers={materialRenderers}
-          cells={materialCells}
-          data={inputData}
-          onChange={e=>setInputData(e.data)}
-          schema={abiToSchema(subAbi.inputs)}
-          uischema={abiToUISchema(subAbi.inputs)}
-        />
-      }
-      <Button style={{width: '120px'}} variant="outlined" size="small" onClick={()=>{
-        setReload(Date.now());
-      }} >Query</Button>
-      {
-        subAbi.outputs.length === 1 && <p>↳&nbsp;{outputData !== undefined && outputData !== null && outputData.toString()} &nbsp;&nbsp;<i style={{color:'gray'}}>{subAbi.outputs[0].type}</i></p>
-      }
-      {
-        subAbi.outputs.length > 1 && subAbi.outputs.map((v,i)=>{
-          return <p key={i}>↳&nbsp;<i style={{color:'gray'}}>{subAbi.outputs[i].name}:</i>&nbsp;&nbsp;{outputData[i] !== undefined && outputData[i] !== null && outputData[i].toString()} &nbsp;<i style={{color:'gray'}}>{subAbi.outputs[i].type}</i></p>
-        })
-      }
-      
-    </Stack>
-  </div>
+  const handleInputChange = (e) => {
+    setInputData({ ...inputData, [e.target.name]: e.target.value });
+  };
+
+  const handleUnitChange = (e, name) => {
+    setInputUnits({ ...inputUnits, [name]: e.target.value });
+  };
+
+  const handleOutputUnitChange = (e, name) => {
+    setOutputUnits({ ...outputUnits, [name]: e.target.value });
+  };
+
+  return (
+    <div className={styles.readPanel}>
+      <Stack spacing={1}>
+        {subAbi.inputs && subAbi.inputs.length > 0 && (
+          <form>
+            {subAbi.inputs.map((input, index) => (
+              <div key={index} className={styles.inputGroup}>
+                <label htmlFor={input.name || `param${index}`}>
+                  {input.name || `param${index}`}
+                  <span className={styles.inputType}>{input.type}</span>
+                </label>
+                <div className={styles.inputWrapper}>
+                  {input.type === 'uint256' && (
+                    <select
+                      name={input.name || `param${index}`}
+                      value={inputUnits[input.name || `param${index}`] || 'Wei'}
+                      onChange={(e) => handleUnitChange(e, input.name || `param${index}`)}
+                      className={styles.unitSelect}
+                    >
+                      <option value="Wei">Wei</option>
+                      <option value="Gwei">Gwei</option>
+                      <option value="Ether">Ether</option>
+                    </select>
+                  )}
+                  <input
+                    type="text"
+                    id={input.name || `param${index}`}
+                    name={input.name || `param${index}`}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                  />
+                </div>
+              </div>
+            ))}
+          </form>
+        )}
+        <Button style={{width: '120px'}} variant="outlined" size="small" onClick={() => setReload(Date.now())}>
+          Query
+        </Button>
+        {subAbi.outputs.length === 1 && (
+          <div className={styles.outputGroup}>
+            <div className={styles.outputWrapper}>
+              {subAbi.outputs[0].type === 'uint256' && (
+                <select
+                  value={outputUnits[subAbi.outputs[0].name] || 'Wei'}
+                  onChange={(e) => handleOutputUnitChange(e, subAbi.outputs[0].name)}
+                  className={styles.unitSelect}
+                >
+                  <option value="Wei">Wei</option>
+                  <option value="Gwei">Gwei</option>
+                  <option value="Ether">Ether</option>
+                </select>
+              )}
+              <span className={styles.outputValue}>
+                {convertFromWei(outputData, outputUnits[subAbi.outputs[0].name] || 'Wei')}
+              </span>
+            </div>
+            <span className={styles.outputType}>{subAbi.outputs[0].type}</span>
+          </div>
+        )}
+        {subAbi.outputs.length > 1 && subAbi.outputs.map((output, i) => (
+          <div key={i} className={styles.outputGroup}>
+            <span className={styles.outputLabel}>{output.name}:</span>
+            <div className={styles.outputWrapper}>
+              {output.type === 'uint256' && (
+                <select
+                  value={outputUnits[output.name] || 'Wei'}
+                  onChange={(e) => handleOutputUnitChange(e, output.name)}
+                  className={styles.unitSelect}
+                >
+                  <option value="Wei">Wei</option>
+                  <option value="Gwei">Gwei</option>
+                  <option value="Ether">Ether</option>
+                </select>
+              )}
+              <span className={styles.outputValue}>
+                {convertFromWei(outputData[i], outputUnits[output.name] || 'Wei')}
+              </span>
+            </div>
+            <span className={styles.outputType}>{output.type}</span>
+          </div>
+        ))}
+      </Stack>
+    </div>
+  );
 }
 
 export function ContractRead(props) {
