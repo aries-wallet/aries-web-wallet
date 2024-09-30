@@ -398,16 +398,16 @@ export default function SideBar() {
           </Tooltip>
           <Stack direction="row" justifyContent="center" spacing={2}>
             <IconButton>
-              <FaTwitter />
+              <FaTwitter onClick={() => window.open('https://x.com/aries_wallet', '_blank')} />
             </IconButton>
             <IconButton>
-              <FaGithub />
+              <FaGithub onClick={() => window.open('https://github.com/aries-wallet/aries-web-wallet.git', '_blank')} />
             </IconButton>
             <IconButton>
-              <FaEnvelope />
+              <FaEnvelope onClick={() => window.open('mailto:lolieatapple@gmail.com', '_blank')} />
             </IconButton>
             <IconButton>
-              <FaHeart />
+              <FaHeart onClick={() => window.open('https://cryptodonations.xyz/donate/0x7521eda00e2ce05ac4a9d8353d096ccb970d5188?tag=arieswallet', '_blank')} />
             </IconButton>
           </Stack>
         </Stack>
