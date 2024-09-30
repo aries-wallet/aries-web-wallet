@@ -6,6 +6,15 @@ import styles from './ContractRead.module.css';
 
 const { Panel } = Collapse;
 
+const getDecimals = (unit) => {
+  switch(unit) {
+    case 'Wei': return 0;
+    case 'Gwei': return 9;
+    case 'Ether': return 18;
+    default: return 0;
+  }
+};
+
 const convertFromWei = (value, unit) => {
   if (!value) return '';
   switch(unit) {
@@ -32,6 +41,17 @@ function ReadPanel(props) {
     const fetchData = async () => {
       try {
         let params = objectToArray(inputData, subAbi.inputs);
+        // Convert input values based on selected units
+        params = params.map((param, index) => {
+          const input = subAbi.inputs[index];
+          if (input.type === 'uint256') {
+            const unit = inputUnits[input.name || `param${index}`] || 'Wei';
+            const decimals = getDecimals(unit);
+            return ethers.utils.parseUnits(param.toString(), decimals).toString();
+          }
+          return param;
+        });
+
         if (subAbi.inputs.length === 0 || params.length > 0) {
           console.log(`query sc function ${subAbi.name} with params ${params} pending...`);
           const result = await sc.methods[subAbi.name](...params).call();
@@ -44,13 +64,13 @@ function ReadPanel(props) {
     };
 
     fetchData();
-  }, [reload, subAbi, inputData, sc]);
+  }, [reload, subAbi, inputData, inputUnits, sc]);
 
   const handleInputChange = (e) => {
     setInputData({ ...inputData, [e.target.name]: e.target.value });
   };
 
-  const handleUnitChange = (e, name) => {
+  const handleInputUnitChange = (e, name) => {
     setInputUnits({ ...inputUnits, [name]: e.target.value });
   };
 
@@ -72,9 +92,9 @@ function ReadPanel(props) {
                 <div className={styles.inputWrapper}>
                   {input.type === 'uint256' && (
                     <select
-                      name={input.name || `param${index}`}
+                      name={`${input.name || `param${index}`}_unit`}
                       value={inputUnits[input.name || `param${index}`] || 'Wei'}
-                      onChange={(e) => handleUnitChange(e, input.name || `param${index}`)}
+                      onChange={(e) => handleInputUnitChange(e, input.name || `param${index}`)}
                       className={styles.unitSelect}
                     >
                       <option value="Wei">Wei</option>
