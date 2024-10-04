@@ -16,6 +16,7 @@ const getDecimals = (unit) => {
 };
 
 const convertFromWei = (value, unit) => {
+  if (value === false) return 'false';
   if (!value) return '';
   switch(unit) {
     case 'Wei':
