@@ -18,6 +18,7 @@
         "@web3-react-wan/wanwallet-connector": "^6.1.17",
         "ahooks": "^3.5.1",
         "antd": "^4.21.4",
+        "bignumber.js": "git+https://github.com/frozeman/bignumber.js-nolookahead.git",
         "copy-to-clipboard": "^3.3.1",
         "darkreader": "^4.9.52",
         "ethereumjs-abi": "^0.6.8",
@@ -677,7 +678,7 @@
 
     "bech32": ["bech32@1.1.4", "", {}, "sha512-s0IrSOzLlbvX7yp4WBfPITzpAU8sqQcpsmwXDiKwrG4r491vwCO/XpejasRNl0piBMe/DvP4Tz0mIS/X1DPJBQ=="],
 
-    "bignumber.js": ["bignumber.js-nolookahead@github:frozeman/bignumber.js-nolookahead#57692b3", {}, ""],
+    "bignumber.js": ["bignumber.js@github:frozeman/bignumber.js-nolookahead#57692b3", {}, "frozeman-bignumber.js-nolookahead-57692b3"],
 
     "bindings": ["bindings@1.5.0", "", { "dependencies": { "file-uri-to-path": "1.0.0" } }, "sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ=="],
 
@@ -2537,17 +2538,13 @@
 
     "ethereumjs-blockchain/ethereumjs-block": ["ethereumjs-block@2.2.2", "", { "dependencies": { "async": "^2.0.1", "ethereumjs-common": "^1.5.0", "ethereumjs-tx": "^2.1.1", "ethereumjs-util": "^5.0.0", "merkle-patricia-tree": "^2.1.2" } }, "sha512-2p49ifhek3h2zeg/+da6XpdFR3GlqY3BIEiqxGF8j9aSRIgkb7M1Ky+yULBKJOu8PAZxfhsYA+HxUk2aCQp3vg=="],
 
-    "ethereumjs-blockchain/ethereumjs-util": ["ethereumjs-util@6.2.1", "", { "dependencies": { "@types/bn.js": "^4.11.3", "bn.js": "^4.11.0", "create-hash": "^1.1.2", "elliptic": "^6.5.2", "ethereum-cryptography": "^0.1.3", "ethjs-util": "0.1.6", "rlp": "^2.2.3" } }, "sha512-W2Ktez4L01Vexijrm5EB6w7dg4n/TgpoYU4avuT5T3Vmnw/eCRtiBrJfQYS/DCSvDIOLn2k57GcHdeBcgVxAqw=="],
-
     "ethereumjs-tx/ethereumjs-util": ["ethereumjs-util@5.2.1", "", { "dependencies": { "bn.js": "^4.11.0", "create-hash": "^1.1.2", "elliptic": "^6.5.2", "ethereum-cryptography": "^0.1.3", "ethjs-util": "^0.1.3", "rlp": "^2.0.0", "safe-buffer": "^5.1.1" } }, "sha512-v3kT+7zdyCm1HIqWlLNrHGqHGLpGYIhjeHxQjnDXjLT2FyGJDsd3LWMYUo7pAFRrk86CR3nUJfhC81CCoJNNGQ=="],
+
+    "ethereumjs-util/bn.js": ["bn.js@4.12.0", "", {}, "sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA=="],
 
     "ethereumjs-vm/ethereumjs-block": ["ethereumjs-block@2.2.2", "", { "dependencies": { "async": "^2.0.1", "ethereumjs-common": "^1.5.0", "ethereumjs-tx": "^2.1.1", "ethereumjs-util": "^5.0.0", "merkle-patricia-tree": "^2.1.2" } }, "sha512-2p49ifhek3h2zeg/+da6XpdFR3GlqY3BIEiqxGF8j9aSRIgkb7M1Ky+yULBKJOu8PAZxfhsYA+HxUk2aCQp3vg=="],
 
-    "ethereumjs-vm/ethereumjs-util": ["ethereumjs-util@6.2.1", "", { "dependencies": { "@types/bn.js": "^4.11.3", "bn.js": "^4.11.0", "create-hash": "^1.1.2", "elliptic": "^6.5.2", "ethereum-cryptography": "^0.1.3", "ethjs-util": "0.1.6", "rlp": "^2.2.3" } }, "sha512-W2Ktez4L01Vexijrm5EB6w7dg4n/TgpoYU4avuT5T3Vmnw/eCRtiBrJfQYS/DCSvDIOLn2k57GcHdeBcgVxAqw=="],
-
     "ethereumjs-wallet/aes-js": ["aes-js@3.1.2", "", {}, "sha512-e5pEa2kBnBOgR4Y/p20pskXI74UEz7de8ZGVo58asOtvSVG5YAbJeELPZxOmt+Bnz3rX753YKhfIn4X4l1PPRQ=="],
-
-    "ethereumjs-wallet/ethereumjs-util": ["ethereumjs-util@6.2.1", "", { "dependencies": { "@types/bn.js": "^4.11.3", "bn.js": "^4.11.0", "create-hash": "^1.1.2", "elliptic": "^6.5.2", "ethereum-cryptography": "^0.1.3", "ethjs-util": "0.1.6", "rlp": "^2.2.3" } }, "sha512-W2Ktez4L01Vexijrm5EB6w7dg4n/TgpoYU4avuT5T3Vmnw/eCRtiBrJfQYS/DCSvDIOLn2k57GcHdeBcgVxAqw=="],
 
     "ethereumjs-wallet/utf8": ["utf8@3.0.0", "", {}, "sha512-E8VjFIQ/TyQgp+TZfS6l8yp/xWppSAHzidGiRrqe4bK4XP9pTRyKFgGJpO3SN7zdX4DeomTrwaseCHovfpFcqQ=="],
 
@@ -2598,8 +2595,6 @@
     "ganache-core/ethereumjs-common": ["ethereumjs-common@1.5.0", "", {}, "sha512-SZOjgK1356hIY7MRj3/ma5qtfr/4B5BL+G4rP/XSMYr2z1H5el4RX5GReYCKmQmYI/nSBmRnwrZ17IfHuG0viQ=="],
 
     "ganache-core/ethereumjs-tx": ["ethereumjs-tx@2.1.2", "", { "dependencies": { "ethereumjs-common": "^1.5.0", "ethereumjs-util": "^6.0.0" } }, "sha512-zZEK1onCeiORb0wyCXUvg94Ve5It/K6GD1K+26KfFKodiBiS6d9lfCXlUKGBBdQ+bv7Day+JK0tj1K+BeNFRAw=="],
-
-    "ganache-core/ethereumjs-util": ["ethereumjs-util@6.2.1", "", { "dependencies": { "@types/bn.js": "^4.11.3", "bn.js": "^4.11.0", "create-hash": "^1.1.2", "elliptic": "^6.5.2", "ethereum-cryptography": "^0.1.3", "ethjs-util": "0.1.6", "rlp": "^2.2.3" } }, "sha512-W2Ktez4L01Vexijrm5EB6w7dg4n/TgpoYU4avuT5T3Vmnw/eCRtiBrJfQYS/DCSvDIOLn2k57GcHdeBcgVxAqw=="],
 
     "ganache-core/ethereumjs-vm": ["ethereumjs-vm@4.2.0", "", { "dependencies": { "async": "^2.1.2", "async-eventemitter": "^0.2.2", "core-js-pure": "^3.0.1", "ethereumjs-account": "^3.0.0", "ethereumjs-block": "^2.2.2", "ethereumjs-blockchain": "^4.0.3", "ethereumjs-common": "^1.5.0", "ethereumjs-tx": "^2.1.2", "ethereumjs-util": "^6.2.0", "fake-merkle-patricia-tree": "^1.0.1", "functional-red-black-tree": "^1.0.1", "merkle-patricia-tree": "^2.3.2", "rustbn.js": "~0.2.0", "safe-buffer": "^5.1.1", "util.promisify": "^1.0.0" } }, "sha512-X6qqZbsY33p5FTuZqCnQ4+lo957iUJMM6Mpa6bL4UW0dxM6WmDSHuI4j/zOp1E2TDKImBGCJA9QPfc08PaNubA=="],
 
@@ -3021,17 +3016,11 @@
 
     "ethereumjs-blockchain/ethereumjs-block/ethereumjs-util": ["ethereumjs-util@5.2.1", "", { "dependencies": { "bn.js": "^4.11.0", "create-hash": "^1.1.2", "elliptic": "^6.5.2", "ethereum-cryptography": "^0.1.3", "ethjs-util": "^0.1.3", "rlp": "^2.0.0", "safe-buffer": "^5.1.1" } }, "sha512-v3kT+7zdyCm1HIqWlLNrHGqHGLpGYIhjeHxQjnDXjLT2FyGJDsd3LWMYUo7pAFRrk86CR3nUJfhC81CCoJNNGQ=="],
 
-    "ethereumjs-blockchain/ethereumjs-util/bn.js": ["bn.js@4.12.0", "", {}, "sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA=="],
-
     "ethereumjs-tx/ethereumjs-util/bn.js": ["bn.js@4.12.0", "", {}, "sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA=="],
 
     "ethereumjs-vm/ethereumjs-block/ethereumjs-tx": ["ethereumjs-tx@2.1.2", "", { "dependencies": { "ethereumjs-common": "^1.5.0", "ethereumjs-util": "^6.0.0" } }, "sha512-zZEK1onCeiORb0wyCXUvg94Ve5It/K6GD1K+26KfFKodiBiS6d9lfCXlUKGBBdQ+bv7Day+JK0tj1K+BeNFRAw=="],
 
     "ethereumjs-vm/ethereumjs-block/ethereumjs-util": ["ethereumjs-util@5.2.1", "", { "dependencies": { "bn.js": "^4.11.0", "create-hash": "^1.1.2", "elliptic": "^6.5.2", "ethereum-cryptography": "^0.1.3", "ethjs-util": "^0.1.3", "rlp": "^2.0.0", "safe-buffer": "^5.1.1" } }, "sha512-v3kT+7zdyCm1HIqWlLNrHGqHGLpGYIhjeHxQjnDXjLT2FyGJDsd3LWMYUo7pAFRrk86CR3nUJfhC81CCoJNNGQ=="],
-
-    "ethereumjs-vm/ethereumjs-util/bn.js": ["bn.js@4.12.0", "", {}, "sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA=="],
-
-    "ethereumjs-wallet/ethereumjs-util/bn.js": ["bn.js@4.12.0", "", {}, "sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA=="],
 
     "expand-brackets/debug/ms": ["ms@2.0.0", "", {}, "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A=="],
 
@@ -3066,8 +3055,6 @@
     "ganache-core/ethereumjs-block/merkle-patricia-tree": ["merkle-patricia-tree@2.3.2", "", { "dependencies": { "async": "^1.4.2", "ethereumjs-util": "^5.0.0", "level-ws": "0.0.0", "levelup": "^1.2.1", "memdown": "^1.0.0", "readable-stream": "^2.0.0", "rlp": "^2.0.0", "semaphore": ">=1.0.1" } }, "sha512-81PW5m8oz/pz3GvsAwbauj7Y00rqm81Tzad77tHBwU7pIAtN+TJnMSOJhxBKflSVYhptMMb9RskhqHqrSm1V+g=="],
 
     "ganache-core/ethereumjs-tx/ethereumjs-common": ["ethereumjs-common@1.5.2", "", {}, "sha512-hTfZjwGX52GS2jcVO6E2sx4YuFnf0Fhp5ylo4pEPhEffNln7vS59Hr5sLnp3/QCazFLluuBZ+FZ6J5HTp0EqCA=="],
-
-    "ganache-core/ethereumjs-util/bn.js": ["bn.js@4.12.0", "", {}, "sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA=="],
 
     "ganache-core/ethereumjs-vm/async": ["async@2.6.4", "", { "dependencies": { "lodash": "^4.17.14" } }, "sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA=="],
 
@@ -3212,6 +3199,8 @@
     "unset-value/has-value/has-values": ["has-values@0.1.4", "", {}, "sha512-J8S0cEdWuQbqD9//tlZxiMuMNmxB8PlEwvYwuxsTmR1G5RXUePEX/SJn7aD0GMLieuZYSwNH0cQuJGwnYunXRQ=="],
 
     "unset-value/has-value/isobject": ["isobject@2.1.0", "", { "dependencies": { "isarray": "1.0.0" } }, "sha512-+OUdGJlgjOBZDfxnDjYYG6zp487z0JGNQq3cYQYg5f5hKR+syHMsaztzGeml/4kGG55CSpKSpWTY+jYGgsHLgA=="],
+
+    "wanchain-util/web3/bignumber.js": ["bignumber.js-nolookahead@github:frozeman/bignumber.js-nolookahead#57692b3", {}, ""],
 
     "web3-core/@types/bn.js/@types/node": ["@types/node@18.0.0", "", {}, "sha512-cHlGmko4gWLVI27cGJntjs/Sj8th9aYwplmZFwmmgYQQvL5NUsgVJG7OddLvNfLqYS31KFN0s3qlaD9qCaxACA=="],
 

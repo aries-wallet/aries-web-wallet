@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://www.arieswallet.com</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/create2</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/hooks/useContract</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/hooks/useWallet</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/keystore</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/meme</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/privateTx</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/raw_transaction</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/script</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/sign_message</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/smart_contract</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/storeman</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/token_tools</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.arieswallet.com/transaction</loc><lastmod>2024-09-30T02:50:37.477Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com</loc><lastmod>2026-02-12T09:36:13.920Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/create2</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/hooks/useContract</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/hooks/useWallet</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/keystore</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/meme</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/privateTx</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/raw_transaction</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/script</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/sign_message</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/smart_contract</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/storeman</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/token_tools</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.arieswallet.com/transaction</loc><lastmod>2026-02-12T09:36:13.921Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 </urlset>
