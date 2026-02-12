@@ -2,7 +2,7 @@ import { JsonForms } from "@jsonforms/react";
 import { materialCells, materialRenderers } from "@jsonforms/material-renderers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Stack, TextField, Tooltip } from "@mui/material";
-import { AddBox, ContentCopy, DeleteForever, Explore, FileCopy } from "@mui/icons-material";
+import { AddBox, ContentCopy, DeleteForever, Edit, Explore, FileCopy } from "@mui/icons-material";
 import { MessageBox } from "./message";
 import useContract from "../pages/hooks/useContract";
 import { ContractRead } from "./ContractRead";
@@ -20,9 +20,10 @@ export function Contract(props) {
   const [successInfo, setSuccessInfo] = useState('');
   const [errorInfo, setErrorInfo] = useState('');
   const [showAddContract, setShowAddContract] = useState(false);
+  const [showEditContract, setShowEditContract] = useState(false);
   const { wallet } = useWallet();
 
-  const {contract, setContract, addContract, contractList, deleteContract } = useContract();
+  const {contract, setContract, addContract, contractList, deleteContract, updateContract } = useContract();
   const [scAddr, setScAddr] = useState('0x');
   const {scName} = useMemo(()=>{
     if (contract && contract.name) {
@@ -60,6 +61,12 @@ export function Contract(props) {
   const [newContract, setNewContract] = useState({
     name: '',
     address: '0x',
+    abi: ''
+  });
+
+  const [editContract, setEditContract] = useState({
+    name: '',
+    contract: '0x',
     abi: ''
   });
 
@@ -175,6 +182,22 @@ export function Contract(props) {
           <AddBox />
         </IconButton>
       </Tooltip>
+      <Tooltip title="Edit Contract">
+        <IconButton size="small" onClick={()=>{
+          if (!contract || !contract.name) {
+            setErrorInfo('No contract selected');
+            return;
+          }
+          setEditContract({
+            name: contract.name || '',
+            contract: contract.contract || scAddr || '0x',
+            abi: contract.abi || ''
+          });
+          setShowEditContract(true);
+        }}>
+          <Edit />
+        </IconButton>
+      </Tooltip>
       <Tooltip title="Remove Contract">
         <IconButton size="small" onClick={async ()=>{
           if (! window.confirm("Are you sure to delete this Contract?")) {
@@ -264,6 +287,98 @@ export function Contract(props) {
         <Button onClick={()=>setShowAddContract(false)}>Cancel</Button>
       </DialogActions>
     </Dialog>
+
+    <Dialog open={showEditContract} onClose={()=>setShowEditContract(false)} fullWidth>
+      <DialogTitle color="white">Edit Contract</DialogTitle>
+      <DialogContent>
+        <JsonForms
+          renderers={materialRenderers}
+          cells={materialCells}
+          data={editContract}
+          onChange={e=>setEditContract(e.data)}
+          schema={{
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                title: 'Contract Name',
+              },
+              contract: {
+                type: 'string',
+                title: 'Contract Address'
+              },
+              abi: {
+                type: 'string',
+                title: 'Contract ABI',
+              }
+            }
+          }}
+          uischema={
+            {
+              type: 'VerticalLayout',
+              elements: [
+                {
+                  type: "Control",
+                  scope: "#/properties/name",
+                },
+                {
+                  type: "Control",
+                  scope: "#/properties/contract",
+                },
+                {
+                  type: "Control",
+                  scope: "#/properties/abi",
+                  options: {
+                    multi: true
+                  }
+                }
+              ]
+            }
+          }
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={async ()=>{
+          try {
+            if (!editContract || !editContract.name) {
+              setErrorInfo('Contract Name required');
+              return;
+            }
+            if (!editContract.contract) {
+              setErrorInfo('Contract Address required');
+              return;
+            }
+            if (!editContract.abi) {
+              setErrorInfo('Contract ABI required');
+              return;
+            }
+
+            try {
+              JSON.parse(editContract.abi);
+            } catch (e) {
+              setErrorInfo('Contract ABI is not valid JSON');
+              return;
+            }
+
+            let ok = await updateContract(scName, editContract);
+            if (!ok) {
+              setErrorInfo('Update contract failed (maybe name already exists)');
+              return;
+            }
+
+            setShowEditContract(false);
+            setSuccessInfo('Contract Updated');
+            await setContract(editContract.name);
+            setScAddr(editContract.contract);
+          } catch (e) {
+            console.error(e);
+            setErrorInfo('Update contract failed');
+          }
+        }}>Ok</Button>
+        <Button onClick={()=>setShowEditContract(false)}>Cancel</Button>
+      </DialogActions>
+    </Dialog>
+
     <MessageBox successInfo={successInfo} errorInfo={errorInfo} setSuccessInfo={setSuccessInfo} setErrorInfo={setErrorInfo} />
   </div>
   

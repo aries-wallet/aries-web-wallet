@@ -47,7 +47,36 @@ function useContract() {
     return true;
   }
 
-  return { contract, contractList, setContract: setCurrentContract, deleteContract, addContract };
+  const updateContract = async (oldContractName, newContract) => {
+    if (!getDb().data || !getDb().data.contractList || getDb().data.contractList.length <= 0) {
+      return false;
+    }
+
+    let index = getDb().data.contractList.findIndex(v => v.name === oldContractName);
+    if (index < 0) {
+      return false;
+    }
+
+    if (newContract && newContract.name && newContract.name !== oldContractName) {
+      let existed = getDb().data.contractList.find(v => v.name === newContract.name);
+      if (existed) {
+        return false;
+      }
+    }
+
+    getDb().data.contractList[index] = newContract;
+
+    if (getDb().data.current && getDb().data.current.contract && getDb().data.current.contract.name === oldContractName) {
+      getDb().data.current.contract = newContract;
+    }
+
+    await getDb().write();
+    setContractList(getDb().data.contractList);
+    setContract(newContract);
+    return true;
+  }
+
+  return { contract, contractList, setContract: setCurrentContract, deleteContract, addContract, updateContract };
 }
 
 export default createModel(useContract);
