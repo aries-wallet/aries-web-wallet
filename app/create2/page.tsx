@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Divider, Paper, Stack, TextField } from '@mui/material'
+import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi'
 import { type Address, decodeEventLog } from 'viem'
@@ -30,85 +30,78 @@ export default function Create2DeployerPage() {
   const { showSuccess, showError } = useSnackbar()
 
   return (
-    <Paper sx={{ padding: '30px', margin: '50px', overflow: 'auto' }}>
-      <Stack spacing={2}>
-        <h1>Create2 Deployer</h1>
-        <h2>Deploy contracts with the same address across multiple blockchains using CREATE2.</h2>
-        <h2>We are using Create2Deployer contract: https://github.com/lolieatapple/create2-same-address.git</h2>
-        <h2>Step1. Input Your contract bytecode and seeds to query deploy address;</h2>
-        <h2>Step2. Click deploy button to finish the deployment;</h2>
+    <Box sx={{ p: 3, maxWidth: 800 }}>
+      <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3 }}>
+        <Stack spacing={2}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Create2 Deployer</Typography>
+          <Typography variant="body2" sx={{ color: '#8a94a6', lineHeight: 1.8 }}>
+            Deploy contracts with the same address across multiple blockchains using CREATE2.
+          </Typography>
 
-        {supportedChains.includes(chainId) && (
-          <Stack spacing={2}>
-            <TextField label="Bytecode start with 0x" placeholder="0x66331231231234..." value={bytecode} onChange={(e) => setBytecode(e.target.value)} />
-            <TextField label="Seed" placeholder="hello world 123" value={seed} onChange={(e) => setSeed(e.target.value)} />
-            <Button
-              variant="contained"
-              sx={{ textTransform: 'none' }}
-              onClick={async () => {
-                try {
-                  if (!publicClient || !address) return
-                  const addr = await publicClient.readContract({
-                    address: create2Deployer,
-                    abi: create2DeployerAbi,
-                    functionName: 'computeAddress',
-                    args: [bytecode as `0x${string}`, seed],
-                  })
-                  setScAddr(addr)
-                } catch (error: unknown) {
-                  console.error(error)
-                  showError((error as Error).message)
-                }
-              }}
-            >
-              Step1. Query Deploy Contract Address
-            </Button>
-            {scAddr && <TextField label="Contract Address" value={scAddr} InputProps={{ readOnly: true }} />}
-            <Button
-              variant="contained"
-              sx={{ textTransform: 'none' }}
-              onClick={async () => {
-                try {
-                  if (!walletClient || !publicClient || !address) return
-                  const hash = await walletClient.writeContract({
-                    address: create2Deployer,
-                    abi: create2DeployerAbi,
-                    functionName: 'deploy',
-                    args: [bytecode as `0x${string}`, seed],
-                  })
-                  const receipt = await publicClient.waitForTransactionReceipt({ hash })
-                  const deployedEvent = receipt.logs.find((log) => {
-                    try {
-                      const decoded = decodeEventLog({ abi: create2DeployerAbi, data: log.data, topics: log.topics })
-                      return decoded.eventName === 'Deployed'
-                    } catch { return false }
-                  })
-                  if (deployedEvent) {
-                    const decoded = decodeEventLog({ abi: create2DeployerAbi, data: deployedEvent.data, topics: deployedEvent.topics })
-                    setFinalAddr((decoded.args as { addr: string }).addr)
-                  }
-                  showSuccess(`Deploy tx: ${hash}`)
-                } catch (error: unknown) {
-                  console.error(error)
-                  showError((error as Error).message)
-                }
-              }}
-            >
-              Step2. Finish Deploy
-            </Button>
-            {finalAddr && <TextField label="Final Address" value={finalAddr} InputProps={{ readOnly: true }} />}
-          </Stack>
-        )}
-
-        {!supportedChains.includes(chainId) && (
-          <Stack spacing={2}>
-            <Divider />
-            <h2>Unsupported chain id: {chainId}</h2>
-            <h2>Currently only support: {supportedChains.toString()}</h2>
-            <h2>If you want more chains, please contact us.</h2>
-          </Stack>
-        )}
-      </Stack>
-    </Paper>
+          {supportedChains.includes(chainId) ? (
+            <Stack spacing={2}>
+              <TextField size="small" label="Bytecode (0x...)" value={bytecode} onChange={(e) => setBytecode(e.target.value)} />
+              <TextField size="small" label="Seed" placeholder="hello world 123" value={seed} onChange={(e) => setSeed(e.target.value)} />
+              <Button variant="contained"
+                sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+                onClick={async () => {
+                  try {
+                    if (!publicClient || !address) return
+                    const addr = await publicClient.readContract({
+                      address: create2Deployer, abi: create2DeployerAbi,
+                      functionName: 'computeAddress', args: [bytecode as `0x${string}`, seed],
+                    })
+                    setScAddr(addr)
+                  } catch (error: unknown) { console.error(error); showError((error as Error).message) }
+                }}
+              >
+                Step 1 — Query Deploy Address
+              </Button>
+              {scAddr && (
+                <Box sx={{ bgcolor: '#f5f7fb', borderRadius: '8px', p: 2 }}>
+                  <Typography variant="caption" sx={{ color: '#8a94a6', fontWeight: 600 }}>Predicted Address</Typography>
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all', mt: 0.5, color: '#2d3748' }}>{scAddr}</Typography>
+                </Box>
+              )}
+              <Button variant="contained"
+                sx={{ alignSelf: 'flex-start', bgcolor: '#e8853d', '&:hover': { bgcolor: '#d47632' } }}
+                onClick={async () => {
+                  try {
+                    if (!walletClient || !publicClient || !address) return
+                    const hash = await walletClient.writeContract({
+                      address: create2Deployer, abi: create2DeployerAbi,
+                      functionName: 'deploy', args: [bytecode as `0x${string}`, seed],
+                    })
+                    const receipt = await publicClient.waitForTransactionReceipt({ hash })
+                    const deployedEvent = receipt.logs.find((log) => {
+                      try { const d = decodeEventLog({ abi: create2DeployerAbi, data: log.data, topics: log.topics }); return d.eventName === 'Deployed' } catch { return false }
+                    })
+                    if (deployedEvent) {
+                      const decoded = decodeEventLog({ abi: create2DeployerAbi, data: deployedEvent.data, topics: deployedEvent.topics })
+                      setFinalAddr((decoded.args as { addr: string }).addr)
+                    }
+                    showSuccess(`Deploy tx: ${hash}`)
+                  } catch (error: unknown) { console.error(error); showError((error as Error).message) }
+                }}
+              >
+                Step 2 — Deploy
+              </Button>
+              {finalAddr && (
+                <Box sx={{ bgcolor: '#f5f7fb', borderRadius: '8px', p: 2 }}>
+                  <Typography variant="caption" sx={{ color: '#8a94a6', fontWeight: 600 }}>Final Address</Typography>
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all', mt: 0.5, color: '#2d3748' }}>{finalAddr}</Typography>
+                </Box>
+              )}
+            </Stack>
+          ) : (
+            <Box sx={{ bgcolor: '#fef8f3', borderRadius: '8px', p: 2 }}>
+              <Typography variant="body2" sx={{ color: '#e8853d' }}>
+                Unsupported chain ({chainId}). Supported: {supportedChains.join(', ')}
+              </Typography>
+            </Box>
+          )}
+        </Stack>
+      </Box>
+    </Box>
   )
 }

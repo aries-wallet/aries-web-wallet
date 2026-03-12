@@ -5,11 +5,10 @@ import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import {
   Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
-  Divider, IconButton, LinearProgress, List, ListItem, ListItemButton, ListItemIcon,
-  ListItemText, ListItemSecondaryAction, Paper, Stack, TextField, Tooltip, styled,
+  IconButton, LinearProgress, List, ListItem, ListItemButton, ListItemIcon,
+  ListItemText, ListItemSecondaryAction, Stack, TextField, Tooltip, Typography,
 } from '@mui/material'
-import { lighten } from '@mui/material/styles'
-import { useAccount, useBalance, useChainId, useDisconnect } from 'wagmi'
+import { useAccount, useBalance, useChainId } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import {
   FaHome, FaFileContract, FaPaperPlane, FaFileAlt, FaSignature, FaCoins, FaCode,
@@ -21,41 +20,6 @@ let DarkReader: typeof import('darkreader') | undefined
 if (typeof window !== 'undefined') {
   DarkReader = require('darkreader')
 }
-
-const Bar = styled(Paper)<{ open: boolean }>`
-  height: 100vh;
-  width: ${(props) => (props.open ? '225px' : '60px')};
-  transition: width 0.3s ease-in-out;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-`
-
-const ScrollableSection = styled('div')`
-  flex-grow: 1;
-  overflow-y: auto;
-`
-
-const CompactListItem = styled(ListItem)({ padding: 0 })
-const CompactListItemButton = styled(ListItemButton)(({ theme }) => ({
-  padding: theme.spacing(0.5, 1),
-  minHeight: 40,
-}))
-const CompactListItemIcon = styled(ListItemIcon)(({ theme }) => ({
-  minWidth: 40,
-  marginRight: 0,
-  marginLeft: theme.spacing(2),
-}))
-
-const ToggleButton = styled(IconButton)(({ theme }) => ({
-  position: 'absolute',
-  top: '50%',
-  right: '-20px',
-  transform: 'translateY(-50%)',
-  backgroundColor: theme.palette.background.paper,
-  '&:hover': { backgroundColor: theme.palette.action.hover },
-  boxShadow: theme.shadows[2],
-}))
 
 const navItems = [
   { path: '/', label: 'Home', icon: FaHome },
@@ -96,11 +60,8 @@ export default function Sidebar() {
 
   const handleDarkMode = () => {
     if (!DarkReader) return
-    if (DarkReader.isEnabled()) {
-      DarkReader.disable()
-    } else {
-      DarkReader.enable({ brightness: 100, contrast: 90, sepia: 10 })
-    }
+    if (DarkReader.isEnabled()) DarkReader.disable()
+    else DarkReader.enable({ brightness: 100, contrast: 90, sepia: 10 })
     setUpdateDark(Date.now())
   }
 
@@ -135,46 +96,55 @@ export default function Sidebar() {
     setSelectedContracts([])
   }
 
-  const getColorForPercentage = (percent: number) => {
-    if (percent < 50) return '#4caf50'
-    if (percent < 75) return '#ff9800'
-    return '#f44336'
-  }
-
   const balance = balanceData ? Number(balanceData.formatted).toFixed(4) : '0'
 
   return (
     <Box sx={{ position: 'relative' }}>
-      <Bar open={open} elevation={12}>
-        <Stack spacing={2} sx={{ padding: '20px 15px' }}>
-          <Stack
-            spacing={1}
-            direction="row"
-            sx={{
-              justifyContent: open ? 'space-between' : 'center',
-              height: '58px',
-              alignItems: 'center',
-              overflow: 'hidden',
-            }}
-          >
+      <Box sx={{
+        height: '100vh',
+        width: open ? 225 : 60,
+        transition: 'width 0.3s ease-in-out',
+        display: 'flex',
+        flexDirection: 'column',
+        flexShrink: 0,
+        bgcolor: '#fff',
+        borderRight: '1px solid #eef0f4',
+      }}>
+        <Stack spacing={1.5} sx={{ p: '16px 12px' }}>
+          <Stack direction="row" sx={{
+            justifyContent: open ? 'space-between' : 'center',
+            alignItems: 'center', minHeight: 48,
+          }}>
             {open ? (
-              <Image
-                alt="logo"
-                src="/logo.png"
-                width={150}
-                height={48}
-                style={{ cursor: 'pointer', flexShrink: 0 }}
+              <Image alt="logo" src="/logo.svg" width={130} height={60}
+                style={{ cursor: 'pointer', flexShrink: 0, marginLeft: 16 }}
                 onClick={() => router.push('/')}
               />
             ) : (
-              <IconButton onClick={handleDarkMode} sx={{ width: 40, height: 40, '& svg': { fontSize: 24 } }}>
+              <IconButton onClick={handleDarkMode} size="small">
                 {isDarkMode ? <FaSun /> : <FaMoon />}
               </IconButton>
             )}
             {open && (
-              <IconButton onClick={handleDarkMode} sx={{ flexShrink: 0 }}>
-                {isDarkMode ? <FaSun /> : <FaMoon />}
-              </IconButton>
+              <Stack direction="column" spacing={0.5} alignItems="center">
+                <Stack direction="row" spacing={0.5}>
+                  <Box
+                    onClick={() => window.open('https://v1.arieswallet.xyz', '_self')}
+                    sx={{
+                      fontSize: 11, fontWeight: 600, color: '#8a94a6', cursor: 'pointer',
+                      px: 0.75, py: 0.25, borderRadius: '4px',
+                      '&:hover': { color: '#5b7ff5', bgcolor: '#eef2ff' },
+                    }}
+                  >V1</Box>
+                  <Box sx={{
+                    fontSize: 11, fontWeight: 700, color: '#fff', bgcolor: '#5b7ff5',
+                    px: 0.75, py: 0.25, borderRadius: '4px',
+                  }}>V2</Box>
+                </Stack>
+                <IconButton onClick={handleDarkMode} size="small" sx={{ color: '#8a94a6' }}>
+                  {isDarkMode ? <FaSun /> : <FaMoon />}
+                </IconButton>
+              </Stack>
             )}
           </Stack>
 
@@ -182,133 +152,198 @@ export default function Sidebar() {
             <ConnectButton.Custom>
               {({ account, chain, openAccountModal, openChainModal, openConnectModal, mounted }) => {
                 const connected = mounted && account && chain
+                if (!connected) {
+                  return (
+                    <Button variant="contained" onClick={openConnectModal} fullWidth
+                      sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+                    >
+                      Connect Wallet
+                    </Button>
+                  )
+                }
                 return (
-                  <Stack spacing={1.5} sx={{ width: '100%' }}>
-                    {!connected ? (
-                      <Button
-                        variant="contained"
-                        onClick={openConnectModal}
-                        fullWidth
-                        sx={{ textTransform: 'none', fontWeight: 600 }}
-                      >
-                        Connect Wallet
-                      </Button>
-                    ) : (
-                      <>
-                        <Button
-                          variant="outlined"
-                          onClick={openChainModal}
-                          fullWidth
-                          size="small"
-                          sx={{ textTransform: 'none', justifyContent: 'flex-start' }}
-                          startIcon={chain.hasIcon && chain.iconUrl ? (
-                            <img src={chain.iconUrl} alt={chain.name ?? ''} width={18} height={18} style={{ borderRadius: 4 }} />
-                          ) : undefined}
-                        >
-                          {chain.name ?? 'Unknown'} ({chain.id})
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          onClick={openAccountModal}
-                          fullWidth
-                          size="small"
-                          sx={{ textTransform: 'none', justifyContent: 'flex-start' }}
-                        >
-                          {account.displayName}
-                        </Button>
-                        <TextField
-                          size="small"
-                          fullWidth
-                          label="Balance"
-                          value={balance}
-                          InputProps={{ readOnly: true }}
-                        />
-                      </>
-                    )}
-                  </Stack>
+                  <Box sx={{
+                    bgcolor: '#f5f7fb', borderRadius: '10px', p: 1.5,
+                    display: 'flex', flexDirection: 'column', gap: 1,
+                  }}>
+                    {/* Network */}
+                    <Box
+                      onClick={openChainModal}
+                      sx={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.75,
+                        cursor: 'pointer', borderRadius: '6px', py: 0.5,
+                        '&:hover': { bgcolor: '#eef2ff' },
+                      }}
+                    >
+                      {chain.hasIcon && chain.iconUrl && (
+                        <img src={chain.iconUrl} alt="" width={14} height={14} style={{ borderRadius: 3 }} />
+                      )}
+                      <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#2d3748' }}>
+                        {chain.name ?? 'Unknown'}
+                      </Typography>
+                      <Typography sx={{ fontSize: 10, color: '#8a94a6' }}>
+                        #{chain.id}
+                      </Typography>
+                    </Box>
+
+                    {/* Address */}
+                    <Box
+                      onClick={openAccountModal}
+                      sx={{
+                        display: 'flex', justifyContent: 'center',
+                        cursor: 'pointer', borderRadius: '6px', py: 0.25,
+                        '&:hover': { bgcolor: '#eef2ff' },
+                      }}
+                    >
+                      <Typography sx={{
+                        fontSize: 11, fontFamily: 'monospace', color: '#4a5568',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {account.address.slice(0, 10) + '...' + account.address.slice(-8)}
+                      </Typography>
+                    </Box>
+
+                    {/* Balance divider + value */}
+                    <Box sx={{
+                      display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 0.5,
+                      borderTop: '1px solid #e8ebf0', pt: 0.75,
+                    }}>
+                      <Typography sx={{ fontSize: 16, fontWeight: 700, fontFamily: 'monospace', color: '#2d3748' }}>
+                        {balance}
+                      </Typography>
+                      <Typography sx={{ fontSize: 10, color: '#8a94a6', fontWeight: 500 }}>
+                        {balanceData?.symbol ?? 'ETH'}
+                      </Typography>
+                    </Box>
+                  </Box>
                 )
               }}
             </ConnectButton.Custom>
           )}
         </Stack>
 
-        <ScrollableSection>
-          <Divider />
-          <List>
-            {navItems.map((item) => (
-              <CompactListItem key={item.path} disablePadding>
-                <CompactListItemButton
-                  selected={pathname === item.path}
-                  onClick={() => router.push(item.path)}
-                >
-                  <CompactListItemIcon>
-                    <item.icon />
-                  </CompactListItemIcon>
-                  {open && <ListItemText primary={item.label} />}
-                </CompactListItemButton>
-              </CompactListItem>
-            ))}
+        <Box sx={{ flexGrow: 1, overflowY: 'auto', px: 0.5 }}>
+          <List disablePadding>
+            {navItems.map((item) => {
+              const active = pathname === item.path
+              return (
+                <ListItem key={item.path} disablePadding sx={{ mb: 0.25 }}>
+                  <ListItemButton
+                    selected={active}
+                    onClick={() => router.push(item.path)}
+                    sx={{
+                      borderRadius: '8px', mx: 0.5, minHeight: 38,
+                      py: 0.5, px: open ? 1.5 : 1,
+                      '&.Mui-selected': { bgcolor: '#eef2ff', color: '#5b7ff5', '&:hover': { bgcolor: '#e5ebff' } },
+                      '&:hover': { bgcolor: '#f5f7fb' },
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 32, color: active ? '#5b7ff5' : '#8a94a6', ml: open ? 0 : 0.5 }}>
+                      <item.icon size={15} />
+                    </ListItemIcon>
+                    {open && (
+                      <ListItemText primary={item.label}
+                        primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 600 : 400, color: active ? '#5b7ff5' : '#4a5568' }}
+                      />
+                    )}
+                  </ListItemButton>
+                </ListItem>
+              )
+            })}
+          </List>
+
+          <Box sx={{ px: 1.5, py: 1 }}>
+            <Typography variant="caption" sx={{ color: '#b0b8c9', fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase' }}>
+              {open ? 'External' : ''}
+            </Typography>
+          </Box>
+
+          <List disablePadding>
             {externalLinks.map((item) => (
-              <CompactListItem key={item.href} disablePadding>
+              <ListItem key={item.href} disablePadding sx={{ mb: 0.25 }}>
                 <ListItemButton
-                  component="a"
-                  target="_blank"
-                  rel="noreferrer"
-                  href={item.href}
-                  sx={{ padding: (theme) => theme.spacing(0.5, 1), minHeight: 40 }}
+                  component="a" target="_blank" rel="noreferrer" href={item.href}
+                  sx={{
+                    borderRadius: '8px', mx: 0.5, minHeight: 38, py: 0.5, px: open ? 1.5 : 1,
+                    '&:hover': { bgcolor: '#f5f7fb' },
+                  }}
                 >
-                  <CompactListItemIcon>
-                    <item.icon />
-                  </CompactListItemIcon>
-                  {open && <ListItemText primary={item.label} />}
+                  <ListItemIcon sx={{ minWidth: 32, color: '#8a94a6', ml: open ? 0 : 0.5 }}>
+                    <item.icon size={15} />
+                  </ListItemIcon>
+                  {open && (
+                    <ListItemText primary={item.label}
+                      primaryTypographyProps={{ fontSize: 13, color: '#4a5568' }}
+                    />
+                  )}
                 </ListItemButton>
-              </CompactListItem>
+              </ListItem>
             ))}
           </List>
-        </ScrollableSection>
+        </Box>
 
-        <Stack spacing={1} sx={{ padding: '10px' }}>
-          <Tooltip title="Click to manage localStorage">
+        <Stack spacing={1} sx={{ p: '8px 12px' }}>
+          <Tooltip title="Click to manage localStorage" placement="top">
             <LinearProgress
-              variant="determinate"
-              value={storagePercent}
+              variant="determinate" value={storagePercent}
               onClick={handleStorageClick}
               sx={{
-                cursor: 'pointer',
-                '& .MuiLinearProgress-bar': { backgroundColor: getColorForPercentage(storagePercent) },
-                backgroundColor: lighten(getColorForPercentage(storagePercent), 0.5),
+                cursor: 'pointer', borderRadius: 4, height: 4,
+                bgcolor: '#f0f2f5',
+                '& .MuiLinearProgress-bar': {
+                  borderRadius: 4,
+                  bgcolor: storagePercent < 50 ? '#5b7ff5' : storagePercent < 75 ? '#f0a45d' : '#e85d5d',
+                },
               }}
             />
           </Tooltip>
-          <Stack direction="row" justifyContent="center" spacing={2}>
-            <IconButton onClick={() => window.open('https://x.com/aries_wallet', '_blank')}>
-              <FaTwitter />
-            </IconButton>
-            <IconButton onClick={() => window.open('https://github.com/aries-wallet/aries-web-wallet.git', '_blank')}>
-              <FaGithub />
-            </IconButton>
-            <IconButton onClick={() => window.open('mailto:lolieatapple@gmail.com', '_blank')}>
-              <FaEnvelope />
-            </IconButton>
-            <IconButton onClick={() => window.open('https://cryptodonations.xyz/donate/0x7521eda00e2ce05ac4a9d8353d096ccb970d5188?tag=arieswallet', '_blank')}>
-              <FaHeart />
-            </IconButton>
+          <Stack direction="row" justifyContent="center" spacing={0.5}>
+            {[
+              { icon: FaTwitter, url: 'https://x.com/aries_wallet' },
+              { icon: FaGithub, url: 'https://github.com/aries-wallet/aries-web-wallet.git' },
+              { icon: FaEnvelope, url: 'mailto:lolieatapple@gmail.com' },
+              { icon: FaHeart, url: 'https://cryptodonations.xyz/donate/0x7521eda00e2ce05ac4a9d8353d096ccb970d5188?tag=arieswallet' },
+            ].map(({ icon: Icon, url }) => (
+              <IconButton key={url} size="small" onClick={() => window.open(url, '_blank')}
+                sx={{ color: '#b0b8c9', '&:hover': { color: '#5b7ff5', bgcolor: '#eef2ff' } }}
+              >
+                <Icon size={13} />
+              </IconButton>
+            ))}
           </Stack>
         </Stack>
-      </Bar>
-      <ToggleButton onClick={() => setOpen(!open)} size="small">
-        {open ? <FaChevronLeft /> : <FaBars />}
-      </ToggleButton>
+      </Box>
+
+      <IconButton
+        onClick={() => setOpen(!open)} size="small"
+        sx={{
+          position: 'absolute', top: '50%', right: -14,
+          transform: 'translateY(-50%)',
+          width: 28, height: 28,
+          bgcolor: '#fff', border: '1px solid #eef0f4',
+          '&:hover': { bgcolor: '#f5f7fb' },
+          color: '#8a94a6', fontSize: 12,
+        }}
+      >
+        {open ? <FaChevronLeft size={10} /> : <FaBars size={10} />}
+      </IconButton>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Manage Contract List</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, color: '#2d3748' }}>Manage Contract List</DialogTitle>
         <DialogContent>
-          <DialogContentText>Select contracts to delete. Current contracts: {contractList.length}</DialogContentText>
+          <DialogContentText sx={{ color: '#8a94a6' }}>
+            Select contracts to delete. Current contracts: {contractList.length}
+          </DialogContentText>
           <Box sx={{ mt: 2, maxHeight: 400, overflow: 'auto' }}>
             <List>
               {contractList.map((c) => (
-                <ListItem key={c.name}>
-                  <ListItemText primary={c.name || 'Unnamed Contract'} secondary={c.contract || 'No address'} />
+                <ListItem key={c.name} sx={{ borderRadius: '8px', '&:hover': { bgcolor: '#f5f7fb' } }}>
+                  <ListItemText
+                    primary={c.name || 'Unnamed Contract'}
+                    secondary={c.contract || 'No address'}
+                    primaryTypographyProps={{ fontWeight: 600, color: '#2d3748', fontSize: 14 }}
+                    secondaryTypographyProps={{ fontFamily: 'monospace', fontSize: 12 }}
+                  />
                   <ListItemSecondaryAction>
                     <Checkbox
                       edge="end"
@@ -325,9 +360,11 @@ export default function Sidebar() {
             </List>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={handleDeleteSelected} disabled={selectedContracts.length === 0} color="error">
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setOpenDialog(false)} sx={{ color: '#8a94a6' }}>Cancel</Button>
+          <Button onClick={handleDeleteSelected} disabled={selectedContracts.length === 0}
+            sx={{ bgcolor: '#e85d5d', color: '#fff', '&:hover': { bgcolor: '#d44d4d' }, '&.Mui-disabled': { bgcolor: '#f0f2f5' } }}
+          >
             Delete Selected ({selectedContracts.length})
           </Button>
         </DialogActions>

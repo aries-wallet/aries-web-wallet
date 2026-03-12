@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
 import { formatEther, parseEther, getAddress, type Address } from 'viem'
@@ -8,11 +8,43 @@ import { useSnackbar } from '@/lib/hooks/use-snackbar'
 
 const storemanSC = '0x1E7450D5d17338a348C5438546f0b4D0A5fbeaB6' as const
 
-// Minimal storeman ABI for the functions we use
 const storemanAbi = [
-  { name: 'getStoremanInfo', type: 'function', stateMutability: 'view', inputs: [{ name: 'wkAddr', type: 'address' }], outputs: [{ name: 'sender', type: 'address' }, { name: 'enodeID', type: 'bytes' }, { name: 'PK', type: 'bytes' }, { name: 'nextPK', type: 'bytes' }, { name: 'groupId', type: 'bytes32' }, { name: 'nextGroupId', type: 'bytes32' }, { name: 'incentive', type: 'uint256' }, { name: 'deposit', type: 'uint256' }, { name: 'delegateDeposit', type: 'uint256' }, { name: 'partnerCount', type: 'uint256' }, { name: 'partnerDeposit', type: 'uint256' }, { name: 'delegatorCount', type: 'uint256' }] },
-  { name: 'getSmDelegatorInfo', type: 'function', stateMutability: 'view', inputs: [{ name: 'wkAddr', type: 'address' }, { name: 'delegator', type: 'address' }], outputs: [{ name: 'sender', type: 'address' }, { name: 'deposit', type: 'uint256' }, { name: 'incentive', type: 'uint256' }] },
-  { name: 'getSmPartnerInfo', type: 'function', stateMutability: 'view', inputs: [{ name: 'wkAddr', type: 'address' }, { name: 'partner', type: 'address' }], outputs: [{ name: 'sender', type: 'address' }, { name: 'deposit', type: 'uint256' }] },
+  {
+    name: 'getStoremanInfo', type: 'function', stateMutability: 'view',
+    inputs: [{ name: 'wkAddr', type: 'address' }],
+    outputs: [{
+      name: 'si', type: 'tuple', components: [
+        { name: 'sender', type: 'address' },
+        { name: 'enodeID', type: 'bytes' },
+        { name: 'PK', type: 'bytes' },
+        { name: 'wkAddr', type: 'address' },
+        { name: 'isWhite', type: 'bool' },
+        { name: 'quited', type: 'bool' },
+        { name: 'delegatorCount', type: 'uint256' },
+        { name: 'delegateDeposit', type: 'uint256' },
+        { name: 'partnerCount', type: 'uint256' },
+        { name: 'partnerDeposit', type: 'uint256' },
+        { name: 'crossIncoming', type: 'uint256' },
+        { name: 'slashedCount', type: 'uint256' },
+        { name: 'incentivedDelegator', type: 'uint256' },
+        { name: 'incentivedDay', type: 'uint256' },
+        { name: 'groupId', type: 'bytes32' },
+        { name: 'nextGroupId', type: 'bytes32' },
+        { name: 'deposit', type: 'uint256' },
+        { name: 'incentive', type: 'uint256' },
+      ],
+    }],
+  },
+  {
+    name: 'getSmDelegatorInfo', type: 'function', stateMutability: 'view',
+    inputs: [{ name: 'wkAddr', type: 'address' }, { name: 'delegator', type: 'address' }],
+    outputs: [{ name: 'sender', type: 'address' }, { name: 'deposit', type: 'uint256' }, { name: 'incentive', type: 'uint256' }],
+  },
+  {
+    name: 'getSmPartnerInfo', type: 'function', stateMutability: 'view',
+    inputs: [{ name: 'wkAddr', type: 'address' }, { name: 'partner', type: 'address' }],
+    outputs: [{ name: 'sender', type: 'address' }, { name: 'deposit', type: 'uint256' }],
+  },
   { name: 'getSmPartnerAddr', type: 'function', stateMutability: 'view', inputs: [{ name: 'wkAddr', type: 'address' }, { name: 'index', type: 'uint256' }], outputs: [{ type: 'address' }] },
   { name: 'checkCanPartnerClaim', type: 'function', stateMutability: 'view', inputs: [{ name: 'wkAddr', type: 'address' }, { name: 'partner', type: 'address' }], outputs: [{ type: 'bool' }] },
   { name: 'stakeIncentiveClaim', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'wkAddr', type: 'address' }], outputs: [] },
@@ -23,6 +55,8 @@ const storemanAbi = [
   { name: 'partClaim', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'wkAddr', type: 'address' }], outputs: [] },
   { name: 'partOut', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'wkAddr', type: 'address' }], outputs: [] },
 ] as const
+
+const actionBtnSx = { fontSize: 12, py: 0.5, bgcolor: '#fff', color: '#5b7ff5', border: '1px solid #e2e6ef', '&:hover': { bgcolor: '#eef2ff', borderColor: '#5b7ff5' } }
 
 export default function Storeman() {
   const { address, isConnected } = useAccount()
@@ -35,8 +69,8 @@ export default function Storeman() {
     return ''
   })
   const [info, setInfo] = useState<Record<string, unknown>>({})
-  const [delegateInfo, setDelegateInfo] = useState<Record<string, unknown>>({})
-  const [partnerInfo, setPartnerInfo] = useState<Record<string, unknown>>({})
+  const [delegateInfo, setDelegateInfo] = useState<{ deposit?: bigint; incentive?: bigint }>({})
+  const [partnerInfo, setPartnerInfo] = useState<{ deposit?: bigint; claimable?: boolean }>({})
   const [updater, setUpdater] = useState(0)
   const [showDistribution, setShowDistribution] = useState(false)
   const [partners, setPartners] = useState<Array<{ sender: string; deposit: bigint }>>([])
@@ -52,22 +86,22 @@ export default function Storeman() {
     const func = async () => {
       try {
         const wkAddr = getAddress(workAddress)
-        const result = await publicClient.readContract({ address: storemanSC, abi: storemanAbi, functionName: 'getStoremanInfo', args: [wkAddr] }) as unknown as Record<string, unknown>
+        const result = await publicClient.readContract({
+          address: storemanSC, abi: storemanAbi, functionName: 'getStoremanInfo', args: [wkAddr],
+        })
         setInfo(result)
-
         if (address) {
-          const dInfo = await publicClient.readContract({ address: storemanSC, abi: storemanAbi, functionName: 'getSmDelegatorInfo', args: [wkAddr, address] }) as unknown as Record<string, unknown>
-          setDelegateInfo(dInfo)
-          const pInfo = await publicClient.readContract({ address: storemanSC, abi: storemanAbi, functionName: 'getSmPartnerInfo', args: [wkAddr, address] }) as unknown as Record<string, unknown>
+          const [, dDeposit, dIncentive] = await publicClient.readContract({ address: storemanSC, abi: storemanAbi, functionName: 'getSmDelegatorInfo', args: [wkAddr, address] })
+          setDelegateInfo({ deposit: dDeposit, incentive: dIncentive })
+          const [, pDeposit] = await publicClient.readContract({ address: storemanSC, abi: storemanAbi, functionName: 'getSmPartnerInfo', args: [wkAddr, address] })
           const claimable = await publicClient.readContract({ address: storemanSC, abi: storemanAbi, functionName: 'checkCanPartnerClaim', args: [wkAddr, address] })
-          setPartnerInfo({ ...pInfo, claimable })
-
-          const partnerCount = Number((result as unknown as { partnerCount: bigint }).partnerCount || 0)
+          setPartnerInfo({ deposit: pDeposit, claimable })
+          const partnerCount = Number(result.partnerCount || 0)
           const _partners: Array<{ sender: string; deposit: bigint }> = []
           for (let i = 0; i < partnerCount; i++) {
-            const partnerAddr = await publicClient.readContract({ address: storemanSC, abi: storemanAbi, functionName: 'getSmPartnerAddr', args: [wkAddr, BigInt(i)] }) as Address
-            const pi = await publicClient.readContract({ address: storemanSC, abi: storemanAbi, functionName: 'getSmPartnerInfo', args: [wkAddr, partnerAddr] }) as unknown as { sender: string; deposit: bigint }
-            _partners.push(pi)
+            const partnerAddr = await publicClient.readContract({ address: storemanSC, abi: storemanAbi, functionName: 'getSmPartnerAddr', args: [wkAddr, BigInt(i)] })
+            const [pSender, pDep] = await publicClient.readContract({ address: storemanSC, abi: storemanAbi, functionName: 'getSmPartnerInfo', args: [wkAddr, partnerAddr] })
+            _partners.push({ sender: pSender, deposit: pDep })
           }
           setPartners(_partners)
         }
@@ -76,7 +110,10 @@ export default function Storeman() {
     func()
   }, [publicClient, workAddress, updater, address, isConnected])
 
-  const fmtEther = (v: unknown) => v ? Number(formatEther(BigInt(String(v)))).toFixed(2) : '0'
+  const fmtEther = (v: unknown) => {
+    if (!v) return '0'
+    return Number(formatEther(BigInt(String(v)))).toFixed(2)
+  }
 
   const calcReward = (value: string, noRewardAddr?: string) => {
     let total = Number(formatEther(BigInt(String(info.deposit || 0))))
@@ -99,7 +136,7 @@ export default function Storeman() {
       const amount = parseEther(depositAmount)
       const wkAddr = getAddress(workAddress)
       const fn = depositType === 'delegate' ? 'delegateIn' : 'partIn'
-      const hash = await walletClient.writeContract({ address: storemanSC, abi: storemanAbi, functionName: fn, args: [wkAddr], value: amount })
+      await walletClient.writeContract({ address: storemanSC, abi: storemanAbi, functionName: fn, args: [wkAddr], value: amount })
       setUpdater(Date.now())
       setDepositDialogOpen(false)
     } catch (e: unknown) { showError((e as Error).message) }
@@ -116,29 +153,43 @@ export default function Storeman() {
   }
 
   return (
-    <div style={{ width: '100%', textAlign: 'center', padding: '40px', display: 'flex', justifyContent: 'center' }}>
-      <Paper elevation={10} sx={{ width: '800px', padding: '20px' }}>
-        <h1>Wanchain Storeman Monitor</h1>
-        <TextField fullWidth label="Work Address" value={workAddress} onChange={(e) => { setWorkAddress(e.target.value); localStorage.setItem('workAddress', e.target.value) }} />
-        <Divider sx={{ margin: '20px' }} />
-        {!isConnected && <h1>Please connect wallet and switch to Wanchain.</h1>}
+    <Box sx={{ p: 3, maxWidth: 900, mx: 'auto' }}>
+      <Stack spacing={2}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Wanchain Storeman Monitor</Typography>
+
+        <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3 }}>
+          <TextField fullWidth size="small" label="Work Address" value={workAddress}
+            onChange={(e) => { setWorkAddress(e.target.value); localStorage.setItem('workAddress', e.target.value) }}
+          />
+        </Box>
+
+        {!isConnected && (
+          <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3, textAlign: 'center' }}>
+            <Typography variant="body1" sx={{ color: '#8a94a6' }}>Please connect wallet and switch to Wanchain.</Typography>
+          </Box>
+        )}
+
         {isConnected && (
-          <Paper elevation={4} sx={{ padding: '10px' }}>
+          <Box sx={{ bgcolor: '#fff', borderRadius: '12px', overflow: 'hidden' }}>
             <Table>
               <TableHead>
-                <TableRow><TableCell>Type</TableCell><TableCell>Value</TableCell><TableCell>Action</TableCell></TableRow>
+                <TableRow sx={{ bgcolor: '#f5f7fb' }}>
+                  <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Type</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Value</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Action</TableCell>
+                </TableRow>
               </TableHead>
               <TableBody>
                 <TableRow>
-                  <TableCell>Deposit</TableCell>
-                  <TableCell>{fmtEther(info.deposit)} WAN</TableCell>
-                  <TableCell><Button variant="outlined" fullWidth disabled>Exit</Button></TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Deposit</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace' }}>{fmtEther(info.deposit)} WAN</TableCell>
+                  <TableCell><Button size="small" disabled sx={actionBtnSx}>Exit</Button></TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>Incentive</TableCell>
-                  <TableCell>{fmtEther(info.incentive)} WAN</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Incentive</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace' }}>{fmtEther(info.incentive)} WAN</TableCell>
                   <TableCell>
-                    <Button variant="outlined" fullWidth onClick={async () => {
+                    <Button size="small" sx={actionBtnSx} onClick={async () => {
                       if (!walletClient) return
                       await walletClient.writeContract({ address: storemanSC, abi: storemanAbi, functionName: 'stakeIncentiveClaim', args: [getAddress(workAddress)] })
                       setUpdater(Date.now())
@@ -146,21 +197,21 @@ export default function Storeman() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>Delegation</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Delegation</TableCell>
                   <TableCell>
-                    <div>All: {fmtEther(info.delegateDeposit)} WAN</div>
-                    <div>My: {fmtEther(delegateInfo.deposit)} WAN</div>
-                    <div>Claimable: {fmtEther(delegateInfo.incentive)} WAN</div>
+                    <Typography variant="caption" sx={{ color: '#8a94a6' }}>All: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(info.delegateDeposit)} WAN</span><br />
+                    <Typography variant="caption" sx={{ color: '#8a94a6' }}>My: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(delegateInfo.deposit)} WAN</span><br />
+                    <Typography variant="caption" sx={{ color: '#8a94a6' }}>Claimable: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(delegateInfo.incentive)} WAN</span>
                   </TableCell>
                   <TableCell>
-                    <Stack spacing={1}>
-                      <Button variant="outlined" onClick={() => openDepositDialog('delegate')}>Deposit</Button>
-                      <Button variant="outlined" onClick={async () => {
+                    <Stack spacing={0.5}>
+                      <Button size="small" sx={actionBtnSx} onClick={() => openDepositDialog('delegate')}>Deposit</Button>
+                      <Button size="small" sx={actionBtnSx} onClick={async () => {
                         if (!walletClient) return
                         await walletClient.writeContract({ address: storemanSC, abi: storemanAbi, functionName: 'delegateIncentiveClaim', args: [getAddress(workAddress)] })
                         setUpdater(Date.now())
                       }}>Claim</Button>
-                      <Button variant="outlined" onClick={async () => {
+                      <Button size="small" sx={actionBtnSx} onClick={async () => {
                         if (!walletClient) return
                         await walletClient.writeContract({ address: storemanSC, abi: storemanAbi, functionName: 'delegateOut', args: [getAddress(workAddress)] })
                         setUpdater(Date.now())
@@ -169,25 +220,25 @@ export default function Storeman() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>DelegatorCount</TableCell>
-                  <TableCell>{String(info.delegatorCount || 0)}</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Delegators</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace' }}>{String(info.delegatorCount ?? 0)}</TableCell>
                   <TableCell />
                 </TableRow>
                 <TableRow>
-                  <TableCell>Partner</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Partner</TableCell>
                   <TableCell>
-                    <div>All: {fmtEther(info.partnerDeposit)} WAN</div>
-                    <div>My: {fmtEther(partnerInfo.deposit)} WAN</div>
+                    <Typography variant="caption" sx={{ color: '#8a94a6' }}>All: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(info.partnerDeposit)} WAN</span><br />
+                    <Typography variant="caption" sx={{ color: '#8a94a6' }}>My: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(partnerInfo.deposit)} WAN</span>
                   </TableCell>
                   <TableCell>
-                    <Stack spacing={1}>
-                      <Button variant="outlined" onClick={() => openDepositDialog('partner')}>Deposit</Button>
-                      <Button variant="outlined" disabled={!partnerInfo.claimable} onClick={async () => {
+                    <Stack spacing={0.5}>
+                      <Button size="small" sx={actionBtnSx} onClick={() => openDepositDialog('partner')}>Deposit</Button>
+                      <Button size="small" sx={actionBtnSx} disabled={!partnerInfo.claimable} onClick={async () => {
                         if (!walletClient) return
                         await walletClient.writeContract({ address: storemanSC, abi: storemanAbi, functionName: 'partClaim', args: [getAddress(workAddress)] })
                         setUpdater(Date.now())
                       }}>Claim</Button>
-                      <Button variant="outlined" onClick={async () => {
+                      <Button size="small" sx={actionBtnSx} onClick={async () => {
                         if (!walletClient) return
                         await walletClient.writeContract({ address: storemanSC, abi: storemanAbi, functionName: 'partOut', args: [getAddress(workAddress)] })
                         setUpdater(Date.now())
@@ -196,84 +247,108 @@ export default function Storeman() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>PartnerCount</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Partners</TableCell>
                   <TableCell>
-                    {String(info.partnerCount || 0)}
-                    &nbsp;&nbsp;<a style={{ cursor: 'pointer' }} onClick={() => setShowDistribution(!showDistribution)}><i><u>Distribution</u></i></a>
+                    <span style={{ fontFamily: 'monospace' }}>{String(info.partnerCount ?? 0)}</span>
+                    <Typography component="span" variant="caption" sx={{ ml: 1, color: '#5b7ff5', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                      onClick={() => setShowDistribution(!showDistribution)}>
+                      Distribution
+                    </Typography>
                   </TableCell>
                   <TableCell />
                 </TableRow>
                 <TableRow>
-                  <TableCell>Owner</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Owner</TableCell>
                   <TableCell>
                     {info.sender ? (
-                      <a style={{ cursor: 'pointer' }} onClick={() => window.open('https://www.wanscan.org/address/' + info.sender)}>
-                        {getAddress(String(info.sender)).slice(0, 6) + '...' + getAddress(String(info.sender)).slice(-4)}
-                      </a>
+                      <Typography variant="body2" component="span" sx={{ fontFamily: 'monospace', color: '#5b7ff5', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                        onClick={() => window.open('https://www.wanscan.org/address/' + info.sender)}>
+                        {String(info.sender).slice(0, 6) + '...' + String(info.sender).slice(-4)}
+                      </Typography>
                     ) : null}
                   </TableCell>
                   <TableCell />
                 </TableRow>
               </TableBody>
             </Table>
-          </Paper>
+          </Box>
         )}
 
-        {showDistribution && <Divider sx={{ margin: '20px' }} />}
         {showDistribution && Boolean(info.sender) && (
-          <Paper elevation={4} sx={{ padding: '10px', textAlign: 'center' }}>
-            <h2>Partner Distribution</h2>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <label>Total Reward(WAN):</label>
-              <input type="text" style={{ border: 'none', borderBottom: '1px solid black', outline: 'none', padding: '4px', textAlign: 'center' }} value={totalReward} onChange={(e) => { setTotalReward(e.target.value); calcReward(e.target.value) }} />
-              <a style={{ cursor: 'pointer' }} onClick={() => { const v = fmtEther(info.incentive); setTotalReward(v); calcReward(v) }}>&#8593;</a>
-            </div>
-            <Table>
-              <TableHead>
-                <TableRow><TableCell>Partner/Staker</TableCell><TableCell>Deposit</TableCell><TableCell>Reward</TableCell><TableCell>Action</TableCell></TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>{String(info.sender).slice(0, 6) + '...' + String(info.sender).slice(-4)}</TableCell>
-                  <TableCell>{formatEther(BigInt(String(info.deposit || 0)))}</TableCell>
-                  <TableCell>{rewards['staker']}</TableCell>
-                  <TableCell>
-                    <Button onClick={async () => {
-                      if (!walletClient || !window.confirm(`Send ${rewards['staker']} WAN to ${info.sender}?`)) return
-                      await walletClient.sendTransaction({ to: info.sender as Address, value: parseEther(String(rewards['staker'])) })
-                    }}>Send</Button>
-                  </TableCell>
-                </TableRow>
-                {partners.map((partner) => (
-                  <TableRow key={partner.sender}>
-                    <TableCell>{partner.sender.slice(0, 6) + '...' + partner.sender.slice(-4)}</TableCell>
-                    <TableCell>{formatEther(partner.deposit)}</TableCell>
-                    <TableCell>{rewards[partner.sender]} <a style={{ cursor: 'pointer' }} onClick={() => calcReward(totalReward, partner.sender)}>&#10062;</a></TableCell>
+          <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3, overflow: 'hidden' }}>
+            <Stack spacing={2}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#2d3748' }}>Partner Distribution</Typography>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography variant="body2" sx={{ color: '#8a94a6' }}>Total Reward (WAN):</Typography>
+                <TextField size="small" variant="standard" value={totalReward}
+                  onChange={(e) => { setTotalReward(e.target.value); calcReward(e.target.value) }}
+                  sx={{ width: 120 }}
+                />
+                <Typography component="span" variant="caption" sx={{ color: '#5b7ff5', cursor: 'pointer' }}
+                  onClick={() => { const v = fmtEther(info.incentive); setTotalReward(v); calcReward(v) }}>
+                  &#8593; use incentive
+                </Typography>
+              </Stack>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#f5f7fb' }}>
+                    <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Partner/Staker</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Deposit</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Reward</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Action</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{String(info.sender || '').slice(0, 6) + '...' + String(info.sender || '').slice(-4)}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{fmtEther(info.deposit)}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{rewards['staker']}</TableCell>
                     <TableCell>
-                      <Button onClick={async () => {
-                        if (!walletClient || !window.confirm(`Send ${rewards[partner.sender]} WAN to ${partner.sender}?`)) return
-                        await walletClient.sendTransaction({ to: partner.sender as Address, value: parseEther(String(rewards[partner.sender])) })
+                      <Button size="small" sx={actionBtnSx} onClick={async () => {
+                        if (!walletClient || !window.confirm(`Send ${rewards['staker']} WAN to ${info.sender}?`)) return
+                        await walletClient.sendTransaction({ to: info.sender as Address, value: parseEther(String(rewards['staker'])) })
                       }}>Send</Button>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Paper>
+                  {partners.map((partner) => (
+                    <TableRow key={partner.sender}>
+                      <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{partner.sender.slice(0, 6) + '...' + partner.sender.slice(-4)}</TableCell>
+                      <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{formatEther(partner.deposit)}</TableCell>
+                      <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+                        {rewards[partner.sender]}
+                        <Typography component="span" variant="caption" sx={{ ml: 0.5, color: '#e85d5d', cursor: 'pointer' }}
+                          onClick={() => calcReward(totalReward, partner.sender)}>&#10062;</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Button size="small" sx={actionBtnSx} onClick={async () => {
+                          if (!walletClient || !window.confirm(`Send ${rewards[partner.sender]} WAN to ${partner.sender}?`)) return
+                          await walletClient.sendTransaction({ to: partner.sender as Address, value: parseEther(String(rewards[partner.sender])) })
+                        }}>Send</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Stack>
+          </Box>
         )}
-      </Paper>
+      </Stack>
 
       <Dialog open={depositDialogOpen} onClose={() => setDepositDialogOpen(false)}>
-        <DialogTitle>{depositType === 'delegate' ? 'Delegation' : 'Partner'} Deposit</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, color: '#2d3748' }}>
+          {depositType === 'delegate' ? 'Delegation' : 'Partner'} Deposit
+        </DialogTitle>
         <DialogContent>
-          <p>Balance: {balance} WAN. Min {depositType === 'delegate' ? '100' : '10000'} WAN for first time.</p>
-          <TextField fullWidth label="Amount in WAN" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} sx={{ mt: 2 }} />
+          <Typography variant="body2" sx={{ color: '#8a94a6', mb: 2 }}>
+            Balance: {balance} WAN. Min {depositType === 'delegate' ? '100' : '10000'} WAN for first time.
+          </Typography>
+          <TextField fullWidth size="small" label="Amount in WAN" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDepositDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDeposit} variant="contained">Deposit</Button>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDepositDialogOpen(false)} sx={{ color: '#8a94a6' }}>Cancel</Button>
+          <Button variant="contained" onClick={handleDeposit} sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}>Deposit</Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { Stack } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import Sidebar from '@/components/sidebar'
 import { Providers } from './providers'
 
@@ -9,9 +9,12 @@ export default function Template({ children }: { children: React.ReactNode }) {
     <Providers>
       <Stack spacing={0} direction="row">
         <Sidebar />
-        <div style={{ width: '100%', height: '100vh', overflow: 'auto' }}>
+        <Box sx={{
+          width: '100%', height: '100vh', overflow: 'auto',
+          bgcolor: '#f0f2f5',
+        }}>
           {children}
-        </div>
+        </Box>
       </Stack>
     </Providers>
   )

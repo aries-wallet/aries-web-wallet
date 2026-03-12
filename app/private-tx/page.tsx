@@ -1,6 +1,6 @@
 'use client'
 
-import { Alert, Paper, Stack, TextareaAutosize } from '@mui/material'
+import { Alert, Box, Button, Stack, TextareaAutosize, Typography } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import { useEffect, useState } from 'react'
 import { useAccount, useChainId, useWalletClient, usePublicClient } from 'wagmi'
@@ -51,7 +51,7 @@ export default function PrivateTx() {
     if (!text) { setLines([]); setError(''); return }
     if (!wanchainUtil) { setError('wanchain-util not loaded'); return }
     try {
-      let _lines = text.split('\n').map((v) => v.trim()).filter(Boolean)
+      const _lines = text.split('\n').map((v) => v.trim()).filter(Boolean)
       let _total = 0
       const parsed = _lines.map((v) => {
         const two = v.split(',').map((s) => s.trim())
@@ -86,50 +86,62 @@ export default function PrivateTx() {
   }, [lines])
 
   return (
-    <Paper elevation={10} sx={{ padding: '30px', margin: '50px', overflow: 'auto' }}>
-      <Stack spacing={3}>
-        <h1>Multiple Private Transaction</h1>
-        <h4>* Support batch sending of private transactions on Wanchain mainnet and testnet. Each line should contain a private address and the amount to be sent, separated by a comma. The amount must be a multiple of 10 WAN.</h4>
-        <h4>* Only Wan Wallet Desktop v1.5.10 or above can receive the WAN.</h4>
-        <TextareaAutosize
-          aria-label="OTA addresses"
-          minRows={10}
-          style={{ color: 'black', backgroundColor: 'white', width: '100%' }}
-          value={text}
-          onChange={(e) => { setText(e.target.value); localStorage.setItem('privateTxText', e.target.value) }}
-          placeholder="For example:\n0x03473d...0B0,100\n0x0387a8...cd0,200"
-        />
-        <p>Address Count: {lines.length}, Total WAN: {total}, OTA Count: {otas.length}</p>
-        {error && <Alert severity="error">{error}</Alert>}
-        {success && <Alert severity="success">{success}</Alert>}
-      </Stack>
-      <LoadingButton
-        disabled={error.length > 0}
-        loading={loading}
-        sx={{ marginTop: '40px', width: '120px' }}
-        variant="contained"
-        onClick={async () => {
-          try {
-            setSuccess('')
-            if (otas.length === 0) throw new Error('No valid data.')
-            if (!address || !walletClient) throw new Error('Please connect to a wallet.')
-            if (![888, 999].includes(chainId)) throw new Error('Please connect to Wanchain mainnet or testnet.')
-            setLoading(true)
-            const hash = await walletClient.writeContract({
-              address: multiPrivateTxSC[chainId],
-              abi: multiPrivateAbi,
-              functionName: 'send',
-              args: [otas.map((v) => v.ota), otas.map((v) => v.value)],
-              value: parseEther(total.toString()),
-            })
-            setSuccess('Success! Tx Hash: ' + hash)
-            setError('')
-          } catch (e: unknown) { setError((e as Error).message) }
-          setLoading(false)
-        }}
-      >
-        Send
-      </LoadingButton>
-    </Paper>
+    <Box sx={{ p: 3, maxWidth: 900 }}>
+      <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3 }}>
+        <Stack spacing={2}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Multiple Private Transaction</Typography>
+          <Typography variant="body2" sx={{ color: '#8a94a6', lineHeight: 1.8 }}>
+            Support batch sending of private transactions on Wanchain mainnet and testnet.
+            Each line should contain a private address and the amount, separated by a comma. The amount must be a multiple of 10 WAN.
+            <br />Only Wan Wallet Desktop v1.5.10 or above can receive the WAN.
+          </Typography>
+          <TextareaAutosize
+            aria-label="OTA addresses" minRows={10}
+            style={{
+              width: '100%', fontFamily: 'monospace', fontSize: 13,
+              padding: 12, borderRadius: 8, border: '1px solid #e2e6ef', outline: 'none',
+              resize: 'vertical',
+            }}
+            value={text}
+            onChange={(e) => { setText(e.target.value); localStorage.setItem('privateTxText', e.target.value) }}
+            placeholder="For example:\n0x03473d...0B0,100\n0x0387a8...cd0,200"
+          />
+
+          <Box sx={{ display: 'flex', gap: 3, px: 1 }}>
+            <Typography variant="caption" sx={{ color: '#8a94a6' }}>Addresses: <b style={{ color: '#2d3748' }}>{lines.length}</b></Typography>
+            <Typography variant="caption" sx={{ color: '#8a94a6' }}>Total WAN: <b style={{ color: '#2d3748' }}>{total}</b></Typography>
+            <Typography variant="caption" sx={{ color: '#8a94a6' }}>OTA Count: <b style={{ color: '#2d3748' }}>{otas.length}</b></Typography>
+          </Box>
+
+          {error && <Alert severity="error" sx={{ borderRadius: '8px' }}>{error}</Alert>}
+          {success && <Alert severity="success" sx={{ borderRadius: '8px' }}>{success}</Alert>}
+
+          <LoadingButton
+            disabled={error.length > 0} loading={loading} variant="contained"
+            sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+            onClick={async () => {
+              try {
+                setSuccess('')
+                if (otas.length === 0) throw new Error('No valid data.')
+                if (!address || !walletClient) throw new Error('Please connect to a wallet.')
+                if (![888, 999].includes(chainId)) throw new Error('Please connect to Wanchain mainnet or testnet.')
+                setLoading(true)
+                const hash = await walletClient.writeContract({
+                  address: multiPrivateTxSC[chainId],
+                  abi: multiPrivateAbi, functionName: 'send',
+                  args: [otas.map((v) => v.ota), otas.map((v) => v.value)],
+                  value: parseEther(total.toString()),
+                })
+                setSuccess('Success! Tx Hash: ' + hash)
+                setError('')
+              } catch (e: unknown) { setError((e as Error).message) }
+              setLoading(false)
+            }}
+          >
+            Send
+          </LoadingButton>
+        </Stack>
+      </Box>
+    </Box>
   )
 }

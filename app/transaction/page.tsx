@@ -1,11 +1,15 @@
 'use client'
 
-import { Button, Paper, Stack, TextField } from '@mui/material'
+import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useAccount, useSendTransaction, usePublicClient } from 'wagmi'
 import { parseEther, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
+
+function Card({ children }: { children: React.ReactNode }) {
+  return <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3 }}>{children}</Box>
+}
 
 export default function TransactionPage() {
   const [toAddr, setToAddr] = useState('')
@@ -23,16 +27,14 @@ export default function TransactionPage() {
   const { showSuccess, showError } = useSnackbar()
 
   return (
-    <div>
-      <Paper sx={{ padding: '30px', margin: '50px', overflow: 'auto' }}>
+    <Stack spacing={2} sx={{ p: 3, maxWidth: 800 }}>
+      <Card>
         <Stack spacing={2}>
-          <h1>Send Normal Transaction</h1>
-          <TextField label="To Address" value={toAddr} onChange={(e) => setToAddr(e.target.value)} />
-          <TextField label="Value in Ether" value={value} onChange={(e) => setValue(e.target.value)} />
-          <TextField label="Data" value={data} onChange={(e) => setData(e.target.value)} />
-          <Button
-            variant="contained"
-            color="primary"
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Send Normal Transaction</Typography>
+          <TextField size="small" label="To Address" value={toAddr} onChange={(e) => setToAddr(e.target.value)} />
+          <TextField size="small" label="Value in Ether" value={value} onChange={(e) => setValue(e.target.value)} />
+          <TextField size="small" label="Data" value={data} onChange={(e) => setData(e.target.value)} />
+          <Button variant="contained" sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
             onClick={async () => {
               try {
                 if (!address) return
@@ -51,15 +53,13 @@ export default function TransactionPage() {
             Send
           </Button>
         </Stack>
-      </Paper>
+      </Card>
 
-      <Paper sx={{ padding: '30px', margin: '50px', overflow: 'auto' }}>
+      <Card>
         <Stack spacing={2}>
-          <h1>Get Transaction Status</h1>
-          <TextField label="Transaction Hash" value={txHash} onChange={(e) => setTxHash(e.target.value)} />
-          <Button
-            variant="contained"
-            color="primary"
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Get Transaction Status</Typography>
+          <TextField size="small" label="Transaction Hash" value={txHash} onChange={(e) => setTxHash(e.target.value)} />
+          <Button variant="contained" sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
             onClick={async () => {
               try {
                 if (!publicClient) return
@@ -75,34 +75,40 @@ export default function TransactionPage() {
           >
             Get Tx & Receipt
           </Button>
-          <h4>Tx JSON</h4>
-          <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{txJson}</pre>
-          <h4>Tx Receipt</h4>
-          <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{txReceipt}</pre>
+          {txJson && (
+            <Box sx={{ bgcolor: '#f5f7fb', borderRadius: '8px', p: 2 }}>
+              <Typography variant="caption" sx={{ color: '#8a94a6', fontWeight: 600 }}>Tx JSON</Typography>
+              <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-all', mt: 0.5, color: '#2d3748' }}>
+                {txJson}
+              </Typography>
+            </Box>
+          )}
+          {txReceipt && (
+            <Box sx={{ bgcolor: '#f5f7fb', borderRadius: '8px', p: 2 }}>
+              <Typography variant="caption" sx={{ color: '#8a94a6', fontWeight: 600 }}>Tx Receipt</Typography>
+              <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-all', mt: 0.5, color: '#2d3748' }}>
+                {txReceipt}
+              </Typography>
+            </Box>
+          )}
         </Stack>
-      </Paper>
+      </Card>
 
-      <Paper sx={{ padding: '30px', margin: '50px', overflow: 'auto' }}>
+      <Card>
         <Stack spacing={2}>
-          <h1>Send Normal Transaction From Private Key</h1>
-          <TextField label="Private Key" type="password" value={privateKey} onChange={(e) => setPrivateKey(e.target.value)} />
-          <TextField label="To Address" value={toAddr} onChange={(e) => setToAddr(e.target.value)} />
-          <TextField label="Value in Ether" value={value} onChange={(e) => setValue(e.target.value)} />
-          <TextField label="GasPrice in Gwei" value={gasPrice} onChange={(e) => setGasPrice(e.target.value)} />
-          <TextField label="Data" value={data} onChange={(e) => setData(e.target.value)} />
-          <Button
-            variant="contained"
-            color="primary"
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Send Transaction From Private Key</Typography>
+          <TextField size="small" label="Private Key" type="password" value={privateKey} onChange={(e) => setPrivateKey(e.target.value)} />
+          <TextField size="small" label="To Address" value={toAddr} onChange={(e) => setToAddr(e.target.value)} />
+          <TextField size="small" label="Value in Ether" value={value} onChange={(e) => setValue(e.target.value)} />
+          <TextField size="small" label="GasPrice in Gwei" value={gasPrice} onChange={(e) => setGasPrice(e.target.value)} />
+          <TextField size="small" label="Data" value={data} onChange={(e) => setData(e.target.value)} />
+          <Button variant="contained" sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
             onClick={async () => {
               try {
                 if (!publicClient) return
                 const account = privateKeyToAccount(privateKey as `0x${string}`)
                 const chain = publicClient.chain
-                const walletClient = createWalletClient({
-                  account,
-                  chain,
-                  transport: http(),
-                })
+                const walletClient = createWalletClient({ account, chain, transport: http() })
                 const hash = await walletClient.sendTransaction({
                   to: toAddr ? (toAddr as `0x${string}`) : undefined,
                   value: value ? parseEther(value) : 0n,
@@ -119,7 +125,7 @@ export default function TransactionPage() {
             Send
           </Button>
         </Stack>
-      </Paper>
-    </div>
+      </Card>
+    </Stack>
   )
 }

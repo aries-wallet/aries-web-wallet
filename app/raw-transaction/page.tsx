@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Paper, Stack, TextField } from '@mui/material'
+import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import { usePublicClient } from 'wagmi'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
@@ -11,31 +11,29 @@ export default function RawTransaction() {
   const { showSuccess, showError } = useSnackbar()
 
   return (
-    <Paper sx={{ padding: '30px', margin: '50px', overflow: 'auto' }}>
-      <Stack spacing={2}>
-        <h1>Send Raw Transaction</h1>
-        <TextField label="Raw Transaction Hex" value={data} onChange={(e) => setData(e.target.value)} />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={async () => {
-            try {
-              if (!publicClient) return
-              console.log('start sending signed tx...', data)
-              const hash = await publicClient.sendRawTransaction({
-                serializedTransaction: data as `0x${string}`,
-              })
-              console.log('tx hash:', hash)
-              showSuccess(`Transaction Hash: ${hash}`)
-            } catch (error: unknown) {
-              console.error(error)
-              showError((error as Error).message)
-            }
-          }}
-        >
-          Send
-        </Button>
-      </Stack>
-    </Paper>
+    <Box sx={{ p: 3, maxWidth: 800 }}>
+      <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3 }}>
+        <Stack spacing={2}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Send Raw Transaction</Typography>
+          <TextField size="small" label="Raw Transaction Hex" value={data} onChange={(e) => setData(e.target.value)} />
+          <Button variant="contained" sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+            onClick={async () => {
+              try {
+                if (!publicClient) return
+                const hash = await publicClient.sendRawTransaction({
+                  serializedTransaction: data as `0x${string}`,
+                })
+                showSuccess(`Transaction Hash: ${hash}`)
+              } catch (error: unknown) {
+                console.error(error)
+                showError((error as Error).message)
+              }
+            }}
+          >
+            Send
+          </Button>
+        </Stack>
+      </Box>
+    </Box>
   )
 }

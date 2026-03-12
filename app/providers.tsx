@@ -16,6 +16,37 @@ const queryClient = new QueryClient()
 const theme = createTheme({
   palette: {
     mode: 'light',
+    background: { default: '#f0f2f5', paper: '#ffffff' },
+  },
+  shape: { borderRadius: 10 },
+  typography: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
+  components: {
+    MuiButton: {
+      defaultProps: { disableElevation: true },
+      styleOverrides: {
+        root: { textTransform: 'none', borderRadius: 8, fontWeight: 600 },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: { '& .MuiOutlinedInput-root': { borderRadius: 8 } },
+      },
+    },
+    MuiPaper: {
+      defaultProps: { elevation: 0 },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: { borderRadius: 16 },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: { borderBottom: '1px solid #f0f2f5' },
+      },
+    },
   },
 })
 

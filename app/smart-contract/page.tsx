@@ -1,12 +1,12 @@
 'use client'
 
-import { Paper } from '@mui/material'
+import { Box } from '@mui/material'
 import { Contract } from '@/components/contract'
 
 export default function SmartContractPage() {
   return (
-    <Paper sx={{ minHeight: '100vh', padding: '30px', overflow: 'auto' }}>
+    <Box sx={{ p: 3, minHeight: '100vh' }}>
       <Contract />
-    </Paper>
+    </Box>
   )
 }
