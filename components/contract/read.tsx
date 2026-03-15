@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Box, Button, MenuItem, Stack, TextField, Typography,
+  Box, Button, CircularProgress, MenuItem, Stack, TextField, Typography,
 } from '@mui/material'
 import { type Abi, type AbiFunction, formatUnits, parseUnits, type PublicClient } from 'viem'
 
@@ -35,11 +35,13 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
   const [outputUnits, setOutputUnits] = useState<Record<string, string>>({})
   const [reload, setReload] = useState(0)
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setError('')
+        setLoading(true)
         const params = subAbi.inputs.map((input, index) => {
           const name = input.name || `param${index}`
           let val = inputData[name] || ''
@@ -60,8 +62,10 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
           setOutputData(result)
         }
       } catch (err: unknown) {
-        setError((err as Error).message?.slice(0, 200) || 'Query failed')
+        setError((err as Error).message || 'Query failed')
         console.error('ERROR:', (err as Error).message)
+      } finally {
+        setLoading(false)
       }
     }
     fetchData()
@@ -97,22 +101,26 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
         )
       })}
 
-      <Button
-        variant="contained"
-        disableElevation
-        size="small"
-        onClick={() => setReload(Date.now())}
-        sx={{
-          alignSelf: 'flex-start',
-          textTransform: 'none',
-          borderRadius: '6px',
-          px: 2.5,
-          bgcolor: '#5b7ff5',
-          '&:hover': { bgcolor: '#4a6de0' },
-        }}
-      >
-        Query
-      </Button>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Button
+          variant="contained"
+          disableElevation
+          size="small"
+          disabled={loading}
+          onClick={() => setReload(Date.now())}
+          sx={{
+            alignSelf: 'flex-start',
+            textTransform: 'none',
+            borderRadius: '6px',
+            px: 2.5,
+            bgcolor: '#5b7ff5',
+            '&:hover': { bgcolor: '#4a6de0' },
+          }}
+        >
+          {loading ? 'Querying...' : 'Query'}
+        </Button>
+        {loading && <CircularProgress size={16} sx={{ color: '#5b7ff5' }} />}
+      </Stack>
 
       {error && (
         <Typography variant="caption" color="error" sx={{ wordBreak: 'break-all' }}>
@@ -153,9 +161,9 @@ function OutputRow({ label, type, value, unit, onUnitChange }: {
   return (
     <Box sx={{
       display: 'flex', alignItems: 'center', gap: 1.5, px: 1.5, py: 1,
-      bgcolor: '#f5f7fb', borderRadius: '6px',
+      bgcolor: 'action.hover', borderRadius: '6px',
     }}>
-      <Typography variant="caption" sx={{ color: '#8a94a6', fontWeight: 500, whiteSpace: 'nowrap' }}>
+      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500, whiteSpace: 'nowrap' }}>
         {label}
       </Typography>
       {isUint && (
@@ -163,7 +171,7 @@ function OutputRow({ label, type, value, unit, onUnitChange }: {
           select size="small" variant="standard" value={unit}
           onChange={(e) => onUnitChange(e.target.value)}
           sx={{ minWidth: 70, '& .MuiInput-underline:before': { border: 'none' }, '& .MuiInput-underline:after': { border: 'none' } }}
-          InputProps={{ disableUnderline: true, sx: { fontSize: 12, color: '#8a94a6' } }}
+          InputProps={{ disableUnderline: true, sx: { fontSize: 12, color: 'text.secondary' } }}
         >
           {unitOptions.map((u) => <MenuItem key={u} value={u}>{u}</MenuItem>)}
         </TextField>
@@ -174,7 +182,7 @@ function OutputRow({ label, type, value, unit, onUnitChange }: {
       >
         {display}
       </Typography>
-      <Typography variant="caption" sx={{ color: '#b0b8c9', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
+      <Typography variant="caption" sx={{ color: 'text.disabled', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
         {type}
       </Typography>
     </Box>
@@ -186,7 +194,7 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
 
   return (
     <Box sx={{
-      bgcolor: '#fff',
+      bgcolor: 'background.paper',
       borderRadius: '10px',
       overflow: 'hidden',
       transition: 'box-shadow 0.2s',
@@ -197,7 +205,7 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
         sx={{
           display: 'flex', alignItems: 'center', gap: 1.5,
           px: 2, py: 1.2, cursor: 'pointer', userSelect: 'none',
-          '&:hover': { bgcolor: '#fafbfd' },
+          '&:hover': { bgcolor: 'action.hover' },
         }}
       >
         <Typography sx={{
@@ -208,17 +216,17 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
         }}>
           {index + 1}
         </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600, flex: 1, color: '#2d3748' }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }}>
           {fn.name}
         </Typography>
         {fn.inputs.length > 0 && (
-          <Typography variant="caption" sx={{ color: '#b0b8c9' }}>
+          <Typography variant="caption" sx={{ color: 'text.disabled' }}>
             {fn.inputs.length} param{fn.inputs.length > 1 ? 's' : ''}
           </Typography>
         )}
         <Box sx={{
           transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s', color: '#b0b8c9', display: 'flex',
+          transition: 'transform 0.2s', color: 'text.disabled', display: 'flex',
         }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
         </Box>
@@ -236,7 +244,7 @@ export function ContractRead({ publicClient, scAddr, abi }: { publicClient: Publ
   const readAbi = useMemo(() => abi.filter((v) => v.type === 'function' && (v.stateMutability === 'view' || v.stateMutability === 'pure')), [abi])
 
   return (
-    <Stack spacing={1} sx={{ mt: 1.5, p: 1, bgcolor: '#f5f7fb', borderRadius: '12px' }}>
+    <Stack spacing={1} sx={{ mt: 1.5, p: 1, bgcolor: 'action.hover', borderRadius: '12px' }}>
       {readAbi.map((v, i) => (
         <FunctionCard key={i} index={i} fn={v}>
           <ReadPanel subAbi={v} publicClient={publicClient} scAddr={scAddr} />

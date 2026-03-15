@@ -17,7 +17,6 @@
     "@rainbow-me/rainbowkit": "2.2.0",
     "@tanstack/react-query": "^5.60.0",
     "copy-to-clipboard": "^3.3.1",
-    "darkreader": "^4.9.52",
     "ethers": "^6.13.0",
     "next": "^14.2.0",
     "next-sitemap": "^4.2.3",

@@ -1,7 +1,7 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
-import { Alert, Snackbar } from '@mui/material'
+import { createContext, forwardRef, useContext, useState, useCallback, type ReactNode } from 'react'
+import { Alert, Button, Snackbar, Typography } from '@mui/material'
 
 interface SnackbarContextValue {
   showSuccess: (msg: string) => void
@@ -13,6 +13,31 @@ const SnackbarContext = createContext<SnackbarContextValue>({
   showError: () => {},
 })
 
+const ErrorAlert = forwardRef<HTMLDivElement, { msg: string; onClose: () => void }>(
+  function ErrorAlert({ msg, onClose }, ref) {
+    const [expanded, setExpanded] = useState(false)
+    const isLong = msg.length > 120
+    const short = isLong ? msg.slice(0, 120) + '...' : msg
+
+    return (
+      <Alert ref={ref} onClose={onClose} severity="error" sx={{ width: '100%', maxWidth: 500 }}>
+        <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+          {isLong && !expanded ? short : msg}
+        </Typography>
+        {isLong && (
+          <Button
+            size="small"
+            onClick={() => setExpanded(!expanded)}
+            sx={{ mt: 0.5, p: 0, minWidth: 0, textTransform: 'none', fontSize: 12, color: 'inherit' }}
+          >
+            {expanded ? 'Show less' : 'Show full error'}
+          </Button>
+        )}
+      </Alert>
+    )
+  }
+)
+
 export function SnackbarProvider({ children }: { children: ReactNode }) {
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
@@ -23,15 +48,19 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
   return (
     <SnackbarContext.Provider value={{ showSuccess, showError }}>
       {children}
-      <Snackbar open={successMsg !== ''} autoHideDuration={6000} onClose={() => setSuccessMsg('')}>
-        <Alert onClose={() => setSuccessMsg('')} severity="success" sx={{ width: '100%' }}>
-          {successMsg}
+      <Snackbar open={successMsg !== ''} autoHideDuration={6000} onClose={() => setSuccessMsg('')}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setSuccessMsg('')} severity="success" sx={{ width: '100%', maxWidth: 500 }}>
+          <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+            {successMsg}
+          </Typography>
         </Alert>
       </Snackbar>
-      <Snackbar open={errorMsg !== ''} autoHideDuration={6000} onClose={() => setErrorMsg('')}>
-        <Alert onClose={() => setErrorMsg('')} severity="error" sx={{ width: '100%' }}>
-          {errorMsg}
-        </Alert>
+      <Snackbar open={errorMsg !== ''} autoHideDuration={12000} onClose={() => setErrorMsg('')}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <ErrorAlert msg={errorMsg} onClose={() => setErrorMsg('')} />
       </Snackbar>
     </SnackbarContext.Provider>
   )

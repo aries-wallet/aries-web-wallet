@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import {
-  Box, Button, MenuItem, Stack, TextField, Typography,
+  Box, Button, CircularProgress, MenuItem, Stack, TextField, Typography,
 } from '@mui/material'
 import { type AbiFunction, parseUnits } from 'viem'
 
@@ -30,10 +30,12 @@ function objectToArray(object: Record<string, string>, abiInputs: readonly { nam
   return ret
 }
 
-function WritePanel({ subAbi, send }: { subAbi: AbiFunction; send: (abi: AbiFunction, params: string[], payableValue?: string) => Promise<void> }) {
+function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: (abi: AbiFunction, params: string[], payableValue?: string) => Promise<void>; sendLoading: boolean }) {
   const [inputData, setInputData] = useState<Record<string, string>>({})
   const [units, setUnits] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+
+  const isLoading = loading || sendLoading
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,6 +69,8 @@ function WritePanel({ subAbi, send }: { subAbi: AbiFunction; send: (abi: AbiFunc
         {subAbi.inputs.map((input, index) => {
           const name = input.name || `param${index}`
           const isUint = input.type === 'uint256'
+          const isArray = input.type.includes('[]')
+          const isTuple = input.type === 'tuple'
           return (
             <Stack key={index} direction="row" spacing={1} alignItems="center">
               <TextField
@@ -75,6 +79,7 @@ function WritePanel({ subAbi, send }: { subAbi: AbiFunction; send: (abi: AbiFunc
                 label={`${name} (${input.type})`}
                 variant="outlined"
                 onChange={(e) => setInputData({ ...inputData, [name]: e.target.value })}
+                helperText={(isArray || isTuple) ? 'Use JSON format: ["val1","val2"] or {"key":"val"}' : undefined}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: '6px' } }}
               />
               {isUint && (
@@ -114,23 +119,26 @@ function WritePanel({ subAbi, send }: { subAbi: AbiFunction; send: (abi: AbiFunc
           </Stack>
         )}
 
-        <Button
-          type="submit"
-          variant="contained"
-          disableElevation
-          size="small"
-          disabled={loading}
-          sx={{
-            alignSelf: 'flex-start',
-            textTransform: 'none',
-            borderRadius: '6px',
-            px: 2.5,
-            bgcolor: '#e8853d',
-            '&:hover': { bgcolor: '#d47632' },
-          }}
-        >
-          {loading ? 'Sending...' : 'Write'}
-        </Button>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Button
+            type="submit"
+            variant="contained"
+            disableElevation
+            size="small"
+            disabled={isLoading}
+            sx={{
+              alignSelf: 'flex-start',
+              textTransform: 'none',
+              borderRadius: '6px',
+              px: 2.5,
+              bgcolor: '#e8853d',
+              '&:hover': { bgcolor: '#d47632' },
+            }}
+          >
+            {isLoading ? 'Sending...' : 'Write'}
+          </Button>
+          {isLoading && <CircularProgress size={16} sx={{ color: '#e8853d' }} />}
+        </Stack>
       </Stack>
     </form>
   )
@@ -141,7 +149,7 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
 
   return (
     <Box sx={{
-      bgcolor: '#fff',
+      bgcolor: 'background.paper',
       borderRadius: '10px',
       overflow: 'hidden',
       transition: 'box-shadow 0.2s',
@@ -152,7 +160,7 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
         sx={{
           display: 'flex', alignItems: 'center', gap: 1.5,
           px: 2, py: 1.2, cursor: 'pointer', userSelect: 'none',
-          '&:hover': { bgcolor: '#fefaf6' },
+          '&:hover': { bgcolor: 'action.hover' },
         }}
       >
         <Typography sx={{
@@ -163,11 +171,11 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
         }}>
           {index + 1}
         </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600, flex: 1, color: '#2d3748' }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }}>
           {fn.name}
         </Typography>
         {fn.inputs.length > 0 && (
-          <Typography variant="caption" sx={{ color: '#b0b8c9' }}>
+          <Typography variant="caption" sx={{ color: 'text.disabled' }}>
             {fn.inputs.length} param{fn.inputs.length > 1 ? 's' : ''}
           </Typography>
         )}
@@ -178,7 +186,7 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
         )}
         <Box sx={{
           transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s', color: '#b0b8c9', display: 'flex',
+          transition: 'transform 0.2s', color: 'text.disabled', display: 'flex',
         }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
         </Box>
@@ -192,14 +200,14 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
   )
 }
 
-export function ContractWrite({ send, abi }: { send: (abi: AbiFunction, params: string[], payableValue?: string) => Promise<void>; abi: AbiFunction[] }) {
+export function ContractWrite({ send, abi, sendLoading }: { send: (abi: AbiFunction, params: string[], payableValue?: string) => Promise<void>; abi: AbiFunction[]; sendLoading: boolean }) {
   const writeAbi = useMemo(() => abi.filter((v) => v.type === 'function' && v.stateMutability !== 'view' && v.stateMutability !== 'pure'), [abi])
 
   return (
-    <Stack spacing={1} sx={{ mt: 1.5, p: 1, bgcolor: '#fef8f3', borderRadius: '12px' }}>
+    <Stack spacing={1} sx={{ mt: 1.5, p: 1, bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(232,133,61,0.08)' : '#fef8f3', borderRadius: '12px' }}>
       {writeAbi.map((v, i) => (
         <FunctionCard key={i} index={i} fn={v}>
-          <WritePanel subAbi={v} send={send} />
+          <WritePanel subAbi={v} send={send} sendLoading={sendLoading} />
         </FunctionCard>
       ))}
     </Stack>

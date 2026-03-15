@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import {
@@ -8,18 +8,15 @@ import {
   IconButton, LinearProgress, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, ListItemSecondaryAction, Stack, TextField, Tooltip, Typography,
 } from '@mui/material'
-import { useAccount, useBalance, useChainId } from 'wagmi'
+import { useAccount, useBalance } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import {
   FaHome, FaFileContract, FaPaperPlane, FaFileAlt, FaSignature, FaCoins, FaCode,
   FaKey, FaUserFriends, FaMoon, FaSun, FaTwitter, FaGithub, FaEnvelope, FaHeart,
-  FaLink, FaChevronLeft, FaBars, FaWallet, FaRocket, FaCubes,
+  FaLink, FaChevronLeft, FaBars, FaWallet, FaRocket, FaCubes, FaCog,
 } from 'react-icons/fa'
-
-let DarkReader: typeof import('darkreader') | undefined
-if (typeof window !== 'undefined') {
-  DarkReader = require('darkreader')
-}
+import { useThemeStore } from '@/lib/store/theme-store'
+import { dbGetAllContracts, dbDeleteContract } from '@/lib/db'
 
 const navItems = [
   { path: '/', label: 'Home', icon: FaHome },
@@ -41,62 +38,98 @@ const externalLinks = [
   { href: 'https://cryptodonations.xyz', label: 'Crypto Donations', icon: FaWallet },
 ]
 
-export default function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void
+}
+
+export default function Sidebar({ onNavigate }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { address, isConnected } = useAccount()
-  const chainId = useChainId()
   const { data: balanceData } = useBalance({ address })
+  const { mode, toggleMode, etherscanApiKey, setEtherscanApiKey } = useThemeStore()
+  const isDark = mode === 'dark'
+
   const [open, setOpen] = useState(true)
   const [storagePercent, setStoragePercent] = useState(0)
   const [openDialog, setOpenDialog] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [contractList, setContractList] = useState<{ name: string; contract: string }[]>([])
   const [selectedContracts, setSelectedContracts] = useState<string[]>([])
-  const [updateDark, setUpdateDark] = useState(0)
-
-  const isDarkMode = useMemo(() => {
-    return DarkReader ? DarkReader.isEnabled() : false
-  }, [updateDark])
-
-  const handleDarkMode = () => {
-    if (!DarkReader) return
-    if (DarkReader.isEnabled()) DarkReader.disable()
-    else DarkReader.enable({ brightness: 100, contrast: 90, sepia: 10 })
-    setUpdateDark(Date.now())
-  }
+  const [apiKeyInput, setApiKeyInput] = useState('')
+  const [storageLabel, setStorageLabel] = useState('')
 
   useEffect(() => {
-    const checkStorage = () => {
+    const checkStorage = async () => {
+      // Estimate total storage usage (localStorage + IndexedDB + caches)
+      if (navigator.storage?.estimate) {
+        try {
+          const est = await navigator.storage.estimate()
+          const used = est.usage || 0
+          const quota = est.quota || 1
+          const pct = (used / quota) * 100
+          setStoragePercent(pct)
+          const usedMB = (used / (1024 * 1024)).toFixed(2)
+          const quotaMB = (quota / (1024 * 1024)).toFixed(0)
+          setStorageLabel(`${usedMB} MB / ${quotaMB} MB`)
+          return
+        } catch { /* fallback below */ }
+      }
+      // Fallback: localStorage only
       let total = 0
       for (const x in localStorage) {
         if (!localStorage.hasOwnProperty(x)) continue
         total += (localStorage[x].length + x.length) * 2
       }
-      setStoragePercent((total * 100) / (1024 * 1024) / 5)
+      const pct = (total * 100) / (1024 * 1024) / 5
+      setStoragePercent(pct)
+      setStorageLabel(`${(total / 1024).toFixed(1)} KB (localStorage only)`)
     }
     checkStorage()
-    const timer = setInterval(checkStorage, 10000)
+    const timer = setInterval(checkStorage, 15000)
     return () => clearInterval(timer)
   }, [])
 
-  const handleStorageClick = () => {
-    const data = JSON.parse(localStorage.getItem('aries-web-wallet') || '{}')
-    setContractList(data.contractList || [])
+  const handleStorageClick = async () => {
+    try {
+      const list = await dbGetAllContracts()
+      setContractList(list.map((c) => ({ name: c.name, contract: c.contract })))
+    } catch {
+      const data = JSON.parse(localStorage.getItem('aries-web-wallet') || '{}')
+      setContractList(data.contractList || [])
+    }
     setSelectedContracts([])
     setOpenDialog(true)
   }
 
-  const handleDeleteSelected = () => {
-    const data = JSON.parse(localStorage.getItem('aries-web-wallet') || '{}')
-    data.contractList = data.contractList.filter(
-      (c: { name: string }) => !selectedContracts.includes(c.name)
-    )
-    localStorage.setItem('aries-web-wallet', JSON.stringify(data))
-    setContractList(data.contractList)
+  const handleDeleteSelected = async () => {
+    for (const name of selectedContracts) {
+      await dbDeleteContract(name)
+    }
+    const list = await dbGetAllContracts()
+    setContractList(list.map((c) => ({ name: c.name, contract: c.contract })))
     setSelectedContracts([])
   }
 
-  const balance = balanceData ? Number(balanceData.formatted).toFixed(4) : '0'
+  const navigate = (path: string) => {
+    router.push(path)
+    onNavigate?.()
+  }
+
+  const balance = balanceData ? Number(balanceData.formatted).toFixed(6) : '0'
+
+  // Theme-aware colors
+  const colors = {
+    bg: isDark ? '#1a1d27' : '#fff',
+    border: isDark ? '#2d3748' : '#eef0f4',
+    navActive: isDark ? '#1e2a4a' : '#eef2ff',
+    navHover: isDark ? '#232838' : '#f5f7fb',
+    textPrimary: isDark ? '#e2e8f0' : '#2d3748',
+    textSecondary: isDark ? '#a0aec0' : '#4a5568',
+    textMuted: isDark ? '#718096' : '#8a94a6',
+    textFaint: isDark ? '#4a5568' : '#b0b8c9',
+    cardBg: isDark ? '#232838' : '#f5f7fb',
+  }
 
   return (
     <Box sx={{ position: 'relative' }}>
@@ -107,8 +140,8 @@ export default function Sidebar() {
         display: 'flex',
         flexDirection: 'column',
         flexShrink: 0,
-        bgcolor: '#fff',
-        borderRight: '1px solid #eef0f4',
+        bgcolor: colors.bg,
+        borderRight: `1px solid ${colors.border}`,
       }}>
         <Stack spacing={1.5} sx={{ p: '16px 12px' }}>
           <Stack direction="row" sx={{
@@ -117,12 +150,12 @@ export default function Sidebar() {
           }}>
             {open ? (
               <Image alt="logo" src="/logo.svg" width={130} height={60}
-                style={{ cursor: 'pointer', flexShrink: 0, marginLeft: 16 }}
-                onClick={() => router.push('/')}
+                style={{ cursor: 'pointer', flexShrink: 0, marginLeft: 16, filter: isDark ? 'invert(0.9)' : 'none' }}
+                onClick={() => navigate('/')}
               />
             ) : (
-              <IconButton onClick={handleDarkMode} size="small">
-                {isDarkMode ? <FaSun /> : <FaMoon />}
+              <IconButton onClick={toggleMode} size="small" sx={{ color: colors.textMuted }}>
+                {isDark ? <FaSun /> : <FaMoon />}
               </IconButton>
             )}
             {open && (
@@ -131,9 +164,9 @@ export default function Sidebar() {
                   <Box
                     onClick={() => window.open('https://v1.arieswallet.xyz', '_self')}
                     sx={{
-                      fontSize: 11, fontWeight: 600, color: '#8a94a6', cursor: 'pointer',
+                      fontSize: 11, fontWeight: 600, color: colors.textMuted, cursor: 'pointer',
                       px: 0.75, py: 0.25, borderRadius: '4px',
-                      '&:hover': { color: '#5b7ff5', bgcolor: '#eef2ff' },
+                      '&:hover': { color: '#5b7ff5', bgcolor: colors.navActive },
                     }}
                   >V1</Box>
                   <Box sx={{
@@ -141,9 +174,14 @@ export default function Sidebar() {
                     px: 0.75, py: 0.25, borderRadius: '4px',
                   }}>V2</Box>
                 </Stack>
-                <IconButton onClick={handleDarkMode} size="small" sx={{ color: '#8a94a6' }}>
-                  {isDarkMode ? <FaSun /> : <FaMoon />}
-                </IconButton>
+                <Stack direction="row" spacing={0.25}>
+                  <IconButton onClick={toggleMode} size="small" sx={{ color: colors.textMuted }}>
+                    {isDark ? <FaSun size={12} /> : <FaMoon size={12} />}
+                  </IconButton>
+                  <IconButton onClick={() => { setApiKeyInput(etherscanApiKey); setSettingsOpen(true) }} size="small" sx={{ color: colors.textMuted }}>
+                    <FaCog size={12} />
+                  </IconButton>
+                </Stack>
               </Stack>
             )}
           </Stack>
@@ -163,55 +201,52 @@ export default function Sidebar() {
                 }
                 return (
                   <Box sx={{
-                    bgcolor: '#f5f7fb', borderRadius: '10px', p: 1.5,
+                    bgcolor: colors.cardBg, borderRadius: '10px', p: 1.5,
                     display: 'flex', flexDirection: 'column', gap: 1,
                   }}>
-                    {/* Network */}
                     <Box
                       onClick={openChainModal}
                       sx={{
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.75,
                         cursor: 'pointer', borderRadius: '6px', py: 0.5,
-                        '&:hover': { bgcolor: '#eef2ff' },
+                        '&:hover': { bgcolor: colors.navActive },
                       }}
                     >
                       {chain.hasIcon && chain.iconUrl && (
                         <img src={chain.iconUrl} alt="" width={14} height={14} style={{ borderRadius: 3 }} />
                       )}
-                      <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#2d3748' }}>
+                      <Typography sx={{ fontSize: 12, fontWeight: 600, color: colors.textPrimary }}>
                         {chain.name ?? 'Unknown'}
                       </Typography>
-                      <Typography sx={{ fontSize: 10, color: '#8a94a6' }}>
+                      <Typography sx={{ fontSize: 10, color: colors.textMuted }}>
                         #{chain.id}
                       </Typography>
                     </Box>
 
-                    {/* Address */}
                     <Box
                       onClick={openAccountModal}
                       sx={{
                         display: 'flex', justifyContent: 'center',
                         cursor: 'pointer', borderRadius: '6px', py: 0.25,
-                        '&:hover': { bgcolor: '#eef2ff' },
+                        '&:hover': { bgcolor: colors.navActive },
                       }}
                     >
                       <Typography sx={{
-                        fontSize: 11, fontFamily: 'monospace', color: '#4a5568',
+                        fontSize: 11, fontFamily: 'monospace', color: colors.textSecondary,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>
                         {account.address.slice(0, 10) + '...' + account.address.slice(-8)}
                       </Typography>
                     </Box>
 
-                    {/* Balance divider + value */}
                     <Box sx={{
                       display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 0.5,
-                      borderTop: '1px solid #e8ebf0', pt: 0.75,
+                      borderTop: `1px solid ${colors.border}`, pt: 0.75,
                     }}>
-                      <Typography sx={{ fontSize: 16, fontWeight: 700, fontFamily: 'monospace', color: '#2d3748' }}>
+                      <Typography sx={{ fontSize: 16, fontWeight: 700, fontFamily: 'monospace', color: colors.textPrimary }}>
                         {balance}
                       </Typography>
-                      <Typography sx={{ fontSize: 10, color: '#8a94a6', fontWeight: 500 }}>
+                      <Typography sx={{ fontSize: 10, color: colors.textMuted, fontWeight: 500 }}>
                         {balanceData?.symbol ?? 'ETH'}
                       </Typography>
                     </Box>
@@ -230,20 +265,20 @@ export default function Sidebar() {
                 <ListItem key={item.path} disablePadding sx={{ mb: 0.25 }}>
                   <ListItemButton
                     selected={active}
-                    onClick={() => router.push(item.path)}
+                    onClick={() => navigate(item.path)}
                     sx={{
                       borderRadius: '8px', mx: 0.5, minHeight: 38,
                       py: 0.5, px: open ? 1.5 : 1,
-                      '&.Mui-selected': { bgcolor: '#eef2ff', color: '#5b7ff5', '&:hover': { bgcolor: '#e5ebff' } },
-                      '&:hover': { bgcolor: '#f5f7fb' },
+                      '&.Mui-selected': { bgcolor: colors.navActive, color: '#5b7ff5', '&:hover': { bgcolor: isDark ? '#243156' : '#e5ebff' } },
+                      '&:hover': { bgcolor: colors.navHover },
                     }}
                   >
-                    <ListItemIcon sx={{ minWidth: 32, color: active ? '#5b7ff5' : '#8a94a6', ml: open ? 0 : 0.5 }}>
+                    <ListItemIcon sx={{ minWidth: 32, color: active ? '#5b7ff5' : colors.textMuted, ml: open ? 0 : 0.5 }}>
                       <item.icon size={15} />
                     </ListItemIcon>
                     {open && (
                       <ListItemText primary={item.label}
-                        primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 600 : 400, color: active ? '#5b7ff5' : '#4a5568' }}
+                        primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 600 : 400, color: active ? '#5b7ff5' : colors.textSecondary }}
                       />
                     )}
                   </ListItemButton>
@@ -253,7 +288,7 @@ export default function Sidebar() {
           </List>
 
           <Box sx={{ px: 1.5, py: 1 }}>
-            <Typography variant="caption" sx={{ color: '#b0b8c9', fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase' }}>
+            <Typography variant="caption" sx={{ color: colors.textFaint, fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase' }}>
               {open ? 'External' : ''}
             </Typography>
           </Box>
@@ -265,15 +300,15 @@ export default function Sidebar() {
                   component="a" target="_blank" rel="noreferrer" href={item.href}
                   sx={{
                     borderRadius: '8px', mx: 0.5, minHeight: 38, py: 0.5, px: open ? 1.5 : 1,
-                    '&:hover': { bgcolor: '#f5f7fb' },
+                    '&:hover': { bgcolor: colors.navHover },
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 32, color: '#8a94a6', ml: open ? 0 : 0.5 }}>
+                  <ListItemIcon sx={{ minWidth: 32, color: colors.textMuted, ml: open ? 0 : 0.5 }}>
                     <item.icon size={15} />
                   </ListItemIcon>
                   {open && (
                     <ListItemText primary={item.label}
-                      primaryTypographyProps={{ fontSize: 13, color: '#4a5568' }}
+                      primaryTypographyProps={{ fontSize: 13, color: colors.textSecondary }}
                     />
                   )}
                 </ListItemButton>
@@ -283,13 +318,13 @@ export default function Sidebar() {
         </Box>
 
         <Stack spacing={1} sx={{ p: '8px 12px' }}>
-          <Tooltip title="Click to manage localStorage" placement="top">
+          <Tooltip title={storageLabel ? `Storage: ${storageLabel} — Click to manage contracts` : 'Click to manage contracts'} placement="top">
             <LinearProgress
               variant="determinate" value={storagePercent}
               onClick={handleStorageClick}
               sx={{
                 cursor: 'pointer', borderRadius: 4, height: 4,
-                bgcolor: '#f0f2f5',
+                bgcolor: isDark ? '#2d3748' : '#f0f2f5',
                 '& .MuiLinearProgress-bar': {
                   borderRadius: 4,
                   bgcolor: storagePercent < 50 ? '#5b7ff5' : storagePercent < 75 ? '#f0a45d' : '#e85d5d',
@@ -305,7 +340,7 @@ export default function Sidebar() {
               { icon: FaHeart, url: 'https://cryptodonations.xyz/donate/0x7521eda00e2ce05ac4a9d8353d096ccb970d5188?tag=arieswallet' },
             ].map(({ icon: Icon, url }) => (
               <IconButton key={url} size="small" onClick={() => window.open(url, '_blank')}
-                sx={{ color: '#b0b8c9', '&:hover': { color: '#5b7ff5', bgcolor: '#eef2ff' } }}
+                sx={{ color: colors.textFaint, '&:hover': { color: '#5b7ff5', bgcolor: colors.navActive } }}
               >
                 <Icon size={13} />
               </IconButton>
@@ -320,28 +355,30 @@ export default function Sidebar() {
           position: 'absolute', top: '50%', right: -14,
           transform: 'translateY(-50%)',
           width: 28, height: 28,
-          bgcolor: '#fff', border: '1px solid #eef0f4',
-          '&:hover': { bgcolor: '#f5f7fb' },
-          color: '#8a94a6', fontSize: 12,
+          bgcolor: colors.bg, border: `1px solid ${colors.border}`,
+          '&:hover': { bgcolor: colors.navHover },
+          color: colors.textMuted, fontSize: 12,
         }}
       >
         {open ? <FaChevronLeft size={10} /> : <FaBars size={10} />}
       </IconButton>
 
+      {/* Manage Contracts Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, color: '#2d3748' }}>Manage Contract List</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, color: 'text.primary' }}>Manage Contract List</DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ color: '#8a94a6' }}>
-            Select contracts to delete. Current contracts: {contractList.length}
+          <DialogContentText sx={{ color: 'text.secondary' }}>
+            Contracts are stored in IndexedDB (no localStorage limit). Select contracts to delete.
+            Current contracts: {contractList.length}
           </DialogContentText>
           <Box sx={{ mt: 2, maxHeight: 400, overflow: 'auto' }}>
             <List>
               {contractList.map((c) => (
-                <ListItem key={c.name} sx={{ borderRadius: '8px', '&:hover': { bgcolor: '#f5f7fb' } }}>
+                <ListItem key={c.name} sx={{ borderRadius: '8px', '&:hover': { bgcolor: 'action.hover' } }}>
                   <ListItemText
                     primary={c.name || 'Unnamed Contract'}
                     secondary={c.contract || 'No address'}
-                    primaryTypographyProps={{ fontWeight: 600, color: '#2d3748', fontSize: 14 }}
+                    primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
                     secondaryTypographyProps={{ fontFamily: 'monospace', fontSize: 12 }}
                   />
                   <ListItemSecondaryAction>
@@ -361,11 +398,37 @@ export default function Sidebar() {
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setOpenDialog(false)} sx={{ color: '#8a94a6' }}>Cancel</Button>
+          <Button onClick={() => setOpenDialog(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
           <Button onClick={handleDeleteSelected} disabled={selectedContracts.length === 0}
-            sx={{ bgcolor: '#e85d5d', color: '#fff', '&:hover': { bgcolor: '#d44d4d' }, '&.Mui-disabled': { bgcolor: '#f0f2f5' } }}
+            sx={{ bgcolor: '#e85d5d', color: '#fff', '&:hover': { bgcolor: '#d44d4d' }, '&.Mui-disabled': { bgcolor: 'action.disabledBackground' } }}
           >
             Delete Selected ({selectedContracts.length})
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Settings</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField
+              label="Etherscan API Key"
+              size="small"
+              value={apiKeyInput}
+              onChange={(e) => setApiKeyInput(e.target.value)}
+              placeholder="For auto-fetching contract ABIs"
+              helperText="Used to fetch ABI from Etherscan, BscScan, etc."
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setSettingsOpen(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+          <Button variant="contained" onClick={() => {
+            setEtherscanApiKey(apiKeyInput)
+            setSettingsOpen(false)
+          }} sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}>
+            Save
           </Button>
         </DialogActions>
       </Dialog>
