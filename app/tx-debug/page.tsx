@@ -233,6 +233,82 @@ function DetailRow({ label, value, mono, copyable, truncate, error }: {
   )
 }
 
+// ── Parity trace_transaction → CallTrace conversion ──
+
+interface ParityTrace {
+  action: {
+    from: string
+    to: string
+    callType?: string  // call, delegatecall, staticcall, create, create2
+    value: string
+    gas: string
+    input: string
+  }
+  result?: {
+    gasUsed: string
+    output: string
+    address?: string  // for CREATE
+  }
+  error?: string
+  subtraces: number
+  traceAddress: number[]
+  type: string  // call, create, suicide
+}
+
+function parityTracesToCallTree(traces: ParityTrace[]): CallTrace | null {
+  if (traces.length === 0) return null
+
+  // Build a map from traceAddress → node
+  const nodeMap = new Map<string, CallTrace>()
+
+  for (const t of traces) {
+    const callType = t.type === 'create'
+      ? 'CREATE'
+      : t.type === 'suicide'
+      ? 'SELFDESTRUCT'
+      : (t.action.callType || 'call').toUpperCase()
+
+    const node: CallTrace = {
+      type: callType,
+      from: t.action.from,
+      to: t.action.to || t.result?.address || '',
+      value: t.action.value,
+      gas: t.action.gas,
+      gasUsed: t.result?.gasUsed,
+      input: t.action.input,
+      output: t.result?.output,
+      error: t.error,
+      calls: [],
+    }
+
+    const key = JSON.stringify(t.traceAddress)
+    nodeMap.set(key, node)
+
+    // Attach to parent
+    if (t.traceAddress.length > 0) {
+      const parentKey = JSON.stringify(t.traceAddress.slice(0, -1))
+      const parent = nodeMap.get(parentKey)
+      if (parent) {
+        if (!parent.calls) parent.calls = []
+        parent.calls.push(node)
+      }
+    }
+  }
+
+  // Root is traceAddress = []
+  const root = nodeMap.get('[]')
+  if (root) {
+    // Remove empty calls arrays for leaf nodes
+    const cleanEmpty = (n: CallTrace) => {
+      if (n.calls && n.calls.length === 0) delete n.calls
+      else if (n.calls) n.calls.forEach(cleanEmpty)
+    }
+    cleanEmpty(root)
+    return root
+  }
+  return null
+}
+
 // ── Main Page ──
 
 type RpcSource = 'wallet' | 'custom'
@@ -246,6 +322,7 @@ export default function TxDebugPage() {
   const [customRpc, setCustomRpc] = useState('')
   const [loading, setLoading] = useState(false)
   const [trace, setTrace] = useState<CallTrace | null>(null)
+  const [traceMethod, setTraceMethod] = useState('')
   const [txInfo, setTxInfo] = useState<{ blockNumber: string; status: string; gasUsed: string } | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -253,13 +330,22 @@ export default function TxDebugPage() {
     if (rpcSource === 'custom') {
       return customRpc.trim() || null
     }
-    // Try to get RPC from publicClient's transport
     if (publicClient) {
       const transport = publicClient.transport as { url?: string }
       if (transport?.url) return transport.url
     }
     return null
   }, [rpcSource, customRpc, publicClient])
+
+  // Generic JSON-RPC call helper
+  const rpcCall = useCallback(async (rpcUrl: string, method: string, params: unknown[]) => {
+    const res = await fetch(rpcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method, params }),
+    })
+    return res.json()
+  }, [])
 
   const handleTrace = useCallback(async () => {
     if (!txHash.trim()) { showError('Please enter a transaction hash'); return }
@@ -275,18 +361,13 @@ export default function TxDebugPage() {
     setTrace(null)
     setTxInfo(null)
     setErrorMsg('')
+    setTraceMethod('')
+
+    const hash = txHash.trim()
 
     try {
-      // Fetch tx receipt for basic info
-      const receiptRes = await fetch(rpcUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0', id: 1, method: 'eth_getTransactionReceipt',
-          params: [txHash.trim()],
-        }),
-      })
-      const receiptJson = await receiptRes.json()
+      // 1. Fetch tx receipt for basic info
+      const receiptJson = await rpcCall(rpcUrl, 'eth_getTransactionReceipt', [hash])
       if (receiptJson.result) {
         setTxInfo({
           blockNumber: hexToDecimal(receiptJson.result.blockNumber),
@@ -295,34 +376,41 @@ export default function TxDebugPage() {
         })
       }
 
-      // debug_traceTransaction with callTracer
-      const traceRes = await fetch(rpcUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0', id: 2, method: 'debug_traceTransaction',
-          params: [txHash.trim(), { tracer: 'callTracer', tracerConfig: { withLog: false } }],
-        }),
-      })
-      const traceJson = await traceRes.json()
+      // 2. Try debug_traceTransaction (Geth debug API) first
+      const debugJson = await rpcCall(rpcUrl, 'debug_traceTransaction', [hash, { tracer: 'callTracer', tracerConfig: { withLog: false } }])
 
-      if (traceJson.error) {
-        setErrorMsg(traceJson.error.message || JSON.stringify(traceJson.error))
+      if (!debugJson.error && debugJson.result) {
+        setTrace(debugJson.result)
+        setTraceMethod('debug_traceTransaction')
+        showSuccess(`Trace loaded via debug_traceTransaction — ${countCalls(debugJson.result)} calls`)
         return
       }
 
-      if (traceJson.result) {
-        setTrace(traceJson.result)
-        showSuccess(`Trace loaded — ${countCalls(traceJson.result)} calls`)
-      } else {
-        setErrorMsg('No trace result returned. The RPC may not support debug_traceTransaction.')
+      // 3. Fallback: trace_transaction (Parity / OpenEthereum / Erigon)
+      const parityJson = await rpcCall(rpcUrl, 'trace_transaction', [hash])
+
+      if (!parityJson.error && Array.isArray(parityJson.result) && parityJson.result.length > 0) {
+        const tree = parityTracesToCallTree(parityJson.result)
+        if (tree) {
+          setTrace(tree)
+          setTraceMethod('trace_transaction')
+          showSuccess(`Trace loaded via trace_transaction — ${countCalls(tree)} calls`)
+          return
+        }
       }
+
+      // 4. Both failed — show errors
+      const errors: string[] = []
+      if (debugJson.error) errors.push(`debug_traceTransaction: ${debugJson.error.message || JSON.stringify(debugJson.error)}`)
+      if (parityJson.error) errors.push(`trace_transaction: ${parityJson.error.message || JSON.stringify(parityJson.error)}`)
+      if (errors.length === 0) errors.push('No trace data returned from any method.')
+      setErrorMsg(errors.join('\n'))
     } catch (err) {
       setErrorMsg('RPC request failed: ' + (err as Error).message)
     } finally {
       setLoading(false)
     }
-  }, [txHash, getRpcUrl, rpcSource, showSuccess, showError])
+  }, [txHash, getRpcUrl, rpcSource, rpcCall, showSuccess, showError])
 
   return (
     <Box sx={{ p: 3, maxWidth: 1200 }}>
@@ -331,7 +419,7 @@ export default function TxDebugPage() {
         <Stack spacing={2}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>TX Debug Trace</Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Trace a transaction&apos;s internal call stack. Requires an RPC node with <code>debug_traceTransaction</code> support (e.g. Erigon, Geth with --http.api=debug, Alchemy, QuickNode).
+            Trace a transaction&apos;s internal call stack. Automatically tries <code>debug_traceTransaction</code> then falls back to <code>trace_transaction</code> (Parity/Erigon). Most public RPCs support at least one.
           </Typography>
 
           <TextField
@@ -384,7 +472,7 @@ export default function TxDebugPage() {
       {/* Error */}
       {errorMsg && (
         <Box sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(232,93,93,0.1)' : '#fef2f2', borderRadius: '12px', p: 2, mb: 2 }}>
-          <Typography variant="body2" sx={{ color: '#e85d5d', wordBreak: 'break-word' }}>
+          <Typography variant="body2" component="pre" sx={{ color: '#e85d5d', wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontFamily: 'inherit', m: 0 }}>
             {errorMsg}
           </Typography>
         </Box>
@@ -398,6 +486,7 @@ export default function TxDebugPage() {
             <InfoChip label="Status" value={txInfo.status} color={txInfo.status === 'Success' ? '#48bb78' : '#e85d5d'} />
             <InfoChip label="Gas Used" value={txInfo.gasUsed} />
             {trace && <InfoChip label="Internal Calls" value={String(countCalls(trace))} />}
+            {traceMethod && <InfoChip label="Method" value={traceMethod} />}
           </Stack>
         </Box>
       )}
