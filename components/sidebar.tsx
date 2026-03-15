@@ -23,6 +23,7 @@ const navItems = [
   { path: '/smart-contract', label: 'Smart Contract', icon: FaFileContract },
   { path: '/transaction', label: 'Transaction', icon: FaPaperPlane },
   { path: '/raw-transaction', label: 'Raw Transaction', icon: FaFileAlt },
+  { path: '/tx-debug', label: 'TX Debug Trace', icon: FaBug },
   { path: '/sign-message', label: 'Sign Message', icon: FaSignature },
   { path: '/token-tools', label: 'Token Tools', icon: FaCoins },
   { path: '/script', label: 'Script', icon: FaCode },
@@ -30,7 +31,6 @@ const navItems = [
   { path: '/storeman', label: 'Wanchain Storeman', icon: FaUserFriends },
   { path: '/meme', label: 'MEME Coin Creation', icon: FaRocket },
   { path: '/create2', label: 'Create2 Deployer', icon: FaCubes },
-  { path: '/tx-debug', label: 'TX Debug Trace', icon: FaBug },
 ]
 
 const externalLinks = [
@@ -113,8 +113,12 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   }
 
   const navigate = (path: string) => {
-    router.push(path)
-    onNavigate?.()
+    const go = () => { router.push(path); onNavigate?.() }
+    if (document.startViewTransition) {
+      document.startViewTransition(go)
+    } else {
+      go()
+    }
   }
 
   const balance = balanceData ? Number(balanceData.formatted).toFixed(6) : '0'
