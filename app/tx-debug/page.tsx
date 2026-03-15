@@ -469,12 +469,36 @@ export default function TxDebugPage() {
         </Stack>
       </Box>
 
-      {/* Error */}
+      {/* Error + cast fallback suggestion */}
       {errorMsg && (
         <Box sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(232,93,93,0.1)' : '#fef2f2', borderRadius: '12px', p: 2, mb: 2 }}>
-          <Typography variant="body2" component="pre" sx={{ color: '#e85d5d', wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontFamily: 'inherit', m: 0 }}>
+          <Typography variant="body2" component="pre" sx={{ color: '#e85d5d', wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontFamily: 'inherit', m: 0, mb: 2 }}>
             {errorMsg}
           </Typography>
+          <Box sx={{ bgcolor: 'background.paper', borderRadius: '8px', p: 2 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+              Alternative: use Foundry&apos;s <code>cast</code> CLI
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5 }}>
+              <code>cast run</code> re-executes the transaction locally using standard RPC calls, so it works with any RPC node — no debug API needed.
+            </Typography>
+            <Box sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? '#0f1117' : '#1a1d23', borderRadius: '6px', p: 1.5, mb: 1.5 }}>
+              <Typography component="pre" sx={{ fontFamily: '"SF Mono", Monaco, Menlo, monospace', fontSize: 12, color: '#00cdae', whiteSpace: 'pre-wrap', wordBreak: 'break-all', m: 0 }}>
+{`# Install Foundry
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+
+# Trace a transaction
+cast run ${txHash || '0x<txHash>'} --rpc-url ${getRpcUrl() || 'https://ethereum-rpc.publicnode.com'}
+
+# Quick mode (skip block environment setup, faster)
+cast run ${txHash || '0x<txHash>'} --rpc-url ${getRpcUrl() || 'https://ethereum-rpc.publicnode.com'} --quick`}
+              </Typography>
+            </Box>
+            <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+              Foundry docs: https://book.getfoundry.sh
+            </Typography>
+          </Box>
         </Box>
       )}
 
