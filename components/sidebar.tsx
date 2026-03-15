@@ -13,7 +13,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import {
   FaHome, FaFileContract, FaPaperPlane, FaFileAlt, FaSignature, FaCoins, FaCode,
   FaKey, FaUserFriends, FaMoon, FaSun, FaTwitter, FaGithub, FaEnvelope, FaHeart,
-  FaLink, FaChevronLeft, FaBars, FaWallet, FaRocket, FaCubes, FaCog,
+  FaLink, FaChevronLeft, FaBars, FaWallet, FaRocket, FaCubes, FaCog, FaBug,
 } from 'react-icons/fa'
 import { useThemeStore } from '@/lib/store/theme-store'
 import { dbGetAllContracts, dbDeleteContract } from '@/lib/db'
@@ -30,6 +30,7 @@ const navItems = [
   { path: '/storeman', label: 'Wanchain Storeman', icon: FaUserFriends },
   { path: '/meme', label: 'MEME Coin Creation', icon: FaRocket },
   { path: '/create2', label: 'Create2 Deployer', icon: FaCubes },
+  { path: '/tx-debug', label: 'TX Debug Trace', icon: FaBug },
 ]
 
 const externalLinks = [
