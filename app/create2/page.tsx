@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi'
 import { type Address, decodeEventLog } from 'viem'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
+import { neu, neuShadows } from '@/app/providers'
+import { useThemeStore } from '@/lib/store/theme-store'
 
 const create2Deployer = '0xB278cEa7C413600F14e7eD92600B7AA0B2A86Df5' as const
 const supportedChains = [888, 999, 43114, 43113, 16180, 62831]
@@ -28,13 +30,16 @@ export default function Create2DeployerPage() {
   const publicClient = usePublicClient()
   const { data: walletClient } = useWalletClient()
   const { showSuccess, showError } = useSnackbar()
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   return (
     <Box sx={{ p: 3, maxWidth: 800 }}>
-      <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3 }}>
+      <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, boxShadow: shadows.extruded }}>
         <Stack spacing={2}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Create2 Deployer</Typography>
-          <Typography variant="body2" sx={{ color: '#8a94a6', lineHeight: 1.8 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>Create2 Deployer</Typography>
+          <Typography variant="body2" sx={{ color: t.textSecondary, lineHeight: 1.8 }}>
             Deploy contracts with the same address across multiple blockchains using CREATE2.
           </Typography>
 
@@ -43,7 +48,7 @@ export default function Create2DeployerPage() {
               <TextField size="small" label="Bytecode (0x...)" value={bytecode} onChange={(e) => setBytecode(e.target.value)} />
               <TextField size="small" label="Seed" placeholder="hello world 123" value={seed} onChange={(e) => setSeed(e.target.value)} />
               <Button variant="contained"
-                sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+                sx={{ alignSelf: 'flex-start' }}
                 onClick={async () => {
                   try {
                     if (!publicClient || !address) return
@@ -58,9 +63,9 @@ export default function Create2DeployerPage() {
                 Step 1 — Query Deploy Address
               </Button>
               {scAddr && (
-                <Box sx={{ bgcolor: '#f5f7fb', borderRadius: '8px', p: 2 }}>
-                  <Typography variant="caption" sx={{ color: '#8a94a6', fontWeight: 600 }}>Predicted Address</Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all', mt: 0.5, color: '#2d3748' }}>{scAddr}</Typography>
+                <Box sx={{ boxShadow: shadows.inset, borderRadius: '16px', p: 2 }}>
+                  <Typography variant="caption" sx={{ color: t.textSecondary, fontWeight: 600 }}>Predicted Address</Typography>
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all', mt: 0.5, color: t.text }}>{scAddr}</Typography>
                 </Box>
               )}
               <Button variant="contained"
@@ -87,14 +92,14 @@ export default function Create2DeployerPage() {
                 Step 2 — Deploy
               </Button>
               {finalAddr && (
-                <Box sx={{ bgcolor: '#f5f7fb', borderRadius: '8px', p: 2 }}>
-                  <Typography variant="caption" sx={{ color: '#8a94a6', fontWeight: 600 }}>Final Address</Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all', mt: 0.5, color: '#2d3748' }}>{finalAddr}</Typography>
+                <Box sx={{ boxShadow: shadows.inset, borderRadius: '16px', p: 2 }}>
+                  <Typography variant="caption" sx={{ color: t.textSecondary, fontWeight: 600 }}>Final Address</Typography>
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all', mt: 0.5, color: t.text }}>{finalAddr}</Typography>
                 </Box>
               )}
             </Stack>
           ) : (
-            <Box sx={{ bgcolor: '#fef8f3', borderRadius: '8px', p: 2 }}>
+            <Box sx={{ boxShadow: shadows.inset, borderRadius: '16px', p: 2 }}>
               <Typography variant="body2" sx={{ color: '#e8853d' }}>
                 Unsupported chain ({chainId}). Supported: {supportedChains.join(', ')}
               </Typography>

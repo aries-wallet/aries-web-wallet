@@ -9,6 +9,8 @@ import { usePublicClient } from 'wagmi'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
 import copy from 'copy-to-clipboard'
 import { FaCopy, FaChevronDown, FaChevronRight, FaExternalLinkAlt } from 'react-icons/fa'
+import { neu, neuShadows } from '@/app/providers'
+import { useThemeStore } from '@/lib/store/theme-store'
 
 // ── Types ──
 
@@ -62,7 +64,7 @@ function shortenData(data: string | undefined, len = 20): string {
 
 function getCallColor(type: string): string {
   switch (type) {
-    case 'CALL': return '#5b7ff5'
+    case 'CALL': return '#6C63FF'
     case 'STATICCALL': return '#48bb78'
     case 'DELEGATECALL': return '#e8853d'
     case 'CREATE': case 'CREATE2': return '#9f7aea'
@@ -87,6 +89,9 @@ function CallNode({ trace, depth = 0 }: { trace: CallTrace; depth?: number }) {
   const hasChildren = trace.calls && trace.calls.length > 0
   const isError = !!trace.error
   const color = getCallColor(trace.type)
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   return (
     <Box sx={{ ml: depth > 0 ? 2.5 : 0 }}>
@@ -95,11 +100,11 @@ function CallNode({ trace, depth = 0 }: { trace: CallTrace; depth?: number }) {
         display: 'flex', alignItems: 'center', gap: 0.75, py: 0.4,
         borderLeft: depth > 0 ? `2px solid ${isError ? '#e85d5d33' : color + '33'}` : 'none',
         pl: depth > 0 ? 1.5 : 0,
-        '&:hover': { bgcolor: 'action.hover', borderRadius: '6px' },
+        '&:hover': { bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(163,177,198,0.15)', borderRadius: '6px' },
       }}>
         {/* Expand toggle */}
         {hasChildren ? (
-          <IconButton size="small" onClick={() => setOpen(!open)} sx={{ p: 0.25, color: 'text.secondary' }}>
+          <IconButton size="small" onClick={() => setOpen(!open)} sx={{ p: 0.25, color: t.textSecondary }}>
             {open ? <FaChevronDown size={10} /> : <FaChevronRight size={10} />}
           </IconButton>
         ) : (
@@ -118,14 +123,14 @@ function CallNode({ trace, depth = 0 }: { trace: CallTrace; depth?: number }) {
 
         {/* From → To */}
         <Tooltip title={trace.from}>
-          <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary', cursor: 'pointer' }}
+          <Typography variant="caption" sx={{ fontFamily: 'monospace', color: t.textSecondary, cursor: 'pointer' }}
             onClick={() => copy(trace.from)}>
             {shortenAddr(trace.from)}
           </Typography>
         </Tooltip>
-        <Typography variant="caption" sx={{ color: 'text.disabled' }}>→</Typography>
+        <Typography variant="caption" sx={{ color: t.textSecondary, opacity: 0.5 }}>→</Typography>
         <Tooltip title={trace.to}>
-          <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.primary', fontWeight: 500, cursor: 'pointer' }}
+          <Typography variant="caption" sx={{ fontFamily: 'monospace', color: t.text, fontWeight: 500, cursor: 'pointer' }}
             onClick={() => copy(trace.to)}>
             {shortenAddr(trace.to)}
           </Typography>
@@ -139,7 +144,7 @@ function CallNode({ trace, depth = 0 }: { trace: CallTrace; depth?: number }) {
         )}
 
         {/* Gas */}
-        <Typography variant="caption" sx={{ color: 'text.disabled', ml: 'auto' }}>
+        <Typography variant="caption" sx={{ color: t.textSecondary, opacity: 0.5, ml: 'auto' }}>
           gas: {formatGas(trace.gasUsed)}/{formatGas(trace.gas)}
         </Typography>
 
@@ -147,8 +152,8 @@ function CallNode({ trace, depth = 0 }: { trace: CallTrace; depth?: number }) {
         {trace.input && trace.input.length >= 10 && (
           <Tooltip title="Function selector — click to copy full input">
             <Typography variant="caption" sx={{
-              fontFamily: 'monospace', color: 'text.disabled', cursor: 'pointer',
-              '&:hover': { color: '#5b7ff5' },
+              fontFamily: 'monospace', color: t.textSecondary, opacity: 0.5, cursor: 'pointer',
+              '&:hover': { color: t.accent },
             }} onClick={() => copy(trace.input || '')}>
               {trace.input.slice(0, 10)}
             </Typography>
@@ -157,7 +162,7 @@ function CallNode({ trace, depth = 0 }: { trace: CallTrace; depth?: number }) {
 
         {/* Details toggle */}
         <Typography variant="caption" sx={{
-          color: '#5b7ff5', cursor: 'pointer', userSelect: 'none',
+          color: t.accent, cursor: 'pointer', userSelect: 'none',
           '&:hover': { textDecoration: 'underline' },
         }} onClick={() => setShowDetails(!showDetails)}>
           {showDetails ? 'hide' : 'detail'}
@@ -175,7 +180,7 @@ function CallNode({ trace, depth = 0 }: { trace: CallTrace; depth?: number }) {
       <Collapse in={showDetails}>
         <Box sx={{
           ml: depth > 0 ? 0 : 0, mt: 0.5, mb: 1, p: 1.5,
-          bgcolor: 'action.hover', borderRadius: '8px',
+          boxShadow: shadows.insetSmall, borderRadius: '16px',
           borderLeft: `3px solid ${color}`,
         }}>
           <Stack spacing={0.75}>
@@ -211,21 +216,23 @@ function CallNode({ trace, depth = 0 }: { trace: CallTrace; depth?: number }) {
 function DetailRow({ label, value, mono, copyable, truncate, error }: {
   label: string; value: string; mono?: boolean; copyable?: boolean; truncate?: boolean; error?: boolean
 }) {
+  const { mode } = useThemeStore()
+  const t = neu[mode]
   const display = truncate && value.length > 200 ? value.slice(0, 200) + '...' : value
   return (
     <Stack direction="row" spacing={1} alignItems="flex-start">
-      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, minWidth: 80, flexShrink: 0 }}>
+      <Typography variant="caption" sx={{ color: t.textSecondary, fontWeight: 600, minWidth: 80, flexShrink: 0 }}>
         {label}
       </Typography>
       <Typography variant="caption" sx={{
         fontFamily: mono ? 'monospace' : 'inherit',
-        color: error ? '#e85d5d' : 'text.primary',
+        color: error ? '#e85d5d' : t.text,
         wordBreak: 'break-all', flex: 1,
       }}>
         {display}
       </Typography>
       {copyable && (
-        <IconButton size="small" onClick={() => copy(value)} sx={{ p: 0.25, color: 'text.disabled', '&:hover': { color: '#5b7ff5' } }}>
+        <IconButton size="small" onClick={() => copy(value)} sx={{ p: 0.25, color: t.textSecondary, '&:hover': { color: t.accent } }}>
           <FaCopy size={10} />
         </IconButton>
       )}
@@ -316,6 +323,9 @@ type RpcSource = 'wallet' | 'custom'
 export default function TxDebugPage() {
   const publicClient = usePublicClient()
   const { showSuccess, showError } = useSnackbar()
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   const [txHash, setTxHash] = useState('')
   const [rpcSource, setRpcSource] = useState<RpcSource>('wallet')
@@ -415,10 +425,10 @@ export default function TxDebugPage() {
   return (
     <Box sx={{ p: 3, maxWidth: 1200 }}>
       {/* Input Card */}
-      <Box sx={{ bgcolor: 'background.paper', borderRadius: '12px', p: 3, mb: 2 }}>
+      <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, mb: 2.5, boxShadow: shadows.extruded }}>
         <Stack spacing={2}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>TX Debug Trace</Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>TX Debug Trace</Typography>
+          <Typography variant="body2" sx={{ color: t.textSecondary }}>
             Trace a transaction&apos;s internal call stack. Automatically tries <code>debug_traceTransaction</code> then falls back to <code>trace_transaction</code> (Parity/Erigon). Most public RPCs support at least one.
           </Typography>
 
@@ -452,16 +462,14 @@ export default function TxDebugPage() {
             )}
 
             {rpcSource === 'wallet' && publicClient && (
-              <Typography variant="caption" sx={{ color: 'text.secondary', pt: 1, fontFamily: 'monospace' }}>
+              <Typography variant="caption" sx={{ color: t.textSecondary, pt: 1, fontFamily: 'monospace' }}>
                 {(publicClient.transport as { url?: string })?.url || 'Connected via wallet'}
               </Typography>
             )}
           </Stack>
 
           <Stack direction="row" spacing={1} alignItems="center">
-            <Button variant="contained" disabled={loading} onClick={handleTrace}
-              sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
-            >
+            <Button variant="contained" disabled={loading} onClick={handleTrace}>
               {loading ? 'Tracing...' : 'Trace Transaction'}
             </Button>
             {loading && <CircularProgress size={18} />}
@@ -471,18 +479,18 @@ export default function TxDebugPage() {
 
       {/* Error + cast fallback suggestion */}
       {errorMsg && (
-        <Box sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(232,93,93,0.1)' : '#fef2f2', borderRadius: '12px', p: 2, mb: 2 }}>
+        <Box sx={{ bgcolor: mode === 'dark' ? 'rgba(232,93,93,0.1)' : '#fef2f2', borderRadius: '24px', p: 2, mb: 2.5, boxShadow: shadows.extruded }}>
           <Typography variant="body2" component="pre" sx={{ color: '#e85d5d', wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontFamily: 'inherit', m: 0, mb: 2 }}>
             {errorMsg}
           </Typography>
-          <Box sx={{ bgcolor: 'background.paper', borderRadius: '8px', p: 2 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+          <Box sx={{ bgcolor: t.bg, borderRadius: '16px', p: 2, boxShadow: shadows.inset }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: t.text }}>
               Alternative: use Foundry&apos;s <code>cast</code> CLI
             </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5 }}>
+            <Typography variant="body2" sx={{ color: t.textSecondary, mb: 1.5 }}>
               <code>cast run</code> re-executes the transaction locally using standard RPC calls, so it works with any RPC node — no debug API needed.
             </Typography>
-            <Box sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? '#0f1117' : '#1a1d23', borderRadius: '6px', p: 1.5, mb: 1.5 }}>
+            <Box sx={{ bgcolor: mode === 'dark' ? '#0f1117' : '#1a1d23', borderRadius: '16px', p: 1.5, mb: 1.5, boxShadow: shadows.insetDeep }}>
               <Typography component="pre" sx={{ fontFamily: '"SF Mono", Monaco, Menlo, monospace', fontSize: 12, color: '#00cdae', whiteSpace: 'pre-wrap', wordBreak: 'break-all', m: 0 }}>
 {`# Install Foundry
 curl -L https://foundry.paradigm.xyz | bash
@@ -495,7 +503,7 @@ cast run ${txHash || '0x<txHash>'} --rpc-url ${getRpcUrl() || 'https://ethereum-
 cast run ${txHash || '0x<txHash>'} --rpc-url ${getRpcUrl() || 'https://ethereum-rpc.publicnode.com'} --quick`}
               </Typography>
             </Box>
-            <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+            <Typography variant="caption" sx={{ color: t.textSecondary, opacity: 0.6 }}>
               Foundry docs: https://book.getfoundry.sh
             </Typography>
           </Box>
@@ -504,7 +512,7 @@ cast run ${txHash || '0x<txHash>'} --rpc-url ${getRpcUrl() || 'https://ethereum-
 
       {/* Tx Info Summary */}
       {txInfo && (
-        <Box sx={{ bgcolor: 'background.paper', borderRadius: '12px', p: 2, mb: 2 }}>
+        <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 2, mb: 2.5, boxShadow: shadows.extruded }}>
           <Stack direction="row" spacing={3} flexWrap="wrap">
             <InfoChip label="Block" value={txInfo.blockNumber} />
             <InfoChip label="Status" value={txInfo.status} color={txInfo.status === 'Success' ? '#48bb78' : '#e85d5d'} />
@@ -517,12 +525,12 @@ cast run ${txHash || '0x<txHash>'} --rpc-url ${getRpcUrl() || 'https://ethereum-
 
       {/* Call Trace Tree */}
       {trace && (
-        <Box sx={{ bgcolor: 'background.paper', borderRadius: '12px', p: 2 }}>
+        <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 2, boxShadow: shadows.extruded }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Call Stack</Typography>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>Call Stack</Typography>
             <Button size="small" onClick={() => copy(JSON.stringify(trace, null, 2))}
               startIcon={<FaCopy size={11} />}
-              sx={{ color: 'text.secondary', textTransform: 'none', fontSize: 12 }}
+              sx={{ color: t.textSecondary, textTransform: 'none', fontSize: 12 }}
             >
               Copy raw JSON
             </Button>
@@ -537,10 +545,12 @@ cast run ${txHash || '0x<txHash>'} --rpc-url ${getRpcUrl() || 'https://ethereum-
 }
 
 function InfoChip({ label, value, color }: { label: string; value: string; color?: string }) {
+  const { mode } = useThemeStore()
+  const t = neu[mode]
   return (
     <Stack spacing={0.25}>
-      <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: 11 }}>{label}</Typography>
-      <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: 'monospace', color: color || 'text.primary' }}>
+      <Typography variant="caption" sx={{ color: t.textSecondary, fontSize: 11 }}>{label}</Typography>
+      <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: 'monospace', color: color || t.text }}>
         {value}
       </Typography>
     </Stack>

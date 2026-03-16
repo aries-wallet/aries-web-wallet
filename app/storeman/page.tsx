@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react'
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
 import { formatEther, parseEther, getAddress, type Address } from 'viem'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
+import { neu, neuShadows } from '@/app/providers'
+import { useThemeStore } from '@/lib/store/theme-store'
 
 const storemanSC = '0x1E7450D5d17338a348C5438546f0b4D0A5fbeaB6' as const
 
@@ -56,13 +58,22 @@ const storemanAbi = [
   { name: 'partOut', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'wkAddr', type: 'address' }], outputs: [] },
 ] as const
 
-const actionBtnSx = { fontSize: 12, py: 0.5, bgcolor: '#fff', color: '#5b7ff5', border: '1px solid #e2e6ef', '&:hover': { bgcolor: '#eef2ff', borderColor: '#5b7ff5' } }
-
 export default function Storeman() {
   const { address, isConnected } = useAccount()
   const publicClient = usePublicClient()
   const { data: walletClient } = useWalletClient()
   const { showError } = useSnackbar()
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
+
+  const actionBtnSx = {
+    fontSize: 12, py: 0.5,
+    bgcolor: t.bg, color: t.accent,
+    boxShadow: shadows.extrudedSmall,
+    border: 'none',
+    '&:hover': { boxShadow: shadows.extruded, transform: 'translateY(-1px)', bgcolor: t.bg },
+  }
 
   const [workAddress, setWorkAddress] = useState(() => {
     if (typeof window !== 'undefined') return localStorage.getItem('workAddress') || ''
@@ -154,39 +165,39 @@ export default function Storeman() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 900, mx: 'auto' }}>
-      <Stack spacing={2}>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Wanchain Storeman Monitor</Typography>
+      <Stack spacing={2.5}>
+        <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>Wanchain Storeman Monitor</Typography>
 
-        <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3 }}>
+        <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, boxShadow: shadows.extruded }}>
           <TextField fullWidth size="small" label="Work Address" value={workAddress}
             onChange={(e) => { setWorkAddress(e.target.value); localStorage.setItem('workAddress', e.target.value) }}
           />
         </Box>
 
         {!isConnected && (
-          <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3, textAlign: 'center' }}>
-            <Typography variant="body1" sx={{ color: '#8a94a6' }}>Please connect wallet and switch to Wanchain.</Typography>
+          <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, textAlign: 'center', boxShadow: shadows.inset }}>
+            <Typography variant="body1" sx={{ color: t.textSecondary }}>Please connect wallet and switch to Wanchain.</Typography>
           </Box>
         )}
 
         {isConnected && (
-          <Box sx={{ bgcolor: '#fff', borderRadius: '12px', overflow: 'hidden' }}>
+          <Box sx={{ bgcolor: t.bg, borderRadius: '24px', overflow: 'hidden', boxShadow: shadows.extruded }}>
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: '#f5f7fb' }}>
-                  <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Type</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Value</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Action</TableCell>
+                <TableRow sx={{ bgcolor: 'transparent' }}>
+                  <TableCell sx={{ fontWeight: 700, color: t.textSecondary, fontSize: 12 }}>Type</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: t.textSecondary, fontSize: 12 }}>Value</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: t.textSecondary, fontSize: 12 }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Deposit</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: t.text }}>Deposit</TableCell>
                   <TableCell sx={{ fontFamily: 'monospace' }}>{fmtEther(info.deposit)} WAN</TableCell>
                   <TableCell><Button size="small" disabled sx={actionBtnSx}>Exit</Button></TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Incentive</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: t.text }}>Incentive</TableCell>
                   <TableCell sx={{ fontFamily: 'monospace' }}>{fmtEther(info.incentive)} WAN</TableCell>
                   <TableCell>
                     <Button size="small" sx={actionBtnSx} onClick={async () => {
@@ -197,11 +208,11 @@ export default function Storeman() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Delegation</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: t.text }}>Delegation</TableCell>
                   <TableCell>
-                    <Typography variant="caption" sx={{ color: '#8a94a6' }}>All: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(info.delegateDeposit)} WAN</span><br />
-                    <Typography variant="caption" sx={{ color: '#8a94a6' }}>My: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(delegateInfo.deposit)} WAN</span><br />
-                    <Typography variant="caption" sx={{ color: '#8a94a6' }}>Claimable: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(delegateInfo.incentive)} WAN</span>
+                    <Typography variant="caption" sx={{ color: t.textSecondary }}>All: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(info.delegateDeposit)} WAN</span><br />
+                    <Typography variant="caption" sx={{ color: t.textSecondary }}>My: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(delegateInfo.deposit)} WAN</span><br />
+                    <Typography variant="caption" sx={{ color: t.textSecondary }}>Claimable: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(delegateInfo.incentive)} WAN</span>
                   </TableCell>
                   <TableCell>
                     <Stack spacing={0.5}>
@@ -220,15 +231,15 @@ export default function Storeman() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Delegators</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: t.text }}>Delegators</TableCell>
                   <TableCell sx={{ fontFamily: 'monospace' }}>{String(info.delegatorCount ?? 0)}</TableCell>
                   <TableCell />
                 </TableRow>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Partner</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: t.text }}>Partner</TableCell>
                   <TableCell>
-                    <Typography variant="caption" sx={{ color: '#8a94a6' }}>All: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(info.partnerDeposit)} WAN</span><br />
-                    <Typography variant="caption" sx={{ color: '#8a94a6' }}>My: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(partnerInfo.deposit)} WAN</span>
+                    <Typography variant="caption" sx={{ color: t.textSecondary }}>All: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(info.partnerDeposit)} WAN</span><br />
+                    <Typography variant="caption" sx={{ color: t.textSecondary }}>My: </Typography><span style={{ fontFamily: 'monospace' }}>{fmtEther(partnerInfo.deposit)} WAN</span>
                   </TableCell>
                   <TableCell>
                     <Stack spacing={0.5}>
@@ -247,10 +258,10 @@ export default function Storeman() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Partners</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: t.text }}>Partners</TableCell>
                   <TableCell>
                     <span style={{ fontFamily: 'monospace' }}>{String(info.partnerCount ?? 0)}</span>
-                    <Typography component="span" variant="caption" sx={{ ml: 1, color: '#5b7ff5', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                    <Typography component="span" variant="caption" sx={{ ml: 1, color: t.accent, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
                       onClick={() => setShowDistribution(!showDistribution)}>
                       Distribution
                     </Typography>
@@ -258,10 +269,10 @@ export default function Storeman() {
                   <TableCell />
                 </TableRow>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, color: '#2d3748' }}>Owner</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: t.text }}>Owner</TableCell>
                   <TableCell>
                     {info.sender ? (
-                      <Typography variant="body2" component="span" sx={{ fontFamily: 'monospace', color: '#5b7ff5', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                      <Typography variant="body2" component="span" sx={{ fontFamily: 'monospace', color: t.accent, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
                         onClick={() => window.open('https://www.wanscan.org/address/' + info.sender)}>
                         {String(info.sender).slice(0, 6) + '...' + String(info.sender).slice(-4)}
                       </Typography>
@@ -275,27 +286,27 @@ export default function Storeman() {
         )}
 
         {showDistribution && Boolean(info.sender) && (
-          <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3, overflow: 'hidden' }}>
+          <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, overflow: 'hidden', boxShadow: shadows.extruded }}>
             <Stack spacing={2}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#2d3748' }}>Partner Distribution</Typography>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>Partner Distribution</Typography>
               <Stack direction="row" spacing={1} alignItems="center">
-                <Typography variant="body2" sx={{ color: '#8a94a6' }}>Total Reward (WAN):</Typography>
+                <Typography variant="body2" sx={{ color: t.textSecondary }}>Total Reward (WAN):</Typography>
                 <TextField size="small" variant="standard" value={totalReward}
                   onChange={(e) => { setTotalReward(e.target.value); calcReward(e.target.value) }}
                   sx={{ width: 120 }}
                 />
-                <Typography component="span" variant="caption" sx={{ color: '#5b7ff5', cursor: 'pointer' }}
+                <Typography component="span" variant="caption" sx={{ color: t.accent, cursor: 'pointer' }}
                   onClick={() => { const v = fmtEther(info.incentive); setTotalReward(v); calcReward(v) }}>
                   &#8593; use incentive
                 </Typography>
               </Stack>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f7fb' }}>
-                    <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Partner/Staker</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Deposit</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Reward</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#8a94a6', fontSize: 12 }}>Action</TableCell>
+                  <TableRow sx={{ bgcolor: 'transparent' }}>
+                    <TableCell sx={{ fontWeight: 700, color: t.textSecondary, fontSize: 12 }}>Partner/Staker</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: t.textSecondary, fontSize: 12 }}>Deposit</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: t.textSecondary, fontSize: 12 }}>Reward</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: t.textSecondary, fontSize: 12 }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -335,18 +346,18 @@ export default function Storeman() {
       </Stack>
 
       <Dialog open={depositDialogOpen} onClose={() => setDepositDialogOpen(false)}>
-        <DialogTitle sx={{ fontWeight: 700, color: '#2d3748' }}>
+        <DialogTitle sx={{ fontWeight: 700, color: t.text }}>
           {depositType === 'delegate' ? 'Delegation' : 'Partner'} Deposit
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body2" sx={{ color: '#8a94a6', mb: 2 }}>
+          <Typography variant="body2" sx={{ color: t.textSecondary, mb: 2 }}>
             Balance: {balance} WAN. Min {depositType === 'delegate' ? '100' : '10000'} WAN for first time.
           </Typography>
           <TextField fullWidth size="small" label="Amount in WAN" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setDepositDialogOpen(false)} sx={{ color: '#8a94a6' }}>Cancel</Button>
-          <Button variant="contained" onClick={handleDeposit} sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}>Deposit</Button>
+          <Button onClick={() => setDepositDialogOpen(false)} sx={{ color: t.textSecondary }}>Cancel</Button>
+          <Button variant="contained" onClick={handleDeposit}>Deposit</Button>
         </DialogActions>
       </Dialog>
     </Box>

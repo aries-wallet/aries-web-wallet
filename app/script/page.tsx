@@ -4,6 +4,8 @@ import { Box, Button, Stack, Typography } from '@mui/material'
 import { useCallback, useRef, useState } from 'react'
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
 import * as viem from 'viem'
+import { neu, neuShadows } from '@/app/providers'
+import { useThemeStore } from '@/lib/store/theme-store'
 
 const template = `
 // You can use the wallet object to get address, chainId, publicClient, walletClient, and viem
@@ -28,6 +30,9 @@ export default function ScriptPage() {
   const publicClient = usePublicClient()
   const { data: walletClient } = useWalletClient()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   const lineCount = code.split('\n').length
 
@@ -77,11 +82,11 @@ export default function ScriptPage() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 960 }}>
-      <Box sx={{ bgcolor: 'background.paper', borderRadius: '12px', p: 3 }}>
+      <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, boxShadow: shadows.extruded }}>
         <Stack spacing={2}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>Script Runner</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>Script Runner</Typography>
           <Button variant="contained" disabled={running}
-            sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+            sx={{ alignSelf: 'flex-start' }}
             onClick={runScript}
           >
             {running ? 'Running...' : 'Run'}
@@ -89,8 +94,8 @@ export default function ScriptPage() {
 
           {/* Editor with line numbers */}
           <Box sx={{
-            display: 'flex', borderRadius: '10px', overflow: 'hidden',
-            bgcolor: '#1a1d23', border: '1px solid #2d3748',
+            display: 'flex', borderRadius: '16px', overflow: 'hidden',
+            bgcolor: '#1a1d23', boxShadow: shadows.insetDeep,
           }}>
             {/* Line numbers */}
             <Box sx={{
@@ -120,8 +125,8 @@ export default function ScriptPage() {
           {/* Output panel */}
           {output.length > 0 && (
             <Box sx={{
-              bgcolor: '#0f1117', borderRadius: '8px', p: 2, maxHeight: 300, overflow: 'auto',
-              border: '1px solid #2d3748',
+              bgcolor: '#0f1117', borderRadius: '16px', p: 2, maxHeight: 300, overflow: 'auto',
+              boxShadow: shadows.inset,
             }}>
               <Typography variant="caption" sx={{ color: '#718096', fontWeight: 600, mb: 1, display: 'block' }}>
                 Output
@@ -138,7 +143,7 @@ export default function ScriptPage() {
             </Box>
           )}
 
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Typography variant="caption" sx={{ color: t.textSecondary }}>
             * Console output is captured above. Full output also available in F12 developer tools.
           </Typography>
         </Stack>

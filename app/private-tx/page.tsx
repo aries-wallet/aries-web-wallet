@@ -5,6 +5,8 @@ import { LoadingButton } from '@mui/lab'
 import { useEffect, useState } from 'react'
 import { useAccount, useChainId, useWalletClient, usePublicClient } from 'wagmi'
 import { parseEther, type Address } from 'viem'
+import { neu, neuShadows } from '@/app/providers'
+import { useThemeStore } from '@/lib/store/theme-store'
 
 let wanchainUtil: { toChecksumOTAddress: (addr: string) => string; generateOTAWaddress: (pk: string) => string } | undefined
 if (typeof window !== 'undefined') {
@@ -46,6 +48,9 @@ export default function PrivateTx() {
   const [total, setTotal] = useState(0)
   const [otas, setOtas] = useState<{ ota: string; value: bigint }[]>([])
   const [loading, setLoading] = useState(false)
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   useEffect(() => {
     if (!text) { setLines([]); setError(''); return }
@@ -87,10 +92,10 @@ export default function PrivateTx() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 900 }}>
-      <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3 }}>
+      <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, boxShadow: shadows.extruded }}>
         <Stack spacing={2}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Multiple Private Transaction</Typography>
-          <Typography variant="body2" sx={{ color: '#8a94a6', lineHeight: 1.8 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>Multiple Private Transaction</Typography>
+          <Typography variant="body2" sx={{ color: t.textSecondary, lineHeight: 1.8 }}>
             Support batch sending of private transactions on Wanchain mainnet and testnet.
             Each line should contain a private address and the amount, separated by a comma. The amount must be a multiple of 10 WAN.
             <br />Only Wan Wallet Desktop v1.5.10 or above can receive the WAN.
@@ -99,8 +104,11 @@ export default function PrivateTx() {
             aria-label="OTA addresses" minRows={10}
             style={{
               width: '100%', fontFamily: 'monospace', fontSize: 13,
-              padding: 12, borderRadius: 8, border: '1px solid #e2e6ef', outline: 'none',
+              padding: 12, borderRadius: 16, border: 'none', outline: 'none',
               resize: 'vertical',
+              backgroundColor: t.bg,
+              color: t.text,
+              boxShadow: shadows.inset,
             }}
             value={text}
             onChange={(e) => { setText(e.target.value); localStorage.setItem('privateTxText', e.target.value) }}
@@ -108,17 +116,17 @@ export default function PrivateTx() {
           />
 
           <Box sx={{ display: 'flex', gap: 3, px: 1 }}>
-            <Typography variant="caption" sx={{ color: '#8a94a6' }}>Addresses: <b style={{ color: '#2d3748' }}>{lines.length}</b></Typography>
-            <Typography variant="caption" sx={{ color: '#8a94a6' }}>Total WAN: <b style={{ color: '#2d3748' }}>{total}</b></Typography>
-            <Typography variant="caption" sx={{ color: '#8a94a6' }}>OTA Count: <b style={{ color: '#2d3748' }}>{otas.length}</b></Typography>
+            <Typography variant="caption" sx={{ color: t.textSecondary }}>Addresses: <b style={{ color: t.text }}>{lines.length}</b></Typography>
+            <Typography variant="caption" sx={{ color: t.textSecondary }}>Total WAN: <b style={{ color: t.text }}>{total}</b></Typography>
+            <Typography variant="caption" sx={{ color: t.textSecondary }}>OTA Count: <b style={{ color: t.text }}>{otas.length}</b></Typography>
           </Box>
 
-          {error && <Alert severity="error" sx={{ borderRadius: '8px' }}>{error}</Alert>}
-          {success && <Alert severity="success" sx={{ borderRadius: '8px' }}>{success}</Alert>}
+          {error && <Alert severity="error" sx={{ borderRadius: '16px' }}>{error}</Alert>}
+          {success && <Alert severity="success" sx={{ borderRadius: '16px' }}>{success}</Alert>}
 
           <LoadingButton
             disabled={error.length > 0} loading={loading} variant="contained"
-            sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+            sx={{ alignSelf: 'flex-start' }}
             onClick={async () => {
               try {
                 setSuccess('')

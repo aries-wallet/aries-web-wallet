@@ -5,6 +5,8 @@ import {
   Box, Button, CircularProgress, MenuItem, Stack, TextField, Typography,
 } from '@mui/material'
 import { type AbiFunction, parseUnits } from 'viem'
+import { neu, neuShadows } from '@/app/providers'
+import { useThemeStore } from '@/lib/store/theme-store'
 
 const unitOptions = ['Wei', 'Gwei', 'Ether'] as const
 
@@ -80,7 +82,6 @@ function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: 
                 variant="outlined"
                 onChange={(e) => setInputData({ ...inputData, [name]: e.target.value })}
                 helperText={(isArray || isTuple) ? 'Use JSON format: ["val1","val2"] or {"key":"val"}' : undefined}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '6px' } }}
               />
               {isUint && (
                 <TextField
@@ -88,7 +89,7 @@ function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: 
                   size="small"
                   value={units[name] || 'Wei'}
                   onChange={(e) => setUnits({ ...units, [name]: e.target.value })}
-                  sx={{ minWidth: 85, '& .MuiOutlinedInput-root': { borderRadius: '6px' } }}
+                  sx={{ minWidth: 85 }}
                 >
                   {unitOptions.map((u) => <MenuItem key={u} value={u}>{u}</MenuItem>)}
                 </TextField>
@@ -105,14 +106,13 @@ function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: 
               label="payable value (uint256)"
               variant="outlined"
               onChange={(e) => setInputData({ ...inputData, payable: e.target.value })}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '6px' } }}
             />
             <TextField
               select
               size="small"
               value={units.payable || 'Wei'}
               onChange={(e) => setUnits({ ...units, payable: e.target.value })}
-              sx={{ minWidth: 85, '& .MuiOutlinedInput-root': { borderRadius: '6px' } }}
+              sx={{ minWidth: 85 }}
             >
               {unitOptions.map((u) => <MenuItem key={u} value={u}>{u}</MenuItem>)}
             </TextField>
@@ -129,7 +129,6 @@ function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: 
             sx={{
               alignSelf: 'flex-start',
               textTransform: 'none',
-              borderRadius: '6px',
               px: 2.5,
               bgcolor: '#e8853d',
               '&:hover': { bgcolor: '#d47632' },
@@ -146,36 +145,40 @@ function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: 
 
 function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction; children: React.ReactNode }) {
   const [open, setOpen] = useState(index === 0)
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   return (
     <Box sx={{
-      bgcolor: 'background.paper',
-      borderRadius: '10px',
+      bgcolor: t.bg,
+      borderRadius: '16px',
       overflow: 'hidden',
-      transition: 'box-shadow 0.2s',
-      '&:hover': { boxShadow: '0 2px 12px rgba(0,0,0,0.04)' },
+      boxShadow: shadows.extrudedSmall,
+      transition: 'all 300ms ease-out',
+      '&:hover': { boxShadow: shadows.extruded, transform: 'translateY(-1px)' },
     }}>
       <Box
         onClick={() => setOpen(!open)}
         sx={{
           display: 'flex', alignItems: 'center', gap: 1.5,
           px: 2, py: 1.2, cursor: 'pointer', userSelect: 'none',
-          '&:hover': { bgcolor: 'action.hover' },
+          '&:hover': { bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(163,177,198,0.15)' },
         }}
       >
         <Typography sx={{
           fontSize: 11, fontWeight: 700, color: '#e8853d',
-          bgcolor: '#fef3e8', borderRadius: '4px',
+          boxShadow: shadows.insetSmall, borderRadius: '6px',
           width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
           {index + 1}
         </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, flex: 1, color: t.text }}>
           {fn.name}
         </Typography>
         {fn.inputs.length > 0 && (
-          <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+          <Typography variant="caption" sx={{ color: t.textSecondary, opacity: 0.6 }}>
             {fn.inputs.length} param{fn.inputs.length > 1 ? 's' : ''}
           </Typography>
         )}
@@ -186,7 +189,7 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
         )}
         <Box sx={{
           transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s', color: 'text.disabled', display: 'flex',
+          transition: 'transform 0.2s', color: t.textSecondary, display: 'flex',
         }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
         </Box>
@@ -202,9 +205,11 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
 
 export function ContractWrite({ send, abi, sendLoading }: { send: (abi: AbiFunction, params: string[], payableValue?: string) => Promise<void>; abi: AbiFunction[]; sendLoading: boolean }) {
   const writeAbi = useMemo(() => abi.filter((v) => v.type === 'function' && v.stateMutability !== 'view' && v.stateMutability !== 'pure'), [abi])
+  const { mode } = useThemeStore()
+  const shadows = neuShadows(mode)
 
   return (
-    <Stack spacing={1} sx={{ mt: 1.5, p: 1, bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(232,133,61,0.08)' : '#fef8f3', borderRadius: '12px' }}>
+    <Stack spacing={1} sx={{ mt: 1.5, p: 1, boxShadow: shadows.inset, borderRadius: '24px' }}>
       {writeAbi.map((v, i) => (
         <FunctionCard key={i} index={i} fn={v}>
           <WritePanel subAbi={v} send={send} sendLoading={sendLoading} />

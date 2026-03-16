@@ -5,6 +5,8 @@ import {
   Box, Button, CircularProgress, MenuItem, Stack, TextField, Typography,
 } from '@mui/material'
 import { type Abi, type AbiFunction, formatUnits, parseUnits, type PublicClient } from 'viem'
+import { neu, neuShadows } from '@/app/providers'
+import { useThemeStore } from '@/lib/store/theme-store'
 
 const unitOptions = ['Wei', 'Gwei', 'Ether'] as const
 
@@ -84,7 +86,6 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
               label={`${name} (${input.type})`}
               variant="outlined"
               onChange={(e) => setInputData({ ...inputData, [name]: e.target.value })}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '6px' } }}
             />
             {isUint && (
               <TextField
@@ -92,7 +93,7 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
                 size="small"
                 value={inputUnits[name] || 'Wei'}
                 onChange={(e) => setInputUnits({ ...inputUnits, [name]: e.target.value })}
-                sx={{ minWidth: 85, '& .MuiOutlinedInput-root': { borderRadius: '6px' } }}
+                sx={{ minWidth: 85 }}
               >
                 {unitOptions.map((u) => <MenuItem key={u} value={u}>{u}</MenuItem>)}
               </TextField>
@@ -111,15 +112,12 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
           sx={{
             alignSelf: 'flex-start',
             textTransform: 'none',
-            borderRadius: '6px',
             px: 2.5,
-            bgcolor: '#5b7ff5',
-            '&:hover': { bgcolor: '#4a6de0' },
           }}
         >
           {loading ? 'Querying...' : 'Query'}
         </Button>
-        {loading && <CircularProgress size={16} sx={{ color: '#5b7ff5' }} />}
+        {loading && <CircularProgress size={16} />}
       </Stack>
 
       {error && (
@@ -155,15 +153,18 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
 function OutputRow({ label, type, value, unit, onUnitChange }: {
   label: string; type: string; value: unknown; unit: string; onUnitChange: (u: string) => void
 }) {
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
   const isUint = type === 'uint256'
   const display = convertFromWei(value, isUint ? unit : 'Wei')
 
   return (
     <Box sx={{
       display: 'flex', alignItems: 'center', gap: 1.5, px: 1.5, py: 1,
-      bgcolor: 'action.hover', borderRadius: '6px',
+      boxShadow: shadows.insetSmall, borderRadius: '16px',
     }}>
-      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500, whiteSpace: 'nowrap' }}>
+      <Typography variant="caption" sx={{ color: t.textSecondary, fontWeight: 500, whiteSpace: 'nowrap' }}>
         {label}
       </Typography>
       {isUint && (
@@ -171,18 +172,18 @@ function OutputRow({ label, type, value, unit, onUnitChange }: {
           select size="small" variant="standard" value={unit}
           onChange={(e) => onUnitChange(e.target.value)}
           sx={{ minWidth: 70, '& .MuiInput-underline:before': { border: 'none' }, '& .MuiInput-underline:after': { border: 'none' } }}
-          InputProps={{ disableUnderline: true, sx: { fontSize: 12, color: 'text.secondary' } }}
+          InputProps={{ disableUnderline: true, sx: { fontSize: 12, color: t.textSecondary } }}
         >
           {unitOptions.map((u) => <MenuItem key={u} value={u}>{u}</MenuItem>)}
         </TextField>
       )}
       <Typography
         variant="body2"
-        sx={{ fontFamily: 'monospace', wordBreak: 'break-all', flex: 1, minWidth: 0, fontWeight: 500 }}
+        sx={{ fontFamily: 'monospace', wordBreak: 'break-all', flex: 1, minWidth: 0, fontWeight: 500, color: t.text }}
       >
         {display}
       </Typography>
-      <Typography variant="caption" sx={{ color: 'text.disabled', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
+      <Typography variant="caption" sx={{ color: t.textSecondary, fontFamily: 'monospace', whiteSpace: 'nowrap', opacity: 0.6 }}>
         {type}
       </Typography>
     </Box>
@@ -191,42 +192,46 @@ function OutputRow({ label, type, value, unit, onUnitChange }: {
 
 function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction; children: React.ReactNode }) {
   const [open, setOpen] = useState(index === 0)
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   return (
     <Box sx={{
-      bgcolor: 'background.paper',
-      borderRadius: '10px',
+      bgcolor: t.bg,
+      borderRadius: '16px',
       overflow: 'hidden',
-      transition: 'box-shadow 0.2s',
-      '&:hover': { boxShadow: '0 2px 12px rgba(0,0,0,0.04)' },
+      boxShadow: shadows.extrudedSmall,
+      transition: 'all 300ms ease-out',
+      '&:hover': { boxShadow: shadows.extruded, transform: 'translateY(-1px)' },
     }}>
       <Box
         onClick={() => setOpen(!open)}
         sx={{
           display: 'flex', alignItems: 'center', gap: 1.5,
           px: 2, py: 1.2, cursor: 'pointer', userSelect: 'none',
-          '&:hover': { bgcolor: 'action.hover' },
+          '&:hover': { bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(163,177,198,0.15)' },
         }}
       >
         <Typography sx={{
-          fontSize: 11, fontWeight: 700, color: '#5b7ff5',
-          bgcolor: '#eef2ff', borderRadius: '4px',
+          fontSize: 11, fontWeight: 700, color: t.accent,
+          boxShadow: shadows.insetSmall, borderRadius: '6px',
           width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
           {index + 1}
         </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, flex: 1, color: t.text }}>
           {fn.name}
         </Typography>
         {fn.inputs.length > 0 && (
-          <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+          <Typography variant="caption" sx={{ color: t.textSecondary, opacity: 0.6 }}>
             {fn.inputs.length} param{fn.inputs.length > 1 ? 's' : ''}
           </Typography>
         )}
         <Box sx={{
           transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s', color: 'text.disabled', display: 'flex',
+          transition: 'transform 0.2s', color: t.textSecondary, display: 'flex',
         }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
         </Box>
@@ -242,9 +247,11 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
 
 export function ContractRead({ publicClient, scAddr, abi }: { publicClient: PublicClient; scAddr: string; abi: AbiFunction[] }) {
   const readAbi = useMemo(() => abi.filter((v) => v.type === 'function' && (v.stateMutability === 'view' || v.stateMutability === 'pure')), [abi])
+  const { mode } = useThemeStore()
+  const shadows = neuShadows(mode)
 
   return (
-    <Stack spacing={1} sx={{ mt: 1.5, p: 1, bgcolor: 'action.hover', borderRadius: '12px' }}>
+    <Stack spacing={1} sx={{ mt: 1.5, p: 1, boxShadow: shadows.inset, borderRadius: '24px' }}>
       {readAbi.map((v, i) => (
         <FunctionCard key={i} index={i} fn={v}>
           <ReadPanel subAbi={v} publicClient={publicClient} scAddr={scAddr} />

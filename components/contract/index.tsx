@@ -13,10 +13,9 @@ import { useContractStore } from '@/lib/store/contract-store'
 import { useThemeStore } from '@/lib/store/theme-store'
 import { useTxHistory } from '@/lib/store/tx-history'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
+import { neu, neuShadows } from '@/app/providers'
 import { ContractRead } from './read'
 import { ContractWrite } from './write'
-
-const iconBtnSx = { color: 'text.secondary', '&:hover': { color: '#5b7ff5', bgcolor: 'action.hover' } }
 
 // Etherscan V2 unified API — all chains via single endpoint with chainid param
 const ETHERSCAN_V2_API = 'https://api.etherscan.io/v2/api'
@@ -164,6 +163,9 @@ function FetchAbiDialog({ open, onClose, address, onResult, currentChainId, save
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState('')
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   // Sync from props when dialog opens
   useEffect(() => {
@@ -218,7 +220,7 @@ function FetchAbiDialog({ open, onClose, address, onResult, currentChainId, save
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 700 }}>Fetch ABI from Explorer</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Fetch ABI from Explorer</DialogTitle>
       <DialogContent>
         <Stack spacing={2.5} sx={{ mt: 1 }}>
           {/* Address */}
@@ -249,7 +251,7 @@ function FetchAbiDialog({ open, onClose, address, onResult, currentChainId, save
             label={
               <Stack>
                 <Typography variant="body2">This is a Proxy contract</Typography>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                <Typography variant="caption" sx={{ color: t.textSecondary }}>
                   Will auto-detect the implementation address and fetch its ABI
                 </Typography>
               </Stack>
@@ -286,14 +288,14 @@ function FetchAbiDialog({ open, onClose, address, onResult, currentChainId, save
 
           {/* Result preview */}
           {result && (
-            <Box sx={{ bgcolor: 'action.hover', borderRadius: '8px', p: 1.5, maxHeight: 200, overflow: 'auto' }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+            <Box sx={{ boxShadow: shadows.inset, borderRadius: '16px', p: 1.5, maxHeight: 200, overflow: 'auto' }}>
+              <Typography variant="caption" sx={{ color: t.textSecondary, fontWeight: 600 }}>
                 ABI fetched ({result.length} chars, {JSON.parse(result).length} entries)
                 {implAddr && ` — via implementation ${implAddr.slice(0, 10)}...${implAddr.slice(-6)}`}
               </Typography>
               <Typography variant="body2" sx={{
                 fontFamily: 'monospace', fontSize: 11, mt: 0.5,
-                whiteSpace: 'pre-wrap', wordBreak: 'break-all', color: 'text.secondary',
+                whiteSpace: 'pre-wrap', wordBreak: 'break-all', color: t.textSecondary,
                 maxHeight: 140, overflow: 'auto',
               }}>
                 {result.slice(0, 500)}{result.length > 500 ? '...' : ''}
@@ -303,7 +305,7 @@ function FetchAbiDialog({ open, onClose, address, onResult, currentChainId, save
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} sx={{ color: 'text.secondary' }}>Cancel</Button>
+        <Button onClick={onClose} sx={{ color: t.textSecondary }}>Cancel</Button>
         {result ? (
           <Button variant="contained" onClick={handleUse}
             sx={{ bgcolor: '#48bb78', '&:hover': { bgcolor: '#38a169' } }}
@@ -311,9 +313,7 @@ function FetchAbiDialog({ open, onClose, address, onResult, currentChainId, save
             Use this ABI
           </Button>
         ) : (
-          <Button variant="contained" onClick={handleFetch} disabled={loading || !addrValid}
-            sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
-          >
+          <Button variant="contained" onClick={handleFetch} disabled={loading || !addrValid}>
             {loading ? <><CircularProgress size={16} sx={{ mr: 1, color: '#fff' }} /> Fetching...</> : 'Fetch ABI'}
           </Button>
         )}
@@ -334,8 +334,12 @@ export function Contract() {
   const chainId = useChainId()
   const publicClient = usePublicClient()
   const { data: walletClient } = useWalletClient()
-  const { etherscanApiKey, setEtherscanApiKey } = useThemeStore()
+  const { etherscanApiKey, setEtherscanApiKey, mode } = useThemeStore()
   const { addTx } = useTxHistory()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
+
+  const iconBtnSx = { color: t.textSecondary, '&:hover': { color: t.accent, bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(163,177,198,0.15)' } }
 
   const { contract, setContract, addContract, contractList, deleteContract, updateContract } = useContractStore()
   const [scAddr, setScAddr] = useState('0x')
@@ -430,7 +434,7 @@ export function Contract() {
   return (
     <Box>
       {/* Toolbar */}
-      <Box sx={{ bgcolor: 'background.paper', borderRadius: '12px', p: 2, mb: 2 }}>
+      <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 2, mb: 2.5, boxShadow: shadows.extruded }}>
         <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" sx={{ gap: 1.5 }}>
           {contractNames.length > 0 && (
             <Autocomplete
@@ -450,7 +454,7 @@ export function Contract() {
           <Button variant="contained" onClick={() => {
             setAccessAddr(scAddr)
             try { setAccessAbi(JSON.parse(contract.abi)) } catch { showError('Invalid ABI JSON') }
-          }} sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}>
+          }}>
             Access
           </Button>
 
@@ -488,7 +492,7 @@ export function Contract() {
               </IconButton>
             </Tooltip>
             <Tooltip title="Remove Contract">
-              <IconButton size="small" sx={{ color: 'text.secondary', '&:hover': { color: '#e85d5d', bgcolor: '#fef2f2' } }} onClick={async () => {
+              <IconButton size="small" sx={{ color: t.textSecondary, '&:hover': { color: '#e85d5d' } }} onClick={async () => {
                 if (!window.confirm('Are you sure to delete this Contract?')) return
                 const ret = await deleteContract(scName)
                 if (ret) showSuccess('Contract Deleted')
@@ -507,10 +511,11 @@ export function Contract() {
             return (
               <Button key={label} size="small" onClick={() => setIsRead(i === 0)}
                 sx={{
-                  bgcolor: active ? '#eef2ff' : 'transparent',
-                  color: active ? '#5b7ff5' : 'text.secondary',
+                  boxShadow: active ? shadows.insetSmall : shadows.extrudedSmall,
+                  color: active ? t.accent : t.textSecondary,
                   fontWeight: active ? 700 : 500,
-                  '&:hover': { bgcolor: active ? '#e5ebff' : 'action.hover' },
+                  bgcolor: t.bg,
+                  '&:hover': { boxShadow: active ? shadows.insetSmall : shadows.extruded, bgcolor: t.bg },
                 }}
               >
                 {label}
@@ -545,7 +550,7 @@ export function Contract() {
 
       {/* Add Dialog */}
       <Dialog open={showAddContract} onClose={() => setShowAddContract(false)} fullWidth maxWidth="md">
-        <DialogTitle sx={{ fontWeight: 700 }}>Add Contract</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Add Contract</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField label="Contract Name" size="small" value={newContract.name} onChange={(e) => setNewContract({ ...newContract, name: e.target.value })} />
@@ -578,7 +583,7 @@ export function Contract() {
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setShowAddContract(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+          <Button onClick={() => setShowAddContract(false)} sx={{ color: t.textSecondary }}>Cancel</Button>
           <Button variant="contained"
             disabled={!newContract.name || !validateAbiJson(newContract.abi)}
             onClick={async () => {
@@ -589,7 +594,7 @@ export function Contract() {
               setAccessAddr(newContract.contract)
               try { setAccessAbi(JSON.parse(newContract.abi)) } catch { /* */ }
               setNewContract({ name: '', contract: '', abi: '' })
-            }} sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}>
+            }}>
             Add
           </Button>
         </DialogActions>
@@ -597,7 +602,7 @@ export function Contract() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditContract} onClose={() => setShowEditContract(false)} fullWidth maxWidth="md">
-        <DialogTitle sx={{ fontWeight: 700 }}>Edit Contract</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Edit Contract</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField label="Contract Name" size="small" value={editContract.name} onChange={(e) => setEditContract({ ...editContract, name: e.target.value })} />
@@ -629,7 +634,7 @@ export function Contract() {
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setShowEditContract(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+          <Button onClick={() => setShowEditContract(false)} sx={{ color: t.textSecondary }}>Cancel</Button>
           <Button variant="contained" onClick={async () => {
             if (!editContract.name) { showError('Contract Name required'); return }
             if (!validateAbiJson(editContract.abi)) { showError('Contract ABI is not valid JSON array'); return }
@@ -639,7 +644,7 @@ export function Contract() {
             showSuccess('Contract Updated')
             await setContract(editContract.name)
             setScAddr(editContract.contract)
-          }} sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}>Save</Button>
+          }}>Save</Button>
         </DialogActions>
       </Dialog>
     </Box>

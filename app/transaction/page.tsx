@@ -7,9 +7,21 @@ import { parseEther, createWalletClient, http, isAddress } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
 import { useTxHistory } from '@/lib/store/tx-history'
+import { neu, neuShadows } from '@/app/providers'
+import { useThemeStore } from '@/lib/store/theme-store'
 
 function Card({ children }: { children: React.ReactNode }) {
-  return <Box sx={{ bgcolor: 'background.paper', borderRadius: '12px', p: 3 }}>{children}</Box>
+  const { mode } = useThemeStore()
+  const shadows = neuShadows(mode)
+  return (
+    <Box sx={{
+      bgcolor: 'background.paper', borderRadius: '24px', p: 3,
+      boxShadow: shadows.extruded,
+      transition: 'box-shadow 300ms ease-out',
+    }}>
+      {children}
+    </Box>
+  )
 }
 
 export default function TransactionPage() {
@@ -32,6 +44,9 @@ export default function TransactionPage() {
   const { sendTransactionAsync } = useSendTransaction()
   const { showSuccess, showError } = useSnackbar()
   const { addTx } = useTxHistory()
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   const validateAddr = (val: string) => {
     setToAddr(val)
@@ -40,10 +55,12 @@ export default function TransactionPage() {
   }
 
   return (
-    <Stack spacing={2} sx={{ p: 3, maxWidth: 800 }}>
+    <Stack spacing={2.5} sx={{ p: 3, maxWidth: 800 }}>
       <Card>
         <Stack spacing={2}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>Send Normal Transaction</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+            Send Normal Transaction
+          </Typography>
           <TextField size="small" label="To Address" value={toAddr}
             onChange={(e) => validateAddr(e.target.value)}
             error={!!addrError} helperText={addrError}
@@ -52,7 +69,7 @@ export default function TransactionPage() {
           <TextField size="small" label="Data (hex)" value={data} onChange={(e) => setData(e.target.value)} />
           <Stack direction="row" spacing={1} alignItems="center">
             <Button variant="contained" disabled={sending}
-              sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+              sx={{ alignSelf: 'flex-start' }}
               onClick={async () => {
                 try {
                   if (!address) return
@@ -86,11 +103,13 @@ export default function TransactionPage() {
 
       <Card>
         <Stack spacing={2}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>Get Transaction Status</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+            Get Transaction Status
+          </Typography>
           <TextField size="small" label="Transaction Hash" value={txHash} onChange={(e) => setTxHash(e.target.value)} />
           <Stack direction="row" spacing={1} alignItems="center">
             <Button variant="contained" disabled={fetching}
-              sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+              sx={{ alignSelf: 'flex-start' }}
               onClick={async () => {
                 try {
                   if (!publicClient) return
@@ -112,17 +131,17 @@ export default function TransactionPage() {
             {fetching && <CircularProgress size={18} />}
           </Stack>
           {txJson && (
-            <Box sx={{ bgcolor: 'action.hover', borderRadius: '8px', p: 2 }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>Tx JSON</Typography>
-              <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-all', mt: 0.5 }}>
+            <Box sx={{ boxShadow: shadows.inset, borderRadius: '16px', p: 2 }}>
+              <Typography variant="caption" sx={{ color: t.textSecondary, fontWeight: 600 }}>Tx JSON</Typography>
+              <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-all', mt: 0.5, color: t.text }}>
                 {txJson}
               </Typography>
             </Box>
           )}
           {txReceipt && (
-            <Box sx={{ bgcolor: 'action.hover', borderRadius: '8px', p: 2 }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>Tx Receipt</Typography>
-              <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-all', mt: 0.5 }}>
+            <Box sx={{ boxShadow: shadows.inset, borderRadius: '16px', p: 2 }}>
+              <Typography variant="caption" sx={{ color: t.textSecondary, fontWeight: 600 }}>Tx Receipt</Typography>
+              <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-all', mt: 0.5, color: t.text }}>
                 {txReceipt}
               </Typography>
             </Box>
@@ -132,7 +151,9 @@ export default function TransactionPage() {
 
       <Card>
         <Stack spacing={2}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>Send Transaction From Private Key</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+            Send Transaction From Private Key
+          </Typography>
           <TextField size="small" label="Private Key" type="password" value={privateKey} onChange={(e) => setPrivateKey(e.target.value)} />
           <TextField size="small" label="To Address" value={toAddr} onChange={(e) => validateAddr(e.target.value)} error={!!addrError} />
           <TextField size="small" label="Value in Ether" value={value} onChange={(e) => setValue(e.target.value)} type="number" />
@@ -140,7 +161,7 @@ export default function TransactionPage() {
           <TextField size="small" label="Data (hex)" value={data} onChange={(e) => setData(e.target.value)} />
           <Stack direction="row" spacing={1} alignItems="center">
             <Button variant="contained" disabled={sendingPk}
-              sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+              sx={{ alignSelf: 'flex-start' }}
               onClick={async () => {
                 try {
                   if (!publicClient) return

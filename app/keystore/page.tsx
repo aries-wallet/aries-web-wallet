@@ -5,6 +5,8 @@ import { useState } from 'react'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import { neu, neuShadows } from '@/app/providers'
+import { useThemeStore } from '@/lib/store/theme-store'
 
 export default function KeyStore() {
   const [privateKey, setPrivateKey] = useState('')
@@ -16,6 +18,9 @@ export default function KeyStore() {
   const [showPrivateKey, setShowPrivateKey] = useState(false)
   const [showDecryptedPrivateKey, setShowDecryptedPrivateKey] = useState(false)
   const [fileUploaded, setFileUploaded] = useState(false)
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   const generateKeystore = async () => {
     try {
@@ -61,48 +66,48 @@ export default function KeyStore() {
   }
 
   return (
-    <Stack spacing={2} sx={{ p: 3, maxWidth: 700 }}>
-      <Typography variant="h6" sx={{ fontWeight: 700, color: '#2d3748' }}>Keystore Management</Typography>
+    <Stack spacing={2.5} sx={{ p: 3, maxWidth: 700 }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>Keystore Management</Typography>
 
-      <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3 }}>
+      <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, boxShadow: shadows.extruded }}>
         <Stack spacing={2}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#2d3748' }}>Generate Keystore</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>Generate Keystore</Typography>
           <TextField
             size="small" label="Private Key"
             type={showPrivateKey ? 'text' : 'password'}
             value={privateKey} onChange={(e) => setPrivateKey(e.target.value)}
             InputProps={{
               endAdornment: (
-                <IconButton size="small" onClick={() => setShowPrivateKey(!showPrivateKey)} sx={{ color: '#8a94a6' }}>
+                <IconButton size="small" onClick={() => setShowPrivateKey(!showPrivateKey)} sx={{ color: t.textSecondary }}>
                   {showPrivateKey ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
                 </IconButton>
               ),
             }}
           />
           <TextField size="small" label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <Button variant="contained" sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }} onClick={generateKeystore}>
+          <Button variant="contained" sx={{ alignSelf: 'flex-start' }} onClick={generateKeystore}>
             Generate & Save
           </Button>
         </Stack>
       </Box>
 
-      <Box sx={{ bgcolor: '#fff', borderRadius: '12px', p: 3 }}>
+      <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, boxShadow: shadows.extruded }}>
         <Stack spacing={2}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#2d3748' }}>Decrypt Keystore</Typography>
-          <Button variant="contained" component="label" sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>Decrypt Keystore</Typography>
+          <Button variant="contained" component="label" sx={{ alignSelf: 'flex-start' }}>
             Upload Keystore File
             <input type="file" hidden onChange={handleFileUpload} />
           </Button>
-          {fileUploaded && <Alert severity="success" sx={{ borderRadius: '8px' }}>Keystore file uploaded</Alert>}
+          {fileUploaded && <Alert severity="success" sx={{ borderRadius: '16px' }}>Keystore file uploaded</Alert>}
           <TextField size="small" label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <Button variant="contained" sx={{ alignSelf: 'flex-start', bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }} onClick={decryptKeystore}>
+          <Button variant="contained" sx={{ alignSelf: 'flex-start' }} onClick={decryptKeystore}>
             Decrypt
           </Button>
-          {decryptSuccess && <Alert severity="success" sx={{ borderRadius: '8px' }}>Decrypted successfully</Alert>}
+          {decryptSuccess && <Alert severity="success" sx={{ borderRadius: '16px' }}>Decrypted successfully</Alert>}
           {decryptedAddress && (
             <TextField size="small" label="Address" value={decryptedAddress}
               InputProps={{ readOnly: true, endAdornment: (
-                <IconButton size="small" onClick={() => copyToClipboard(decryptedAddress)} sx={{ color: '#8a94a6' }}>
+                <IconButton size="small" onClick={() => copyToClipboard(decryptedAddress)} sx={{ color: t.textSecondary }}>
                   <ContentCopyIcon fontSize="small" />
                 </IconButton>
               )}}
@@ -113,10 +118,10 @@ export default function KeyStore() {
               type={showDecryptedPrivateKey ? 'text' : 'password'} value={decryptedPrivateKey}
               InputProps={{ readOnly: true, endAdornment: (
                 <>
-                  <IconButton size="small" onClick={() => setShowDecryptedPrivateKey(!showDecryptedPrivateKey)} sx={{ color: '#8a94a6' }}>
+                  <IconButton size="small" onClick={() => setShowDecryptedPrivateKey(!showDecryptedPrivateKey)} sx={{ color: t.textSecondary }}>
                     {showDecryptedPrivateKey ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
                   </IconButton>
-                  <IconButton size="small" onClick={() => copyToClipboard(decryptedPrivateKey)} sx={{ color: '#8a94a6' }}>
+                  <IconButton size="small" onClick={() => copyToClipboard(decryptedPrivateKey)} sx={{ color: t.textSecondary }}>
                     <ContentCopyIcon fontSize="small" />
                   </IconButton>
                 </>

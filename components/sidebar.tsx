@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fa'
 import { useThemeStore } from '@/lib/store/theme-store'
 import { dbGetAllContracts, dbDeleteContract } from '@/lib/db'
+import { neu, neuShadows } from '@/app/providers'
 
 const navItems = [
   { path: '/', label: 'Home', icon: FaHome },
@@ -60,9 +61,11 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const [apiKeyInput, setApiKeyInput] = useState('')
   const [storageLabel, setStorageLabel] = useState('')
 
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
+
   useEffect(() => {
     const checkStorage = async () => {
-      // Estimate total storage usage (localStorage + IndexedDB + caches)
       if (navigator.storage?.estimate) {
         try {
           const est = await navigator.storage.estimate()
@@ -76,7 +79,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           return
         } catch { /* fallback below */ }
       }
-      // Fallback: localStorage only
       let total = 0
       for (const x in localStorage) {
         if (!localStorage.hasOwnProperty(x)) continue
@@ -123,30 +125,16 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
 
   const balance = balanceData ? Number(balanceData.formatted).toFixed(6) : '0'
 
-  // Theme-aware colors
-  const colors = {
-    bg: isDark ? '#1a1d27' : '#fff',
-    border: isDark ? '#2d3748' : '#eef0f4',
-    navActive: isDark ? '#1e2a4a' : '#eef2ff',
-    navHover: isDark ? '#232838' : '#f5f7fb',
-    textPrimary: isDark ? '#e2e8f0' : '#2d3748',
-    textSecondary: isDark ? '#a0aec0' : '#4a5568',
-    textMuted: isDark ? '#718096' : '#8a94a6',
-    textFaint: isDark ? '#4a5568' : '#b0b8c9',
-    cardBg: isDark ? '#232838' : '#f5f7fb',
-  }
-
   return (
     <Box sx={{ position: 'relative' }}>
       <Box sx={{
         height: '100vh',
-        width: open ? 225 : 60,
+        width: open ? 235 : 64,
         transition: 'width 0.3s ease-in-out',
         display: 'flex',
         flexDirection: 'column',
         flexShrink: 0,
-        bgcolor: colors.bg,
-        borderRight: `1px solid ${colors.border}`,
+        bgcolor: t.bg,
       }}>
         <Stack spacing={1.5} sx={{ p: '16px 12px' }}>
           <Stack direction="row" sx={{
@@ -159,7 +147,14 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                 onClick={() => navigate('/')}
               />
             ) : (
-              <IconButton onClick={toggleMode} size="small" sx={{ color: colors.textMuted }}>
+              <IconButton onClick={toggleMode} size="small" sx={{
+                color: t.textSecondary,
+                boxShadow: shadows.extrudedSmall,
+                borderRadius: '12px',
+                width: 36, height: 36,
+                transition: 'all 300ms ease-out',
+                '&:hover': { boxShadow: shadows.extruded, transform: 'translateY(-1px)' },
+              }}>
                 {isDark ? <FaSun /> : <FaMoon />}
               </IconButton>
             )}
@@ -169,21 +164,31 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                   <Box
                     onClick={() => window.open('https://v1.arieswallet.xyz', '_self')}
                     sx={{
-                      fontSize: 11, fontWeight: 600, color: colors.textMuted, cursor: 'pointer',
-                      px: 0.75, py: 0.25, borderRadius: '4px',
-                      '&:hover': { color: '#5b7ff5', bgcolor: colors.navActive },
+                      fontSize: 11, fontWeight: 600, color: t.textSecondary, cursor: 'pointer',
+                      px: 0.75, py: 0.25, borderRadius: '8px',
+                      transition: 'all 300ms ease-out',
+                      '&:hover': { color: t.accent },
                     }}
                   >V1</Box>
                   <Box sx={{
-                    fontSize: 11, fontWeight: 700, color: '#fff', bgcolor: '#5b7ff5',
-                    px: 0.75, py: 0.25, borderRadius: '4px',
+                    fontSize: 11, fontWeight: 700, color: '#fff', bgcolor: t.accent,
+                    px: 0.75, py: 0.25, borderRadius: '8px',
+                    boxShadow: `3px 3px 6px ${t.shadowDark}, -3px -3px 6px ${t.shadowLight}`,
                   }}>V2</Box>
                 </Stack>
                 <Stack direction="row" spacing={0.25}>
-                  <IconButton onClick={toggleMode} size="small" sx={{ color: colors.textMuted }}>
+                  <IconButton onClick={toggleMode} size="small" sx={{
+                    color: t.textSecondary,
+                    transition: 'all 300ms ease-out',
+                    '&:hover': { color: t.accent },
+                  }}>
                     {isDark ? <FaSun size={12} /> : <FaMoon size={12} />}
                   </IconButton>
-                  <IconButton onClick={() => { setApiKeyInput(etherscanApiKey); setSettingsOpen(true) }} size="small" sx={{ color: colors.textMuted }}>
+                  <IconButton onClick={() => { setApiKeyInput(etherscanApiKey); setSettingsOpen(true) }} size="small" sx={{
+                    color: t.textSecondary,
+                    transition: 'all 300ms ease-out',
+                    '&:hover': { color: t.accent },
+                  }}>
                     <FaCog size={12} />
                   </IconButton>
                 </Stack>
@@ -198,7 +203,12 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                 if (!connected) {
                   return (
                     <Button variant="contained" onClick={openConnectModal} fullWidth
-                      sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}
+                      sx={{
+                        bgcolor: t.accent,
+                        borderRadius: '16px',
+                        py: 1.2,
+                        '&:hover': { bgcolor: t.accentHover },
+                      }}
                     >
                       Connect Wallet
                     </Button>
@@ -206,24 +216,26 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                 }
                 return (
                   <Box sx={{
-                    bgcolor: colors.cardBg, borderRadius: '10px', p: 1.5,
+                    bgcolor: t.bg, borderRadius: '16px', p: 1.5,
+                    boxShadow: shadows.inset,
                     display: 'flex', flexDirection: 'column', gap: 1,
                   }}>
                     <Box
                       onClick={openChainModal}
                       sx={{
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.75,
-                        cursor: 'pointer', borderRadius: '6px', py: 0.5,
-                        '&:hover': { bgcolor: colors.navActive },
+                        cursor: 'pointer', borderRadius: '12px', py: 0.5,
+                        transition: 'all 300ms ease-out',
+                        '&:hover': { boxShadow: shadows.insetSmall },
                       }}
                     >
                       {chain.hasIcon && chain.iconUrl && (
-                        <img src={chain.iconUrl} alt="" width={14} height={14} style={{ borderRadius: 3 }} />
+                        <img src={chain.iconUrl} alt="" width={14} height={14} style={{ borderRadius: 6 }} />
                       )}
-                      <Typography sx={{ fontSize: 12, fontWeight: 600, color: colors.textPrimary }}>
+                      <Typography sx={{ fontSize: 12, fontWeight: 600, color: t.text }}>
                         {chain.name ?? 'Unknown'}
                       </Typography>
-                      <Typography sx={{ fontSize: 10, color: colors.textMuted }}>
+                      <Typography sx={{ fontSize: 10, color: t.textSecondary }}>
                         #{chain.id}
                       </Typography>
                     </Box>
@@ -232,12 +244,13 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                       onClick={openAccountModal}
                       sx={{
                         display: 'flex', justifyContent: 'center',
-                        cursor: 'pointer', borderRadius: '6px', py: 0.25,
-                        '&:hover': { bgcolor: colors.navActive },
+                        cursor: 'pointer', borderRadius: '12px', py: 0.25,
+                        transition: 'all 300ms ease-out',
+                        '&:hover': { boxShadow: shadows.insetSmall },
                       }}
                     >
                       <Typography sx={{
-                        fontSize: 11, fontFamily: 'monospace', color: colors.textSecondary,
+                        fontSize: 11, fontFamily: 'monospace', color: t.textSecondary,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>
                         {account.address.slice(0, 10) + '...' + account.address.slice(-8)}
@@ -246,12 +259,12 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
 
                     <Box sx={{
                       display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 0.5,
-                      borderTop: `1px solid ${colors.border}`, pt: 0.75,
+                      pt: 0.75,
                     }}>
-                      <Typography sx={{ fontSize: 16, fontWeight: 700, fontFamily: 'monospace', color: colors.textPrimary }}>
+                      <Typography sx={{ fontSize: 16, fontWeight: 700, fontFamily: 'monospace', color: t.text }}>
                         {balance}
                       </Typography>
-                      <Typography sx={{ fontSize: 10, color: colors.textMuted, fontWeight: 500 }}>
+                      <Typography sx={{ fontSize: 10, color: t.textSecondary, fontWeight: 500 }}>
                         {balanceData?.symbol ?? 'ETH'}
                       </Typography>
                     </Box>
@@ -267,23 +280,40 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
             {navItems.map((item) => {
               const active = pathname === item.path
               return (
-                <ListItem key={item.path} disablePadding sx={{ mb: 0.25 }}>
+                <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
                   <ListItemButton
                     selected={active}
                     onClick={() => navigate(item.path)}
+                    disableRipple
                     sx={{
-                      borderRadius: '8px', mx: 0.5, minHeight: 38,
+                      borderRadius: '12px', mx: 0.5, minHeight: 38,
                       py: 0.5, px: open ? 1.5 : 1,
-                      '&.Mui-selected': { bgcolor: colors.navActive, color: '#5b7ff5', '&:hover': { bgcolor: isDark ? '#243156' : '#e5ebff' } },
-                      '&:hover': { bgcolor: colors.navHover },
+                      transition: 'all 300ms ease-out',
+                      '&.Mui-selected': {
+                        bgcolor: 'transparent',
+                        boxShadow: shadows.inset,
+                        color: t.accent,
+                        '&:hover': {
+                          bgcolor: 'transparent',
+                          boxShadow: shadows.insetDeep,
+                        },
+                      },
+                      '&:hover': {
+                        bgcolor: 'transparent',
+                        boxShadow: shadows.extrudedSmall,
+                        transform: 'translateY(-1px)',
+                      },
                     }}
                   >
-                    <ListItemIcon sx={{ minWidth: 32, color: active ? '#5b7ff5' : colors.textMuted, ml: open ? 0 : 0.5 }}>
+                    <ListItemIcon sx={{ minWidth: 32, color: active ? t.accent : t.textSecondary, ml: open ? 0 : 0.5 }}>
                       <item.icon size={15} />
                     </ListItemIcon>
                     {open && (
                       <ListItemText primary={item.label}
-                        primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 600 : 400, color: active ? '#5b7ff5' : colors.textSecondary }}
+                        primaryTypographyProps={{
+                          fontSize: 13, fontWeight: active ? 600 : 400,
+                          color: active ? t.accent : t.textSecondary,
+                        }}
                       />
                     )}
                   </ListItemButton>
@@ -293,27 +323,36 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           </List>
 
           <Box sx={{ px: 1.5, py: 1 }}>
-            <Typography variant="caption" sx={{ color: colors.textFaint, fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase' }}>
+            <Typography variant="caption" sx={{
+              color: t.textSecondary, fontWeight: 600, fontSize: 10,
+              letterSpacing: 1, textTransform: 'uppercase', opacity: 0.6,
+            }}>
               {open ? 'External' : ''}
             </Typography>
           </Box>
 
           <List disablePadding>
             {externalLinks.map((item) => (
-              <ListItem key={item.href} disablePadding sx={{ mb: 0.25 }}>
+              <ListItem key={item.href} disablePadding sx={{ mb: 0.5 }}>
                 <ListItemButton
                   component="a" target="_blank" rel="noreferrer" href={item.href}
+                  disableRipple
                   sx={{
-                    borderRadius: '8px', mx: 0.5, minHeight: 38, py: 0.5, px: open ? 1.5 : 1,
-                    '&:hover': { bgcolor: colors.navHover },
+                    borderRadius: '12px', mx: 0.5, minHeight: 38, py: 0.5, px: open ? 1.5 : 1,
+                    transition: 'all 300ms ease-out',
+                    '&:hover': {
+                      bgcolor: 'transparent',
+                      boxShadow: shadows.extrudedSmall,
+                      transform: 'translateY(-1px)',
+                    },
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 32, color: colors.textMuted, ml: open ? 0 : 0.5 }}>
+                  <ListItemIcon sx={{ minWidth: 32, color: t.textSecondary, ml: open ? 0 : 0.5 }}>
                     <item.icon size={15} />
                   </ListItemIcon>
                   {open && (
                     <ListItemText primary={item.label}
-                      primaryTypographyProps={{ fontSize: 13, color: colors.textSecondary }}
+                      primaryTypographyProps={{ fontSize: 13, color: t.textSecondary }}
                     />
                   )}
                 </ListItemButton>
@@ -322,17 +361,16 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           </List>
         </Box>
 
-        <Stack spacing={1} sx={{ p: '8px 12px' }}>
+        <Stack spacing={1.5} sx={{ p: '10px 14px' }}>
           <Tooltip title={storageLabel ? `Storage: ${storageLabel} — Click to manage contracts` : 'Click to manage contracts'} placement="top">
             <LinearProgress
               variant="determinate" value={storagePercent}
               onClick={handleStorageClick}
               sx={{
-                cursor: 'pointer', borderRadius: 4, height: 4,
-                bgcolor: isDark ? '#2d3748' : '#f0f2f5',
+                cursor: 'pointer',
                 '& .MuiLinearProgress-bar': {
                   borderRadius: 4,
-                  bgcolor: storagePercent < 50 ? '#5b7ff5' : storagePercent < 75 ? '#f0a45d' : '#e85d5d',
+                  bgcolor: storagePercent < 50 ? t.accent : storagePercent < 75 ? '#f0a45d' : '#e85d5d',
                 },
               }}
             />
@@ -345,7 +383,16 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
               { icon: FaHeart, url: 'https://cryptodonations.xyz/donate/0x7521eda00e2ce05ac4a9d8353d096ccb970d5188?tag=arieswallet' },
             ].map(({ icon: Icon, url }) => (
               <IconButton key={url} size="small" onClick={() => window.open(url, '_blank')}
-                sx={{ color: colors.textFaint, '&:hover': { color: '#5b7ff5', bgcolor: colors.navActive } }}
+                sx={{
+                  color: t.textSecondary, opacity: 0.6,
+                  borderRadius: '10px',
+                  transition: 'all 300ms ease-out',
+                  '&:hover': {
+                    color: t.accent, opacity: 1,
+                    boxShadow: shadows.extrudedSmall,
+                    transform: 'translateY(-1px)',
+                  },
+                }}
               >
                 <Icon size={13} />
               </IconButton>
@@ -360,9 +407,15 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           position: 'absolute', top: '50%', right: -14,
           transform: 'translateY(-50%)',
           width: 28, height: 28,
-          bgcolor: colors.bg, border: `1px solid ${colors.border}`,
-          '&:hover': { bgcolor: colors.navHover },
-          color: colors.textMuted, fontSize: 12,
+          bgcolor: t.bg,
+          boxShadow: shadows.extrudedSmall,
+          borderRadius: '10px',
+          transition: 'all 300ms ease-out',
+          '&:hover': {
+            boxShadow: shadows.extruded,
+            transform: 'translateY(-50%) translateY(-1px)',
+          },
+          color: t.textSecondary, fontSize: 12,
         }}
       >
         {open ? <FaChevronLeft size={10} /> : <FaBars size={10} />}
@@ -370,7 +423,9 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
 
       {/* Manage Contracts Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, color: 'text.primary' }}>Manage Contract List</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, color: 'text.primary', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+          Manage Contract List
+        </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ color: 'text.secondary' }}>
             Contracts are stored in IndexedDB (no localStorage limit). Select contracts to delete.
@@ -379,7 +434,11 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           <Box sx={{ mt: 2, maxHeight: 400, overflow: 'auto' }}>
             <List>
               {contractList.map((c) => (
-                <ListItem key={c.name} sx={{ borderRadius: '8px', '&:hover': { bgcolor: 'action.hover' } }}>
+                <ListItem key={c.name} sx={{
+                  borderRadius: '12px', mb: 0.5,
+                  transition: 'all 300ms ease-out',
+                  '&:hover': { boxShadow: shadows.extrudedSmall },
+                }}>
                   <ListItemText
                     primary={c.name || 'Unnamed Contract'}
                     secondary={c.contract || 'No address'}
@@ -405,7 +464,11 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setOpenDialog(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
           <Button onClick={handleDeleteSelected} disabled={selectedContracts.length === 0}
-            sx={{ bgcolor: '#e85d5d', color: '#fff', '&:hover': { bgcolor: '#d44d4d' }, '&.Mui-disabled': { bgcolor: 'action.disabledBackground' } }}
+            variant="contained"
+            sx={{
+              bgcolor: '#e85d5d', '&:hover': { bgcolor: '#d44d4d' },
+              '&.Mui-disabled': { bgcolor: 'action.disabledBackground' },
+            }}
           >
             Delete Selected ({selectedContracts.length})
           </Button>
@@ -414,7 +477,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
 
       {/* Settings Dialog */}
       <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>Settings</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif' }}>Settings</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField
@@ -432,7 +495,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           <Button variant="contained" onClick={() => {
             setEtherscanApiKey(apiKeyInput)
             setSettingsOpen(false)
-          }} sx={{ bgcolor: '#5b7ff5', '&:hover': { bgcolor: '#4a6de0' } }}>
+          }}>
             Save
           </Button>
         </DialogActions>

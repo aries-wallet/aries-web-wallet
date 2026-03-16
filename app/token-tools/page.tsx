@@ -6,6 +6,8 @@ import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi'
 import { type Address, isAddress, maxUint256 } from 'viem'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
 import { useTxHistory } from '@/lib/store/tx-history'
+import { neu, neuShadows } from '@/app/providers'
+import { useThemeStore } from '@/lib/store/theme-store'
 
 const erc20Abi = [
   { name: 'approve', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'spender', type: 'address' }, { name: 'value', type: 'uint256' }], outputs: [{ type: 'bool' }] },
@@ -22,13 +24,6 @@ const erc721Abi = [
   { name: 'transferFrom', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'from', type: 'address' }, { name: 'to', type: 'address' }, { name: 'tokenId', type: 'uint256' }], outputs: [] },
 ] as const
 
-const btnSx = {
-  bgcolor: 'background.paper',
-  color: '#5b7ff5',
-  border: (t: { palette: { mode: string } }) => `1px solid ${t.palette.mode === 'dark' ? '#2d3748' : '#e2e6ef'}`,
-  '&:hover': { bgcolor: '#eef2ff', borderColor: '#5b7ff5' },
-}
-
 export default function TokenTools() {
   const { address } = useAccount()
   const chainId = useChainId()
@@ -36,6 +31,9 @@ export default function TokenTools() {
   const { data: walletClient } = useWalletClient()
   const { showSuccess, showError } = useSnackbar()
   const { addTx } = useTxHistory()
+  const { mode } = useThemeStore()
+  const t = neu[mode]
+  const shadows = neuShadows(mode)
 
   const [tokenAddress, setTokenAddress] = useState(() => {
     if (typeof window !== 'undefined') return localStorage.getItem('tokenAddress') || ''
@@ -68,6 +66,14 @@ export default function TokenTools() {
     try { await fn() } finally { setLoadingAction('') }
   }
 
+  const btnSx = {
+    bgcolor: t.bg,
+    color: t.accent,
+    boxShadow: shadows.extrudedSmall,
+    border: 'none',
+    '&:hover': { boxShadow: shadows.extruded, transform: 'translateY(-1px)', bgcolor: t.bg },
+  }
+
   const ActionButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
     <Button fullWidth sx={btnSx} disabled={!!loadingAction} onClick={onClick}>
       {loadingAction === label ? <CircularProgress size={18} sx={{ mr: 1 }} /> : null}
@@ -77,12 +83,12 @@ export default function TokenTools() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>DApp Tools</Typography>
-      <Stack direction="row" spacing={2} flexWrap="wrap" sx={{ gap: 2 }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2.5, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>DApp Tools</Typography>
+      <Stack direction="row" spacing={2.5} flexWrap="wrap" sx={{ gap: 2.5 }}>
         {/* ERC20 */}
-        <Box sx={{ bgcolor: 'background.paper', borderRadius: '12px', p: 3, minWidth: 360, flex: 1 }}>
+        <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, minWidth: 360, flex: 1, boxShadow: shadows.extruded, transition: 'all 300ms ease-out', '&:hover': { boxShadow: shadows.extrudedHover, transform: 'translateY(-2px)' } }}>
           <Stack spacing={2} alignItems="center">
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>ERC20 Tools</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>ERC20 Tools</Typography>
             <TextField fullWidth size="small" value={tokenAddress}
               onChange={(e) => { setTokenAddress(e.target.value); saveToStorage('tokenAddress', e.target.value) }}
               placeholder="Token SC Address"
@@ -127,9 +133,9 @@ export default function TokenTools() {
         </Box>
 
         {/* ERC721 */}
-        <Box sx={{ bgcolor: 'background.paper', borderRadius: '12px', p: 3, minWidth: 360, flex: 1 }}>
+        <Box sx={{ bgcolor: t.bg, borderRadius: '24px', p: 3, minWidth: 360, flex: 1, boxShadow: shadows.extruded, transition: 'all 300ms ease-out', '&:hover': { boxShadow: shadows.extrudedHover, transform: 'translateY(-2px)' } }}>
           <Stack spacing={2} alignItems="center">
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>ERC721 Tools</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans", sans-serif', color: t.text }}>ERC721 Tools</Typography>
             <TextField fullWidth size="small" value={tokenAddress}
               onChange={(e) => { setTokenAddress(e.target.value); saveToStorage('tokenAddress', e.target.value) }}
               placeholder="Token SC Address"
