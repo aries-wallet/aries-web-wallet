@@ -15,7 +15,7 @@ export function useDynamicPublicClient(): PublicClient | undefined {
   const [provider, setProvider] = useState<unknown>(null)
 
   useEffect(() => {
-    if (!connector || !isConnected) {
+    if (!connector || !isConnected || typeof connector.getProvider !== 'function') {
       setProvider(null)
       return
     }
