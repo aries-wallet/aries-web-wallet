@@ -2,7 +2,8 @@
 
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
-import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
+import { useAccount, useWalletClient } from 'wagmi'
+import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { type Address } from 'viem'
 import copy from 'copy-to-clipboard'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
@@ -14,7 +15,7 @@ export default function MemeCoinCreation() {
   const [totalSupply, setTotalSupply] = useState('')
   const [receiver, setReceiver] = useState('')
   const { address } = useAccount()
-  const publicClient = usePublicClient()
+  const publicClient = useDynamicPublicClient()
   const { data: walletClient } = useWalletClient()
   const { showSuccess, showError } = useSnackbar()
 

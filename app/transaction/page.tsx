@@ -2,7 +2,8 @@
 
 import { Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
-import { useAccount, useChainId, useSendTransaction, usePublicClient } from 'wagmi'
+import { useAccount, useChainId, useSendTransaction } from 'wagmi'
+import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { parseEther, createWalletClient, http, isAddress } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
@@ -28,7 +29,7 @@ export default function TransactionPage() {
 
   const { address } = useAccount()
   const chainId = useChainId()
-  const publicClient = usePublicClient()
+  const publicClient = useDynamicPublicClient()
   const { sendTransactionAsync } = useSendTransaction()
   const { showSuccess, showError } = useSnackbar()
   const { addTx } = useTxHistory()
@@ -146,7 +147,7 @@ export default function TransactionPage() {
                   if (!publicClient) return
                   setSendingPk(true)
                   const account = privateKeyToAccount(privateKey as `0x${string}`)
-                  const chain = publicClient.chain
+                  const chain = publicClient.chain!
                   const walletClient = createWalletClient({ account, chain, transport: http() })
                   const hash = await walletClient.sendTransaction({
                     to: toAddr ? (toAddr as `0x${string}`) : undefined,

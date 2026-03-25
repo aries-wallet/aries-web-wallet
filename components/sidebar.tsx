@@ -8,7 +8,8 @@ import {
   IconButton, LinearProgress, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, ListItemSecondaryAction, Stack, TextField, Tooltip, Typography,
 } from '@mui/material'
-import { useAccount, useBalance } from 'wagmi'
+import { useAccount } from 'wagmi'
+import { useDynamicBalance } from '@/lib/hooks/use-dynamic-client'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import {
   FaHome, FaFileContract, FaPaperPlane, FaFileAlt, FaSignature, FaCoins, FaCode,
@@ -47,7 +48,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { address, isConnected } = useAccount()
-  const { data: balanceData } = useBalance({ address })
+  const balanceData = useDynamicBalance()
   const { mode, toggleMode, etherscanApiKey, setEtherscanApiKey } = useThemeStore()
   const isDark = mode === 'dark'
 

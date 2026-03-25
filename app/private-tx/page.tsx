@@ -3,7 +3,8 @@
 import { Alert, Box, Button, Stack, TextareaAutosize, Typography } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import { useEffect, useState } from 'react'
-import { useAccount, useChainId, useWalletClient, usePublicClient } from 'wagmi'
+import { useAccount, useChainId, useWalletClient } from 'wagmi'
+import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { parseEther, type Address } from 'viem'
 
 let wanchainUtil: { toChecksumOTAddress: (addr: string) => string; generateOTAWaddress: (pk: string) => string } | undefined
@@ -35,7 +36,7 @@ export default function PrivateTx() {
   const { address } = useAccount()
   const chainId = useChainId()
   const { data: walletClient } = useWalletClient()
-  const publicClient = usePublicClient()
+  const publicClient = useDynamicPublicClient()
   const [text, setText] = useState(() => {
     if (typeof window !== 'undefined') return localStorage.getItem('privateTxText') || ''
     return ''

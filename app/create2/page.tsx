@@ -2,7 +2,8 @@
 
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
-import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi'
+import { useAccount, useChainId, useWalletClient } from 'wagmi'
+import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { type Address, decodeEventLog } from 'viem'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
 
@@ -25,7 +26,7 @@ export default function Create2DeployerPage() {
   const [seed, setSeed] = useState('')
   const { address } = useAccount()
   const chainId = useChainId()
-  const publicClient = usePublicClient()
+  const publicClient = useDynamicPublicClient()
   const { data: walletClient } = useWalletClient()
   const { showSuccess, showError } = useSnackbar()
 

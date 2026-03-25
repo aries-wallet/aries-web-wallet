@@ -2,12 +2,12 @@
 
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
-import { usePublicClient } from 'wagmi'
+import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
 
 export default function RawTransaction() {
   const [data, setData] = useState('')
-  const publicClient = usePublicClient()
+  const publicClient = useDynamicPublicClient()
   const { showSuccess, showError } = useSnackbar()
 
   return (

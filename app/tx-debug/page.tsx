@@ -5,7 +5,7 @@ import {
   Box, Button, CircularProgress, Collapse, IconButton, MenuItem,
   Stack, TextField, Tooltip, Typography,
 } from '@mui/material'
-import { usePublicClient } from 'wagmi'
+import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
 import copy from 'copy-to-clipboard'
 import { FaCopy, FaChevronDown, FaChevronRight, FaExternalLinkAlt } from 'react-icons/fa'
@@ -314,7 +314,7 @@ function parityTracesToCallTree(traces: ParityTrace[]): CallTrace | null {
 type RpcSource = 'wallet' | 'custom'
 
 export default function TxDebugPage() {
-  const publicClient = usePublicClient()
+  const publicClient = useDynamicPublicClient()
   const { showSuccess, showError } = useSnackbar()
 
   const [txHash, setTxHash] = useState('')

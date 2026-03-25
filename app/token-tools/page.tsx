@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material'
-import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi'
+import { useAccount, useChainId, useWalletClient } from 'wagmi'
+import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { type Address, isAddress, maxUint256 } from 'viem'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
 import { useTxHistory } from '@/lib/store/tx-history'
@@ -32,7 +33,7 @@ const btnSx = {
 export default function TokenTools() {
   const { address } = useAccount()
   const chainId = useChainId()
-  const publicClient = usePublicClient()
+  const publicClient = useDynamicPublicClient()
   const { data: walletClient } = useWalletClient()
   const { showSuccess, showError } = useSnackbar()
   const { addTx } = useTxHistory()
