@@ -2,8 +2,8 @@
 
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { useCallback, useRef, useState } from 'react'
-import { useAccount, useWalletClient } from 'wagmi'
-import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
+import { useAccount } from 'wagmi'
+import { useDynamicPublicClient, useDynamicWalletClient } from '@/lib/hooks/use-dynamic-client'
 import * as viem from 'viem'
 
 const template = `
@@ -27,7 +27,7 @@ export default function ScriptPage() {
   const [running, setRunning] = useState(false)
   const { address, chainId } = useAccount()
   const publicClient = useDynamicPublicClient()
-  const { data: walletClient } = useWalletClient()
+  const walletClient = useDynamicWalletClient()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const lineCount = code.split('\n').length

@@ -6,8 +6,8 @@ import {
   FormControlLabel, IconButton, InputAdornment, MenuItem, Stack, TextField, Tooltip, Typography,
 } from '@mui/material'
 import { AddBox, ContentCopy, DeleteForever, Edit, FileCopy, CloudDownload, Visibility, VisibilityOff } from '@mui/icons-material'
-import { useAccount, useWalletClient } from 'wagmi'
-import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
+import { useAccount } from 'wagmi'
+import { useDynamicPublicClient, useDynamicWalletClient } from '@/lib/hooks/use-dynamic-client'
 import { type Abi, type AbiFunction, isAddress } from 'viem'
 import copy from 'copy-to-clipboard'
 import { useContractStore } from '@/lib/store/contract-store'
@@ -333,7 +333,7 @@ export function Contract() {
   const [fetchTarget, setFetchTarget] = useState<'toolbar' | 'add' | 'edit'>('toolbar')
   const { address, chainId } = useAccount()
   const publicClient = useDynamicPublicClient()
-  const { data: walletClient } = useWalletClient({ chainId })
+  const walletClient = useDynamicWalletClient()
   const { etherscanApiKey, setEtherscanApiKey } = useThemeStore()
   const { addTx } = useTxHistory()
 

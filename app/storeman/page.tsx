@@ -2,8 +2,8 @@
 
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { useAccount, useWalletClient } from 'wagmi'
-import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
+import { useAccount } from 'wagmi'
+import { useDynamicPublicClient, useDynamicWalletClient } from '@/lib/hooks/use-dynamic-client'
 import { formatEther, parseEther, getAddress, type Address } from 'viem'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
 
@@ -62,7 +62,7 @@ const actionBtnSx = { fontSize: 12, py: 0.5, bgcolor: '#fff', color: '#5b7ff5', 
 export default function Storeman() {
   const { address, isConnected } = useAccount()
   const publicClient = useDynamicPublicClient()
-  const { data: walletClient } = useWalletClient()
+  const walletClient = useDynamicWalletClient()
   const { showError } = useSnackbar()
 
   const [workAddress, setWorkAddress] = useState(() => {

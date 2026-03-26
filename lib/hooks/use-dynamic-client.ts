@@ -1,17 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { createPublicClient, custom, formatUnits, type Chain, type PublicClient } from 'viem'
+import { createPublicClient, createWalletClient, custom, formatUnits, type Chain, type PublicClient, type WalletClient } from 'viem'
 import { useAccount } from 'wagmi'
 
-/**
- * Returns a PublicClient that always follows the wallet's current chain,
- * even if the chain is not in wagmi's configured chain list.
- * Uses the wallet provider (e.g. MetaMask) as transport so all RPC
- * calls are routed through the wallet on whatever chain it's on.
- */
-export function useDynamicPublicClient(): PublicClient | undefined {
-  const { connector, isConnected, chainId, chain } = useAccount()
+/** Shared hook: wallet provider + chain definition that follows the wallet */
+function useWalletProvider() {
+  const { connector, isConnected, chainId, chain, address } = useAccount()
   const [provider, setProvider] = useState<unknown>(null)
 
   useEffect(() => {
@@ -28,21 +23,54 @@ export function useDynamicPublicClient(): PublicClient | undefined {
     return () => { cancelled = true }
   }, [connector, isConnected, chainId])
 
-  return useMemo(() => {
+  const chainDef: Chain | undefined = useMemo(() => {
     if (!provider) return undefined
-    // Use wagmi's chain definition if available (configured chain),
-    // otherwise construct a minimal chain object for unknown chains
-    const chainDef: Chain = chain || {
+    return chain || {
       id: chainId || 1,
       name: `Chain ${chainId}`,
       nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
       rpcUrls: { default: { http: [] } },
     }
+  }, [provider, chain, chainId])
+
+  return { provider, chainDef, address }
+}
+
+/**
+ * Returns a PublicClient that always follows the wallet's current chain,
+ * even if the chain is not in wagmi's configured chain list.
+ * Uses the wallet provider (e.g. MetaMask) as transport so all RPC
+ * calls are routed through the wallet on whatever chain it's on.
+ */
+export function useDynamicPublicClient(): PublicClient | undefined {
+  const { provider, chainDef } = useWalletProvider()
+
+  return useMemo(() => {
+    if (!provider || !chainDef) return undefined
     return createPublicClient({
       chain: chainDef,
       transport: custom(provider as Parameters<typeof custom>[0]),
     })
-  }, [provider, chain, chainId]) as PublicClient | undefined
+  }, [provider, chainDef]) as PublicClient | undefined
+}
+
+/**
+ * Returns a WalletClient that always follows the wallet's current chain,
+ * even if the chain is not in wagmi's configured chain list.
+ * The client always has a chain set, so writeContract/sendTransaction
+ * never fail with "No chain was provided".
+ */
+export function useDynamicWalletClient() {
+  const { provider, chainDef, address } = useWalletProvider()
+
+  return useMemo(() => {
+    if (!provider || !chainDef || !address) return undefined
+    return createWalletClient({
+      account: address,
+      chain: chainDef,
+      transport: custom(provider as Parameters<typeof custom>[0]),
+    })
+  }, [provider, chainDef, address])
 }
 
 /**
