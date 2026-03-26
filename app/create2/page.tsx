@@ -2,7 +2,7 @@
 
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
-import { useAccount, useChainId, useWalletClient } from 'wagmi'
+import { useAccount, useWalletClient } from 'wagmi'
 import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { type Address, decodeEventLog } from 'viem'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
@@ -24,10 +24,9 @@ export default function Create2DeployerPage() {
   const [finalAddr, setFinalAddr] = useState('')
   const [bytecode, setBytecode] = useState('')
   const [seed, setSeed] = useState('')
-  const { address } = useAccount()
-  const chainId = useChainId()
+  const { address, chainId } = useAccount()
   const publicClient = useDynamicPublicClient()
-  const { data: walletClient } = useWalletClient()
+  const { data: walletClient } = useWalletClient({ chainId })
   const { showSuccess, showError } = useSnackbar()
 
   return (
@@ -39,7 +38,7 @@ export default function Create2DeployerPage() {
             Deploy contracts with the same address across multiple blockchains using CREATE2.
           </Typography>
 
-          {supportedChains.includes(chainId) ? (
+          {chainId && supportedChains.includes(chainId) ? (
             <Stack spacing={2}>
               <TextField size="small" label="Bytecode (0x...)" value={bytecode} onChange={(e) => setBytecode(e.target.value)} />
               <TextField size="small" label="Seed" placeholder="hello world 123" value={seed} onChange={(e) => setSeed(e.target.value)} />

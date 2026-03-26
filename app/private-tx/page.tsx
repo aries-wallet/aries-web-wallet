@@ -3,7 +3,7 @@
 import { Alert, Box, Button, Stack, TextareaAutosize, Typography } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import { useEffect, useState } from 'react'
-import { useAccount, useChainId, useWalletClient } from 'wagmi'
+import { useAccount, useWalletClient } from 'wagmi'
 import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { parseEther, type Address } from 'viem'
 
@@ -33,9 +33,8 @@ function splitAmount(amount: number) {
 }
 
 export default function PrivateTx() {
-  const { address } = useAccount()
-  const chainId = useChainId()
-  const { data: walletClient } = useWalletClient()
+  const { address, chainId } = useAccount()
+  const { data: walletClient } = useWalletClient({ chainId })
   const publicClient = useDynamicPublicClient()
   const [text, setText] = useState(() => {
     if (typeof window !== 'undefined') return localStorage.getItem('privateTxText') || ''
@@ -125,7 +124,7 @@ export default function PrivateTx() {
                 setSuccess('')
                 if (otas.length === 0) throw new Error('No valid data.')
                 if (!address || !walletClient) throw new Error('Please connect to a wallet.')
-                if (![888, 999].includes(chainId)) throw new Error('Please connect to Wanchain mainnet or testnet.')
+                if (!chainId || ![888, 999].includes(chainId)) throw new Error('Please connect to Wanchain mainnet or testnet.')
                 setLoading(true)
                 const hash = await walletClient.writeContract({
                   address: multiPrivateTxSC[chainId],

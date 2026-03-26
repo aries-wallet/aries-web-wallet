@@ -6,7 +6,7 @@ import {
   FormControlLabel, IconButton, InputAdornment, MenuItem, Stack, TextField, Tooltip, Typography,
 } from '@mui/material'
 import { AddBox, ContentCopy, DeleteForever, Edit, FileCopy, CloudDownload, Visibility, VisibilityOff } from '@mui/icons-material'
-import { useAccount, useChainId, useWalletClient } from 'wagmi'
+import { useAccount, useWalletClient } from 'wagmi'
 import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { type Abi, type AbiFunction, isAddress } from 'viem'
 import copy from 'copy-to-clipboard'
@@ -331,10 +331,9 @@ export function Contract() {
   const [showEditContract, setShowEditContract] = useState(false)
   const [showFetchDialog, setShowFetchDialog] = useState(false)
   const [fetchTarget, setFetchTarget] = useState<'toolbar' | 'add' | 'edit'>('toolbar')
-  const { address } = useAccount()
-  const chainId = useChainId()
+  const { address, chainId } = useAccount()
   const publicClient = useDynamicPublicClient()
-  const { data: walletClient } = useWalletClient()
+  const { data: walletClient } = useWalletClient({ chainId })
   const { etherscanApiKey, setEtherscanApiKey } = useThemeStore()
   const { addTx } = useTxHistory()
 
@@ -383,7 +382,7 @@ export function Contract() {
         from: address,
         to: scAddr,
         value: payableValue || '0',
-        chainId: chainId,
+        chainId: chainId!,
         chainName: publicClient?.chain?.name || `Chain ${chainId}`,
         type: 'contract-write',
         description: `${scName}.${subAbi.name}()`,
@@ -539,7 +538,7 @@ export function Contract() {
         onClose={() => setShowFetchDialog(false)}
         address={fetchDialogAddr}
         onResult={handleFetchResult}
-        currentChainId={chainId}
+        currentChainId={chainId ?? 1}
         savedApiKey={etherscanApiKey}
         onSaveApiKey={setEtherscanApiKey}
       />

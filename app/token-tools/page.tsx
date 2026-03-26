@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material'
-import { useAccount, useChainId, useWalletClient } from 'wagmi'
+import { useAccount, useWalletClient } from 'wagmi'
 import { useDynamicPublicClient } from '@/lib/hooks/use-dynamic-client'
 import { type Address, isAddress, maxUint256 } from 'viem'
 import { useSnackbar } from '@/lib/hooks/use-snackbar'
@@ -31,10 +31,9 @@ const btnSx = {
 }
 
 export default function TokenTools() {
-  const { address } = useAccount()
-  const chainId = useChainId()
+  const { address, chainId } = useAccount()
   const publicClient = useDynamicPublicClient()
-  const { data: walletClient } = useWalletClient()
+  const { data: walletClient } = useWalletClient({ chainId })
   const { showSuccess, showError } = useSnackbar()
   const { addTx } = useTxHistory()
 
@@ -98,13 +97,13 @@ export default function TokenTools() {
               if (!validate(true)) return
               const hash = await walletClient!.writeContract({ address: tokenAddress as Address, abi: erc20Abi, functionName: 'approve', args: [destAddress as Address, maxUint256] })
               showSuccess(`Approve MAX success. Hash: ${hash}`)
-              addTx({ hash, from: address!, to: tokenAddress, value: '0', chainId, chainName: publicClient?.chain?.name || '', type: 'token', description: 'ERC20 Approve MAX' })
+              addTx({ hash, from: address!, to: tokenAddress, value: '0', chainId: chainId!, chainName: publicClient?.chain?.name || '', type: 'token', description: 'ERC20 Approve MAX' })
             })} />
             <ActionButton label="Approve 0" onClick={() => withLoading('Approve 0', async () => {
               if (!validate(true)) return
               const hash = await walletClient!.writeContract({ address: tokenAddress as Address, abi: erc20Abi, functionName: 'approve', args: [destAddress as Address, 0n] })
               showSuccess(`Approve 0 success. Hash: ${hash}`)
-              addTx({ hash, from: address!, to: tokenAddress, value: '0', chainId, chainName: publicClient?.chain?.name || '', type: 'token', description: 'ERC20 Approve 0' })
+              addTx({ hash, from: address!, to: tokenAddress, value: '0', chainId: chainId!, chainName: publicClient?.chain?.name || '', type: 'token', description: 'ERC20 Approve 0' })
             })} />
             <ActionButton label="Allowance" onClick={() => withLoading('Allowance', async () => {
               if (!validate(true)) return
@@ -122,7 +121,7 @@ export default function TokenTools() {
               if (!amount) return
               const hash = await walletClient!.writeContract({ address: tokenAddress as Address, abi: erc20Abi, functionName: 'transfer', args: [destAddress as Address, BigInt(amount)] })
               showSuccess(`Transfer success. Hash: ${hash}`)
-              addTx({ hash, from: address!, to: destAddress, value: amount, chainId, chainName: publicClient?.chain?.name || '', type: 'token', description: `ERC20 Transfer ${amount} wei` })
+              addTx({ hash, from: address!, to: destAddress, value: amount, chainId: chainId!, chainName: publicClient?.chain?.name || '', type: 'token', description: `ERC20 Transfer ${amount} wei` })
             })} />
           </Stack>
         </Box>
@@ -154,13 +153,13 @@ export default function TokenTools() {
               if (!validate(true)) return
               const hash = await walletClient!.writeContract({ address: tokenAddress as Address, abi: erc721Abi, functionName: 'setApprovalForAll', args: [destAddress as Address, true] })
               showSuccess(`setApprovalForAll(true) success. Hash: ${hash}`)
-              addTx({ hash, from: address!, to: tokenAddress, value: '0', chainId, chainName: publicClient?.chain?.name || '', type: 'token', description: 'ERC721 setApprovalForAll(true)' })
+              addTx({ hash, from: address!, to: tokenAddress, value: '0', chainId: chainId!, chainName: publicClient?.chain?.name || '', type: 'token', description: 'ERC721 setApprovalForAll(true)' })
             })} />
             <ActionButton label="setApprovalForAll: false" onClick={() => withLoading('setApprovalForAll: false', async () => {
               if (!validate(true)) return
               const hash = await walletClient!.writeContract({ address: tokenAddress as Address, abi: erc721Abi, functionName: 'setApprovalForAll', args: [destAddress as Address, false] })
               showSuccess(`setApprovalForAll(false) success. Hash: ${hash}`)
-              addTx({ hash, from: address!, to: tokenAddress, value: '0', chainId, chainName: publicClient?.chain?.name || '', type: 'token', description: 'ERC721 setApprovalForAll(false)' })
+              addTx({ hash, from: address!, to: tokenAddress, value: '0', chainId: chainId!, chainName: publicClient?.chain?.name || '', type: 'token', description: 'ERC721 setApprovalForAll(false)' })
             })} />
             <ActionButton label="Get Balance" onClick={() => withLoading('Get Balance', async () => {
               if (!validate()) return
@@ -172,7 +171,7 @@ export default function TokenTools() {
               if (!tokenID) { showError('Token ID required'); return }
               const hash = await walletClient!.writeContract({ address: tokenAddress as Address, abi: erc721Abi, functionName: 'transferFrom', args: [address!, destAddress as Address, BigInt(tokenID)] })
               showSuccess(`Transfer success. Hash: ${hash}`)
-              addTx({ hash, from: address!, to: destAddress, value: tokenID, chainId, chainName: publicClient?.chain?.name || '', type: 'token', description: `ERC721 Transfer #${tokenID}` })
+              addTx({ hash, from: address!, to: destAddress, value: tokenID, chainId: chainId!, chainName: publicClient?.chain?.name || '', type: 'token', description: `ERC721 Transfer #${tokenID}` })
             })} />
           </Stack>
         </Box>
