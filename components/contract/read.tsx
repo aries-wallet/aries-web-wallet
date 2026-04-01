@@ -16,10 +16,22 @@ const getDecimals = (unit: string) => {
   }
 }
 
+const formatValue = (value: unknown): string => {
+  if (value === false) return 'false'
+  if (value === true) return 'true'
+  if (value === null || value === undefined || value === '') return ''
+  if (typeof value === 'bigint') return value.toString()
+  if (typeof value === 'object') {
+    return JSON.stringify(value, (_key, v) => typeof v === 'bigint' ? v.toString() : v, 2)
+  }
+  return String(value)
+}
+
 const convertFromWei = (value: unknown, unit: string): string => {
   if (value === false) return 'false'
   if (value === true) return 'true'
   if (value === null || value === undefined || value === '') return ''
+  if (typeof value === 'object') return formatValue(value)
   const str = String(value)
   switch (unit) {
     case 'Gwei': return formatUnits(BigInt(str), 9)
@@ -178,7 +190,7 @@ function OutputRow({ label, type, value, unit, onUnitChange }: {
       )}
       <Typography
         variant="body2"
-        sx={{ fontFamily: 'monospace', wordBreak: 'break-all', flex: 1, minWidth: 0, fontWeight: 500 }}
+        sx={{ fontFamily: 'monospace', wordBreak: 'break-all', whiteSpace: 'pre-wrap', flex: 1, minWidth: 0, fontWeight: 500 }}
       >
         {display}
       </Typography>
