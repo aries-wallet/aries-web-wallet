@@ -365,7 +365,7 @@ export function Contract() {
     }
   }
 
-  const send = useCallback(async (subAbi: AbiFunction, params: string[], payableValue?: string) => {
+  const send = useCallback(async (subAbi: AbiFunction, params: unknown[], payableValue?: string) => {
     try {
       setSendLoading(true)
       if (!walletClient || !address) { showError('Please connect wallet'); return }

@@ -16,21 +16,29 @@ const getDecimals = (unit: string) => {
   }
 }
 
-function objectToArray(object: Record<string, string>, abiInputs: readonly { name?: string; type: string }[]): string[] {
-  const ret: string[] = []
+function parseBool(val: string): boolean {
+  const v = val.trim().toLowerCase()
+  if (v === 'true' || v === '1') return true
+  if (v === 'false' || v === '0') return false
+  throw new Error(`Invalid bool value: "${val}"`)
+}
+
+function objectToArray(object: Record<string, string>, abiInputs: readonly { name?: string; type: string }[]): unknown[] {
+  const ret: unknown[] = []
   abiInputs.forEach((v, i) => {
-    let val = object[v.name || `param${i}`] || ''
+    let val: unknown = object[v.name || `param${i}`] || ''
     try {
-      if (val.includes('[') || val.includes('{')) val = JSON.parse(val)
+      if (typeof val === 'string' && (val.includes('[') || val.includes('{'))) val = JSON.parse(val)
     } catch { /* ignore */ }
-    if (val === 'true') ret.push('true')
-    else if (val === 'false') ret.push('false')
-    else ret.push(val)
+    if (v.type === 'bool') {
+      val = parseBool(val as string)
+    }
+    ret.push(val)
   })
   return ret
 }
 
-function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: (abi: AbiFunction, params: string[], payableValue?: string) => Promise<void>; sendLoading: boolean }) {
+function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: (abi: AbiFunction, params: unknown[], payableValue?: string) => Promise<void>; sendLoading: boolean }) {
   const [inputData, setInputData] = useState<Record<string, string>>({})
   const [units, setUnits] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
@@ -200,7 +208,7 @@ function FunctionCard({ index, fn, children }: { index: number; fn: AbiFunction;
   )
 }
 
-export function ContractWrite({ send, abi, sendLoading }: { send: (abi: AbiFunction, params: string[], payableValue?: string) => Promise<void>; abi: AbiFunction[]; sendLoading: boolean }) {
+export function ContractWrite({ send, abi, sendLoading }: { send: (abi: AbiFunction, params: unknown[], payableValue?: string) => Promise<void>; abi: AbiFunction[]; sendLoading: boolean }) {
   const writeAbi = useMemo(() => abi.filter((v) => v.type === 'function' && v.stateMutability !== 'view' && v.stateMutability !== 'pure'), [abi])
 
   return (

@@ -54,17 +54,22 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
       try {
         setError('')
         setLoading(true)
-        const params = subAbi.inputs.map((input, index) => {
+        const params: unknown[] = subAbi.inputs.map((input, index) => {
           const name = input.name || `param${index}`
-          let val = inputData[name] || ''
+          let val: unknown = inputData[name] || ''
           if (input.type === 'uint256' && val) {
             const unit = inputUnits[name] || 'Wei'
-            val = parseUnits(val, getDecimals(unit)).toString()
+            val = parseUnits(val as string, getDecimals(unit)).toString()
+          }
+          if (input.type === 'bool') {
+            const v = (val as string).trim().toLowerCase()
+            if (v === 'true' || v === '1') val = true
+            else if (v === 'false' || v === '0') val = false
           }
           return val
         })
 
-        if (subAbi.inputs.length === 0 || params.every((p) => p !== '')) {
+        if (subAbi.inputs.length === 0 || params.every((p) => p !== '' && p !== undefined)) {
           const result = await publicClient.readContract({
             address: scAddr as `0x${string}`,
             abi: [subAbi] as Abi,
