@@ -97,11 +97,13 @@ export function wanWallet() {
 
     async setup() {},
 
-    async connect() {
+    async connect(parameters?: { withCapabilities?: boolean }) {
       const provider = createWanWalletProvider()
       const accounts = (await provider.request({ method: 'eth_requestAccounts' })) as Address[]
       return {
-        accounts,
+        accounts: (parameters?.withCapabilities
+          ? accounts.map((address) => ({ address, capabilities: {} }))
+          : accounts) as never,
         chainId: wanchain.id,
       }
     },
