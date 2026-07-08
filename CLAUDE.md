@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Aries Web Wallet — a multi-chain EVM wallet web app for smart contract interaction, token management, transactions, and Wanchain private transactions. Does not store private keys; relies on RainbowKit/wagmi provider-based signing.
+Aries Web Wallet — a multi-chain EVM wallet web app for smart contract interaction, token management, and transactions. Does not store private keys; relies on RainbowKit/wagmi provider-based signing.
 
 ## Commands
 
@@ -44,7 +44,6 @@ app/                          # Next.js App Router pages
   token-tools/                # ERC20/721 tools
   script/                     # JS execution with wallet context
   keystore/                   # Keystore generate/decrypt (uses ethers v6)
-  private-tx/                 # Wanchain OTA private transactions
   create2/                    # CREATE2 deployer
   meme/                       # ERC20 token creation
   storeman/                   # Wanchain cross-chain bridge (Storeman)
@@ -88,6 +87,6 @@ Wanchain (888), Wanchain Testnet (999), Ethereum, Avalanche, Avalanche Fuji, BSC
 - All pages are `'use client'` components; root layout uses `force-dynamic` to prevent SSR prerendering issues
 - Default contracts and RPC endpoints are in `lib/constants.ts`
 - Contract ABIs are stored as JSON strings in localStorage, parsed at runtime
-- Wanchain-specific features (private TX, storeman) use `wanchain-util` and check for chainId 888/999
+- Wanchain-specific features (storeman) check for chainId 888/999
 - WAN Wallet Desktop connector detects via `window.injectWeb3` flag
 - Script page passes `{ address, chainId, publicClient, walletClient, viem }` to user scripts
