@@ -5,43 +5,14 @@ import {
   Box, Button, CircularProgress, MenuItem, Stack, TextField, Typography,
 } from '@mui/material'
 import { type AbiFunction, parseUnits } from 'viem'
-
-const unitOptions = ['Wei', 'Gwei', 'Ether'] as const
-
-const getDecimals = (unit: string) => {
-  switch (unit) {
-    case 'Gwei': return 9
-    case 'Ether': return 18
-    default: return 0
-  }
-}
-
-function parseBool(val: string): boolean {
-  const v = val.trim().toLowerCase()
-  if (v === 'true' || v === '1') return true
-  if (v === 'false' || v === '0') return false
-  throw new Error(`Invalid bool value: "${val}"`)
-}
-
-function objectToArray(object: Record<string, string>, abiInputs: readonly { name?: string; type: string }[]): unknown[] {
-  const ret: unknown[] = []
-  abiInputs.forEach((v, i) => {
-    let val: unknown = object[v.name || `param${i}`] || ''
-    try {
-      if (typeof val === 'string' && (val.includes('[') || val.includes('{'))) val = JSON.parse(val)
-    } catch { /* ignore */ }
-    if (v.type === 'bool') {
-      val = parseBool(val as string)
-    }
-    ret.push(val)
-  })
-  return ret
-}
+import { buildArgs, getDecimals, paramName, unitOptions } from '@/lib/abi-args'
+import { useSnackbar } from '@/lib/hooks/use-snackbar'
 
 function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: (abi: AbiFunction, params: unknown[], payableValue?: string) => Promise<void>; sendLoading: boolean }) {
   const [inputData, setInputData] = useState<Record<string, string>>({})
   const [units, setUnits] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+  const { showError } = useSnackbar()
 
   const isLoading = loading || sendLoading
 
@@ -49,23 +20,13 @@ function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: 
     e.preventDefault()
     setLoading(true)
     try {
-      const params = { ...inputData }
-      const convertedParams: Record<string, string> = {}
-
-      for (const key of Object.keys(params)) {
-        const isUint = subAbi.inputs.some((input) => input.type === 'uint256' && (input.name === key || `param${subAbi.inputs.indexOf(input)}` === key))
-        if (isUint || key === 'payable') {
-          convertedParams[key] = parseUnits(params[key] || '0', getDecimals(units[key] || 'Wei')).toString()
-        } else {
-          convertedParams[key] = params[key]
-        }
-      }
-
-      const payable = convertedParams.payable
-      delete convertedParams.payable
-
-      const args = objectToArray(convertedParams, subAbi.inputs)
+      const args = buildArgs(subAbi.inputs, inputData, units)
+      const payable = subAbi.stateMutability === 'payable'
+        ? parseUnits(inputData.payable || '0', getDecimals(units.payable || 'Wei')).toString()
+        : undefined
       await send(subAbi, args, payable)
+    } catch (err: unknown) {
+      showError((err as Error).message)
     } finally {
       setLoading(false)
     }
@@ -75,7 +36,7 @@ function WritePanel({ subAbi, send, sendLoading }: { subAbi: AbiFunction; send: 
     <form onSubmit={handleSubmit}>
       <Stack spacing={1.5} sx={{ pt: 1.5 }}>
         {subAbi.inputs.map((input, index) => {
-          const name = input.name || `param${index}`
+          const name = paramName(input, index)
           const isUint = input.type === 'uint256'
           const isArray = input.type.includes('[]')
           const isTuple = input.type === 'tuple'

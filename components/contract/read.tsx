@@ -4,17 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   Box, Button, CircularProgress, MenuItem, Stack, TextField, Typography,
 } from '@mui/material'
-import { type Abi, type AbiFunction, formatUnits, parseUnits, type PublicClient } from 'viem'
-
-const unitOptions = ['Wei', 'Gwei', 'Ether'] as const
-
-const getDecimals = (unit: string) => {
-  switch (unit) {
-    case 'Gwei': return 9
-    case 'Ether': return 18
-    default: return 0
-  }
-}
+import { type Abi, type AbiFunction, formatUnits, type PublicClient } from 'viem'
+import { buildArgs, missingParams, paramName, unitOptions } from '@/lib/abi-args'
 
 const formatValue = (value: unknown): string => {
   if (value === false) return 'false'
@@ -47,37 +38,30 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
   const [outputUnits, setOutputUnits] = useState<Record<string, string>>({})
   const [reload, setReload] = useState(0)
   const [error, setError] = useState('')
+  const [hint, setHint] = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setError('')
-        setLoading(true)
-        const params: unknown[] = subAbi.inputs.map((input, index) => {
-          const name = input.name || `param${index}`
-          let val: unknown = inputData[name] || ''
-          if (input.type === 'uint256' && val) {
-            const unit = inputUnits[name] || 'Wei'
-            val = parseUnits(val as string, getDecimals(unit)).toString()
-          }
-          if (input.type === 'bool') {
-            const v = (val as string).trim().toLowerCase()
-            if (v === 'true' || v === '1') val = true
-            else if (v === 'false' || v === '0') val = false
-          }
-          return val
-        })
-
-        if (subAbi.inputs.length === 0 || params.every((p) => p !== '' && p !== undefined)) {
-          const result = await publicClient.readContract({
-            address: scAddr as `0x${string}`,
-            abi: [subAbi] as Abi,
-            functionName: subAbi.name,
-            args: params.length > 0 ? params : undefined,
-          })
-          setOutputData(result)
+        const missing = missingParams(subAbi.inputs, inputData)
+        if (missing.length > 0) {
+          // Drop the previous result so a stale value cannot be mistaken for this query's answer
+          setHint(`Enter a value for: ${missing.join(', ')}`)
+          setOutputData(null)
+          return
         }
+        setHint('')
+        setLoading(true)
+        const params = buildArgs(subAbi.inputs, inputData, inputUnits)
+        const result = await publicClient.readContract({
+          address: scAddr as `0x${string}`,
+          abi: [subAbi] as Abi,
+          functionName: subAbi.name,
+          args: params.length > 0 ? params : undefined,
+        })
+        setOutputData(result)
       } catch (err: unknown) {
         setError((err as Error).message || 'Query failed')
         console.error('ERROR:', (err as Error).message)
@@ -91,7 +75,7 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
   return (
     <Stack spacing={1.5} sx={{ pt: 1.5 }}>
       {subAbi.inputs.map((input, index) => {
-        const name = input.name || `param${index}`
+        const name = paramName(input, index)
         const isUint = input.type === 'uint256'
         return (
           <Stack key={index} direction="row" spacing={1} alignItems="center">
@@ -142,6 +126,12 @@ function ReadPanel({ subAbi, publicClient, scAddr }: { subAbi: AbiFunction; publ
       {error && (
         <Typography variant="caption" color="error" sx={{ wordBreak: 'break-all' }}>
           {error}
+        </Typography>
+      )}
+
+      {!error && hint && (
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          {hint}
         </Typography>
       )}
 
