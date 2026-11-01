@@ -13,8 +13,8 @@ import { useDynamicBalance } from '@/lib/hooks/use-dynamic-client'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import {
   FaHome, FaFileContract, FaPaperPlane, FaFileAlt, FaSignature, FaCoins, FaCode,
-  FaKey, FaUserFriends, FaMoon, FaSun, FaTwitter, FaGithub, FaEnvelope, FaHeart,
-  FaLink, FaChevronLeft, FaBars, FaWallet, FaRocket, FaCubes, FaCog, FaBug,
+  FaKey, FaUserFriends, FaMoon, FaSun, FaTwitter, FaGithub, FaEnvelope,
+  FaLink, FaChevronLeft, FaBars, FaRocket, FaCubes, FaCog, FaBug,
 } from 'react-icons/fa'
 import { useThemeStore } from '@/lib/store/theme-store'
 import { dbGetAllContracts, dbDeleteContract } from '@/lib/db'
@@ -36,8 +36,6 @@ const navItems = [
 
 const externalLinks = [
   { href: 'https://analyzer.arieswallet.xyz', label: 'Event Analyzer', icon: FaLink },
-  { href: 'https://friend.arieswallet.xyz', label: 'FriendTech Analytics', icon: FaUserFriends },
-  { href: 'https://cryptodonations.xyz', label: 'Crypto Donations', icon: FaWallet },
 ]
 
 interface SidebarProps {
@@ -343,7 +341,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
               { icon: FaTwitter, url: 'https://x.com/aries_wallet' },
               { icon: FaGithub, url: 'https://github.com/aries-wallet/aries-web-wallet.git' },
               { icon: FaEnvelope, url: 'mailto:lolieatapple@gmail.com' },
-              { icon: FaHeart, url: 'https://cryptodonations.xyz/donate/0x7521eda00e2ce05ac4a9d8353d096ccb970d5188?tag=arieswallet' },
             ].map(({ icon: Icon, url }) => (
               <IconButton key={url} size="small" onClick={() => window.open(url, '_blank')}
                 sx={{ color: colors.textFaint, '&:hover': { color: '#5b7ff5', bgcolor: colors.navActive } }}
